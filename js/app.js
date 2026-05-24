@@ -6,7 +6,7 @@ const App = {
     t.className = 'toast' + (isError ? ' error' : '');
     t.classList.add('show');
     clearTimeout(this._toastTimer);
-    this._toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    this._toastTimer = setTimeout(() => t.classList.remove('show'), 5000);
   },
 
   // ====== HOME STATS ======
