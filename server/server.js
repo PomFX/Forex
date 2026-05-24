@@ -20,6 +20,7 @@ app.use('/api/brokers', require('./routes/brokers'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/stats', require('./routes/stats'));
 app.use('/api/upload', require('./routes/upload'));
+app.use('/api/settings', require('./routes/settings'));
 
 // SPA fallback
 app.get('*', (req, res) => {

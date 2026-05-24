@@ -329,5 +329,54 @@ const Admin = {
       this.renderBrokers();
       App.toast('ลบโบรกเกอร์แล้ว');
     } catch {}
+  },
+
+  // ====== CONTACT ======
+  setupContactForm() {
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        line_id: document.getElementById('contactLineID').value,
+        phone: document.getElementById('contactPhoneInput').value,
+        email: document.getElementById('contactEmailInput').value,
+        facebook: document.getElementById('contactFacebookInput').value,
+        qr_code: document.getElementById('contactQRInput').value,
+      };
+      try {
+        await API.updateContact(data);
+        App.toast('บันทึกช่องทางติดต่อแล้ว');
+      } catch {}
+    });
+
+    // QR upload
+    document.getElementById('contactQRUpload').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      document.getElementById('contactQRName').textContent = 'กำลังอัปโหลด...';
+      try {
+        const url = await this.uploadFile(file);
+        document.getElementById('contactQRInput').value = url;
+        document.getElementById('contactQRName').textContent = '✔ อัปโหลดแล้ว';
+        document.getElementById('contactQRPreview').src = url;
+        document.getElementById('contactPreview').style.display = 'block';
+      } catch {
+        document.getElementById('contactQRName').textContent = '✖ ล้มเหลว';
+      }
+    });
+  },
+
+  async renderContactSettings() {
+    try {
+      const data = await API.getContact();
+      document.getElementById('contactLineID').value = data.line_id || '';
+      document.getElementById('contactPhoneInput').value = data.phone || '';
+      document.getElementById('contactEmailInput').value = data.email || '';
+      document.getElementById('contactFacebookInput').value = data.facebook || '';
+      document.getElementById('contactQRInput').value = data.qr_code || '';
+      if (data.qr_code) {
+        document.getElementById('contactQRPreview').src = data.qr_code;
+        document.getElementById('contactPreview').style.display = 'block';
+      }
+    } catch {}
   }
 };

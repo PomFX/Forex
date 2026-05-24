@@ -22,6 +22,7 @@
         <a href="#/brokers" class="nav-link">โบรกเกอร์</a>
         <a href="#/signals" class="nav-link">สัญญาณเทรด</a>
         <a href="#/articles" class="nav-link">บทความ</a>
+        <a href="#/contact" class="nav-link">ติดต่อ</a>
         <a href="#/vip" class="nav-link">VIP</a>
         <a href="#/login" class="nav-link" id="navLogin">เข้าสู่ระบบ</a>
         <a href="#/register" class="nav-link btn-gold" id="navRegister">สมัครสมาชิก</a>
@@ -159,6 +160,40 @@
       </div>
     </section>
 
+    <!-- ====== CONTACT ====== -->
+    <section class="page" id="page-contact">
+      <div class="container">
+        <h1 class="page-title">ติดต่อเรา</h1>
+        <p class="page-subtitle">ช่องทางการติดต่อ ATH Trader</p>
+        <div class="contact-page" id="contactPage">
+          <div class="contact-card">
+            <div class="contact-icon">&#128172;</div>
+            <h3>Line ID</h3>
+            <p id="contactLine" class="contact-value">-</p>
+          </div>
+          <div class="contact-card">
+            <div class="contact-icon">&#128222;</div>
+            <h3>โทรศัพท์</h3>
+            <p id="contactPhone" class="contact-value">-</p>
+          </div>
+          <div class="contact-card">
+            <div class="contact-icon">&#9993;</div>
+            <h3>อีเมล</h3>
+            <p id="contactEmail" class="contact-value">-</p>
+          </div>
+          <div class="contact-card">
+            <div class="contact-icon">&#128247;</div>
+            <h3>Facebook</h3>
+            <p id="contactFacebook" class="contact-value">-</p>
+          </div>
+          <div class="contact-qr" id="contactQRWrap" style="display:none">
+            <h3>Line Official</h3>
+            <img id="contactQR" src="" alt="QR Code">
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ====== ADMIN PANEL ====== -->
     <section class="page admin-page" id="page-admin">
       <div class="admin-layout">
@@ -171,6 +206,7 @@
             <a href="#/admin/signals" class="admin-link" data-page="signals">สัญญาณเทรด</a>
             <a href="#/admin/articles" class="admin-link" data-page="articles">บทความ</a>
             <a href="#/admin/brokers" class="admin-link" data-page="brokers">โบรกเกอร์</a>
+            <a href="#/admin/contact" class="admin-link" data-page="contact">ติดต่อ</a>
             <a href="#/" class="admin-link admin-logout">กลับหน้าบ้าน</a>
           </nav>
         </aside>
@@ -273,6 +309,34 @@
               <input type="hidden" id="brokerEditId" value="">
             </form>
             <div class="table-wrapper" style="margin-top:1.5rem"><table class="admin-table"><thead><tr><th>ชื่อ</th><th>คะแนน</th><th>IB Link</th><th>จัดการ</th></tr></thead><tbody id="brokersBody"></tbody></table></div>
+          </div>
+
+          <!-- Contact Settings -->
+          <div class="admin-page-content" id="admin-contact">
+            <h1>จัดการช่องทางติดต่อ</h1>
+            <form class="admin-form" id="contactForm">
+              <div class="form-row">
+                <div class="form-group"><label>Line ID</label><input type="text" id="contactLineID" placeholder="@athtrader"></div>
+                <div class="form-group"><label>โทรศัพท์</label><input type="text" id="contactPhoneInput" placeholder="099-999-9999"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>อีเมล</label><input type="email" id="contactEmailInput" placeholder="contact@athtrader.com"></div>
+                <div class="form-group"><label>Facebook</label><input type="text" id="contactFacebookInput" placeholder="https://facebook.com/..."></div>
+              </div>
+              <div class="form-group"><label>QR Code Line</label>
+                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                  <input type="text" id="contactQRInput" placeholder="URL หรืออัปโหลด" style="flex:1;min-width:200px">
+                  <input type="file" id="contactQRUpload" accept="image/*" style="display:none">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('contactQRUpload').click()">เลือกรูป QR</button>
+                  <span id="contactQRName" style="font-size:0.8rem;color:var(--text-muted)"></span>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-gold">บันทึก</button>
+            </form>
+            <div id="contactPreview" style="margin-top:1rem;padding:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);text-align:center;display:none">
+              <p style="color:var(--text-muted);margin-bottom:0.5rem">ตัวอย่าง QR Code</p>
+              <img id="contactQRPreview" src="" style="max-width:200px;border-radius:8px">
+            </div>
           </div>
         </main>
       </div>

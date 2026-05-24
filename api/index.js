@@ -15,6 +15,7 @@ app.use('/api/brokers', require('../server/routes/brokers'));
 app.use('/api/users', require('../server/routes/users'));
 app.use('/api/stats', require('../server/routes/stats'));
 app.use('/api/upload', require('../server/routes/upload'));
+app.use('/api/settings', require('../server/routes/settings'));
 app.use('/uploads', express.static('/tmp/uploads'));
 
 app.get('/api/*', (req, res) => res.status(404).json({ error: 'API not found' }));

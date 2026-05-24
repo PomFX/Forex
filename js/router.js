@@ -15,6 +15,7 @@ const Router = {
     Admin.setupBrokerForm();
     Admin.populatePairSelect();
     Admin.setupUploads();
+    Admin.setupContactForm();
 
     window.addEventListener('hashchange', () => this.handleRoute());
     this.handleRoute();
@@ -51,6 +52,7 @@ const Router = {
         case 'signals': await Admin.renderSignals(); break;
         case 'articles': await Admin.renderArticles(); break;
         case 'brokers': await Admin.renderBrokers(); break;
+        case 'contact': await Admin.renderContactSettings(); break;
         default: await Admin.showDashboard(); break;
       }
       return;
@@ -73,6 +75,9 @@ const Router = {
         break;
       case 'articles':
         await App.renderArticles();
+        break;
+      case 'contact':
+        await App.renderContact();
         break;
       case 'vip':
         App.renderVipPlans();

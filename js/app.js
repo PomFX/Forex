@@ -137,6 +137,25 @@ const App = {
     `).join('');
   },
 
+  // ====== CONTACT ======
+  async renderContact() {
+    try {
+      const data = await API.getContact();
+      document.getElementById('contactLine').textContent = data.line_id || '-';
+      document.getElementById('contactPhone').textContent = data.phone || '-';
+      document.getElementById('contactEmail').innerHTML = data.email ? `<a href="mailto:${data.email}">${data.email}</a>` : '-';
+      document.getElementById('contactFacebook').innerHTML = data.facebook ? `<a href="${data.facebook}" target="_blank">${data.facebook}</a>` : '-';
+      const qrWrap = document.getElementById('contactQRWrap');
+      const qrImg = document.getElementById('contactQR');
+      if (data.qr_code) {
+        qrWrap.style.display = 'block';
+        qrImg.src = data.qr_code;
+      } else {
+        qrWrap.style.display = 'none';
+      }
+    } catch {}
+  },
+
   // ====== AUTH HANDLERS ======
   setupAuth() {
     document.getElementById('loginForm').addEventListener('submit', async (e) => {

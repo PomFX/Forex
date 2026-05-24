@@ -268,6 +268,36 @@ img { max-width: 100%; height: auto; }
 .broker-card .rating { color: var(--gold); margin-bottom: 0.5rem; }
 .broker-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem; }
 
+/* ====== CONTACT PAGE ====== */
+.contact-page {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding-bottom: 2rem;
+}
+.contact-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  text-align: center;
+  transition: var(--transition);
+}
+.contact-card:hover { border-color: var(--gold-dark); transform: translateY(-2px); }
+.contact-icon { font-size: 2rem; color: var(--gold); margin-bottom: 0.5rem; }
+.contact-card h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+.contact-value { font-size: 1.1rem; color: #fff; font-weight: 600; word-break: break-all; }
+.contact-qr {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.contact-qr h3 { color: var(--gold); margin-bottom: 0.8rem; }
+.contact-qr img { max-width: 200px; border-radius: 8px; }
+
 /* ====== VIP PLANS ====== */
 .vip-grid {
   display: grid;

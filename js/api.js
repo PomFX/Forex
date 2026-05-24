@@ -105,4 +105,13 @@ const API = {
   async getPublicStats() {
     return this._fetch('/stats/public');
   },
+
+  // Contact
+  async getContact() {
+    return this._fetch('/settings/contact');
+  },
+
+  async updateContact(data) {
+    return this._fetch('/settings/contact', { method: 'PUT', body: JSON.stringify(data) });
+  },
 };

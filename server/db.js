@@ -81,6 +81,18 @@ async function initDB() {
         ('วิเคราะห์ทองคํา XAU/USD ประจําสัปดาห์', 'ราคาทองคํายังคงได้รับแรงหนุนจากความไม่แน่นอนทางเศรษฐกิจโลก และนโยบายดอกเบี้ยของธนาคารกลางสหรัฐฯ นักวิเคราะห์คาดว่าราคาจะเคลื่อนไหวในกรอบ 2030-2060 ดอลลาร์.')`);
     }
 
+    // Contact settings
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS site_settings (
+        key VARCHAR(50) PRIMARY KEY,
+        value TEXT NOT NULL
+      );
+    `);
+    const contactExists = await client.query("SELECT COUNT(*) FROM site_settings WHERE key='contact'");
+    if (parseInt(contactExists.rows[0].count) === 0) {
+      await client.query(`INSERT INTO site_settings (key, value) VALUES ('contact', '{"line_id":"@athtrader","phone":"","email":"contact@athtrader.com","qr_code":"","facebook":"","website":""}')`);
+    }
+
     console.log('Database initialized');
   } finally {
     client.release();
