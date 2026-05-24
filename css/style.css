@@ -314,7 +314,10 @@ img { max-width: 100%; height: auto; }
   padding: 1rem;
   text-align: center;
   width: 180px;
+  cursor: pointer;
+  transition: var(--transition);
 }
+.home-qr-item:hover { border-color: var(--gold-dark); transform: translateY(-2px); }
 .home-qr-item h4 {
   color: var(--gold);
   margin-bottom: 0.5rem;
@@ -323,6 +326,12 @@ img { max-width: 100%; height: auto; }
 .home-qr-item img {
   max-width: 150px;
   border-radius: 6px;
+}
+.home-qr-click {
+  color: var(--gold);
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  text-decoration: underline;
 }
 
 /* ====== VIP PLANS ====== */

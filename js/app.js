@@ -33,12 +33,16 @@ const App = {
     try {
       const data = await API.getContact();
       const qrs = [
-        { label: 'Line', img: data.qr_code },
-        { label: 'OpenChat', img: data.openchat_qr },
-        { label: 'TikTok', img: data.tiktok_qr },
+        { label: 'Line', img: data.qr_code, url: data.line_id },
+        { label: 'OpenChat', img: data.openchat_qr, url: data.openchat },
+        { label: 'TikTok', img: data.tiktok_qr, url: data.tiktok },
       ].filter(q => q.img);
       document.getElementById('homeQRList').innerHTML = qrs.map(q =>
-        `<div class="home-qr-item"><h4>${q.label}</h4><img src="${q.img}" alt="${q.label} QR"></div>`
+        `<div class="home-qr-item" ${q.url ? `onclick="window.open('${q.url}','_blank')"` : ''}>
+          <h4>${q.label}</h4>
+          <img src="${q.img}" alt="${q.label} QR">
+          <p class="home-qr-click">คลิกที่นี้</p>
+        </div>`
       ).join('');
       document.getElementById('homeQR').style.display = qrs.length ? '' : 'none';
     } catch { document.getElementById('homeQR').style.display = 'none'; }
