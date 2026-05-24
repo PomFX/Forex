@@ -17,8 +17,8 @@ router.get('/contact', async (req, res) => {
 // Update contact settings (admin)
 router.put('/contact', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { line_id, phone, email, qr_code, facebook, website, tiktok, youtube } = req.body;
-    const data = JSON.stringify({ line_id: line_id || '', phone: phone || '', email: email || '', qr_code: qr_code || '', facebook: facebook || '', website: website || '', tiktok: tiktok || '', youtube: youtube || '' });
+    const { line_id, phone, email, qr_code, facebook, website, tiktok, youtube, openchat } = req.body;
+    const data = JSON.stringify({ line_id: line_id || '', phone: phone || '', email: email || '', qr_code: qr_code || '', facebook: facebook || '', website: website || '', tiktok: tiktok || '', youtube: youtube || '', openchat: openchat || '' });
     await pool.query("UPDATE site_settings SET value=$1 WHERE key='contact'", [data]);
     res.json({ ok: true });
   } catch (err) {

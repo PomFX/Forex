@@ -147,6 +147,7 @@ const App = {
       document.getElementById('contactFacebook').innerHTML = data.facebook ? `<a href="${data.facebook}" target="_blank">${data.facebook}</a>` : '-';
       document.getElementById('contactTiktok').innerHTML = data.tiktok ? `<a href="${data.tiktok}" target="_blank">${data.tiktok}</a>` : '-';
       document.getElementById('contactYoutube').innerHTML = data.youtube ? `<a href="${data.youtube}" target="_blank">${data.youtube}</a>` : '-';
+      document.getElementById('contactOpenchat').innerHTML = data.openchat ? `<a href="${data.openchat}" target="_blank">${data.openchat}</a>` : '-';
       const qrWrap = document.getElementById('contactQRWrap');
       const qrImg = document.getElementById('contactQR');
       if (data.qr_code) {

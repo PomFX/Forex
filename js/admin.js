@@ -342,6 +342,7 @@ const Admin = {
         facebook: document.getElementById('contactFacebookInput').value,
         tiktok: document.getElementById('contactTiktokInput').value,
         youtube: document.getElementById('contactYoutubeInput').value,
+        openchat: document.getElementById('contactOpenchatInput').value,
         qr_code: document.getElementById('contactQRInput').value,
       };
       try {
@@ -376,6 +377,7 @@ const Admin = {
       document.getElementById('contactFacebookInput').value = data.facebook || '';
       document.getElementById('contactTiktokInput').value = data.tiktok || '';
       document.getElementById('contactYoutubeInput').value = data.youtube || '';
+      document.getElementById('contactOpenchatInput').value = data.openchat || '';
       document.getElementById('contactQRInput').value = data.qr_code || '';
       if (data.qr_code) {
         document.getElementById('contactQRPreview').src = data.qr_code;
