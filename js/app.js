@@ -141,13 +141,35 @@ const App = {
   async renderContact() {
     try {
       const data = await API.getContact();
-      document.getElementById('contactLine').textContent = data.line_id || '-';
-      document.getElementById('contactPhone').textContent = data.phone || '-';
-      document.getElementById('contactEmail').innerHTML = data.email ? `<a href="mailto:${data.email}">${data.email}</a>` : '-';
-      document.getElementById('contactFacebook').innerHTML = data.facebook ? `<a href="${data.facebook}" target="_blank">${data.facebook}</a>` : '-';
-      document.getElementById('contactTiktok').innerHTML = data.tiktok ? `<a href="${data.tiktok}" target="_blank">${data.tiktok}</a>` : '-';
-      document.getElementById('contactYoutube').innerHTML = data.youtube ? `<a href="${data.youtube}" target="_blank">${data.youtube}</a>` : '-';
-      document.getElementById('contactOpenchat').innerHTML = data.openchat ? `<a href="${data.openchat}" target="_blank">${data.openchat}</a>` : '-';
+
+      const setCard = (id, url, label) => {
+        const el = document.getElementById(id);
+        const card = el?.closest('.contact-card');
+        if (url) {
+          el.textContent = label || 'เชื่อมต่อ';
+          if (card) card.dataset.href = url;
+        } else {
+          el.textContent = '-';
+          if (card) delete card.dataset.href;
+        }
+      };
+
+      setCard('contactLine', data.line_id?.startsWith('http') ? data.line_id : null, data.line_id || null);
+      if (data.phone) {
+        setCard('contactPhone', 'tel:' + data.phone, data.phone);
+      } else {
+        setCard('contactPhone', null);
+      }
+      if (data.email) {
+        setCard('contactEmail', 'mailto:' + data.email, data.email);
+      } else {
+        setCard('contactEmail', null);
+      }
+      setCard('contactFacebook', data.facebook, 'Facebook');
+      setCard('contactTiktok', data.tiktok, 'TikTok');
+      setCard('contactYoutube', data.youtube, 'YouTube');
+      setCard('contactOpenchat', data.openchat, 'เปิดแชท');
+
       const qrWrap = document.getElementById('contactQRWrap');
       const qrImg = document.getElementById('contactQR');
       if (data.qr_code) {
@@ -164,6 +186,12 @@ const App = {
       } else {
         ocQRWrap.style.display = 'none';
       }
+
+      // Card click handler
+      document.getElementById('contactPage').onclick = (e) => {
+        const card = e.target.closest('.contact-card[data-href]');
+        if (card) window.open(card.dataset.href, '_blank');
+      };
     } catch {}
   },
 

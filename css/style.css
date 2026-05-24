@@ -283,7 +283,9 @@ img { max-width: 100%; height: auto; }
   text-align: center;
   transition: var(--transition);
 }
+.contact-card[data-href] { cursor: pointer; }
 .contact-card:hover { border-color: var(--gold-dark); transform: translateY(-2px); }
+.contact-card[data-href]:active { transform: scale(0.97); }
 .contact-icon { font-size: 2rem; color: var(--gold); margin-bottom: 0.5rem; }
 .contact-card h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem; }
 .contact-value { font-size: 1.1rem; color: #fff; font-weight: 600; word-break: break-all; }
