@@ -154,7 +154,7 @@ const App = {
         }
       };
 
-      setCard('contactLine', data.line_id?.startsWith('http') ? data.line_id : null, data.line_id || null);
+      setCard('contactLine', data.line_id?.startsWith('http') ? data.line_id : null, data.line_id ? (data.line_id.startsWith('http') ? 'Line' : data.line_id) : null);
       if (data.phone) {
         setCard('contactPhone', 'tel:' + data.phone, data.phone);
       } else {
