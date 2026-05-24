@@ -186,6 +186,14 @@ const App = {
       } else {
         ocQRWrap.style.display = 'none';
       }
+      const ttQRWrap = document.getElementById('contactTiktokQRWrap');
+      const ttQRImg = document.getElementById('contactTiktokQR');
+      if (data.tiktok_qr) {
+        ttQRWrap.style.display = 'block';
+        ttQRImg.src = data.tiktok_qr;
+      } else {
+        ttQRWrap.style.display = 'none';
+      }
 
       // Card click handler
       document.getElementById('contactPage').onclick = (e) => {

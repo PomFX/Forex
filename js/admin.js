@@ -344,6 +344,7 @@ const Admin = {
         youtube: document.getElementById('contactYoutubeInput').value,
         openchat: document.getElementById('contactOpenchatInput').value,
         openchat_qr: document.getElementById('contactOpenchatQRInput').value,
+        tiktok_qr: document.getElementById('contactTiktokQRInput').value,
         qr_code: document.getElementById('contactQRInput').value,
       };
       try {
@@ -383,6 +384,22 @@ const Admin = {
         document.getElementById('contactOpenchatQRName').textContent = '✖ ล้มเหลว';
       }
     });
+
+    // QR upload TikTok
+    document.getElementById('contactTiktokQRUpload').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      document.getElementById('contactTiktokQRName').textContent = 'กำลังอัปโหลด...';
+      try {
+        const url = await this.uploadFile(file);
+        document.getElementById('contactTiktokQRInput').value = url;
+        document.getElementById('contactTiktokQRName').textContent = '✔ อัปโหลดแล้ว';
+        document.getElementById('contactTiktokQRPreview').src = url;
+        document.getElementById('contactTiktokPreview').style.display = 'block';
+      } catch {
+        document.getElementById('contactTiktokQRName').textContent = '✖ ล้มเหลว';
+      }
+    });
   },
 
   async renderContactSettings() {
@@ -397,6 +414,7 @@ const Admin = {
       document.getElementById('contactOpenchatInput').value = data.openchat || '';
       document.getElementById('contactQRInput').value = data.qr_code || '';
       document.getElementById('contactOpenchatQRInput').value = data.openchat_qr || '';
+      document.getElementById('contactTiktokQRInput').value = data.tiktok_qr || '';
       if (data.qr_code) {
         document.getElementById('contactQRPreview').src = data.qr_code;
         document.getElementById('contactPreview').style.display = 'block';
@@ -404,6 +422,10 @@ const Admin = {
       if (data.openchat_qr) {
         document.getElementById('contactOpenchatQRPreview').src = data.openchat_qr;
         document.getElementById('contactOpenchatPreview').style.display = 'block';
+      }
+      if (data.tiktok_qr) {
+        document.getElementById('contactTiktokQRPreview').src = data.tiktok_qr;
+        document.getElementById('contactTiktokPreview').style.display = 'block';
       }
     } catch {}
   }

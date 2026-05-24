@@ -209,6 +209,10 @@
             <h3>OpenChat</h3>
             <img id="contactOpenchatQR" src="" alt="OpenChat QR">
           </div>
+          <div class="contact-qr" id="contactTiktokQRWrap" style="display:none">
+            <h3>TikTok</h3>
+            <img id="contactTiktokQR" src="" alt="TikTok QR">
+          </div>
         </div>
       </div>
     </section>
@@ -363,6 +367,14 @@
                   <span id="contactOpenchatQRName" style="font-size:0.8rem;color:var(--text-muted)"></span>
                 </div>
               </div>
+              <div class="form-group"><label>QR Code TikTok</label>
+                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                  <input type="text" id="contactTiktokQRInput" placeholder="URL หรืออัปโหลด" style="flex:1;min-width:200px">
+                  <input type="file" id="contactTiktokQRUpload" accept="image/*" style="display:none">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('contactTiktokQRUpload').click()">เลือกรูป QR</button>
+                  <span id="contactTiktokQRName" style="font-size:0.8rem;color:var(--text-muted)"></span>
+                </div>
+              </div>
               <button type="submit" class="btn btn-gold">บันทึก</button>
             </form>
             <div style="margin-top:1rem;padding:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);text-align:center;display:none" id="contactPreview">
@@ -372,6 +384,10 @@
             <div style="margin-top:1rem;padding:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);text-align:center;display:none" id="contactOpenchatPreview">
               <p style="color:var(--text-muted);margin-bottom:0.5rem">ตัวอย่าง QR OpenChat</p>
               <img id="contactOpenchatQRPreview" src="" style="max-width:200px;border-radius:8px">
+            </div>
+            <div style="margin-top:1rem;padding:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);text-align:center;display:none" id="contactTiktokPreview">
+              <p style="color:var(--text-muted);margin-bottom:0.5rem">ตัวอย่าง QR TikTok</p>
+              <img id="contactTiktokQRPreview" src="" style="max-width:200px;border-radius:8px">
             </div>
           </div>
         </main>
