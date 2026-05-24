@@ -238,7 +238,7 @@ img { max-width: 100%; height: auto; }
 }
 .article-card-body { padding: 1rem; }
 .article-card-body h3 { font-size: 1rem; margin-bottom: 0.5rem; }
-.article-card-body p { font-size: 0.85rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.article-card-body p { font-size: 0.85rem; color: var(--text-muted); }
 .article-card-body .meta { font-size: 0.75rem; color: var(--gold); margin-top: 0.5rem; }
 
 /* ====== BROKER CARDS ====== */
