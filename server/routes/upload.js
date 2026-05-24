@@ -1,14 +1,19 @@
 const express = require('express');
 const multer = require('multer');
-const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
 const { authMiddleware, adminMiddleware } = require('./auth');
 const router = express.Router();
 
-const UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads');
 const MAX_WIDTH = 1200;
 const QUALITY = 80;
+
+// Detect environment
+const isVercel = !!process.env.VERCEL;
+const UPLOAD_DIR = isVercel ? '/tmp/uploads' : path.join(__dirname, '..', '..', 'uploads');
+
+// Ensure upload dir exists
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -28,34 +33,36 @@ router.post('/', authMiddleware, adminMiddleware, upload.single('image'), async 
     if (!req.file) return res.status(400).json({ error: 'ไม่พบไฟล์รูปภาพ' });
 
     const ext = path.extname(req.file.originalname) || '.jpg';
-    const filename = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + ext;
-    const filepath = path.join(UPLOAD_DIR, filename);
-
-    let image = sharp(req.file.buffer);
-    const meta = await image.metadata();
-
-    // Resize if too wide
-    if (meta.width > MAX_WIDTH) {
-      image = image.resize(MAX_WIDTH, undefined, { fit: 'inside', withoutEnlargement: true });
-    }
-
-    // Convert to WebP for smaller size
-    const outName = filename.replace(ext, '.webp');
+    const baseName = Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+    const outName = baseName + '.webp';
     const outPath = path.join(UPLOAD_DIR, outName);
 
-    await image
-      .webp({ quality: QUALITY })
-      .toFile(outPath);
-
-    // Remove original if format changed
-    if (outName !== filename) {
-      // just don't save the original buffer
+    try {
+      const sharp = require('sharp');
+      let image = sharp(req.file.buffer);
+      const meta = await image.metadata();
+      if (meta.width > MAX_WIDTH) {
+        image = image.resize(MAX_WIDTH, undefined, { fit: 'inside', withoutEnlargement: true });
+      }
+      await image.webp({ quality: QUALITY }).toFile(outPath);
+    } catch {
+      // sharp failed — save original
+      const fallbackName = baseName + ext;
+      fs.writeFileSync(path.join(UPLOAD_DIR, fallbackName), req.file.buffer);
+      return res.json({ url: '/api/upload/file/' + fallbackName });
     }
 
-    res.json({ url: '/uploads/' + outName });
+    res.json({ url: '/api/upload/file/' + outName });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Serve uploaded files via /api/upload/file/:name
+router.get('/file/:file', (req, res) => {
+  const filePath = path.join(UPLOAD_DIR, req.params.file);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
+  res.sendFile(filePath);
 });
 
 // Error handling for multer
