@@ -65,6 +65,7 @@ const Router = {
       case 'home':
         await App.renderHomeStats();
         await App.renderHomeSignals();
+        await App.renderHomeQR();
         await App.renderHomeArticles();
         break;
       case 'brokers':

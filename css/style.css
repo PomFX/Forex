@@ -300,6 +300,31 @@ img { max-width: 100%; height: auto; }
 .contact-qr h3 { color: var(--gold); margin-bottom: 0.8rem; }
 .contact-qr img { max-width: 200px; border-radius: 8px; }
 
+/* ====== HOME QR ROW ====== */
+.home-qr-row {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.home-qr-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  text-align: center;
+  width: 180px;
+}
+.home-qr-item h4 {
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+.home-qr-item img {
+  max-width: 150px;
+  border-radius: 6px;
+}
+
 /* ====== VIP PLANS ====== */
 .vip-grid {
   display: grid;

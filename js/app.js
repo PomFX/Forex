@@ -28,6 +28,22 @@ const App = {
     } catch { /* ignore */ }
   },
 
+  // ====== HOME QR ======
+  async renderHomeQR() {
+    try {
+      const data = await API.getContact();
+      const qrs = [
+        { label: 'Line', img: data.qr_code },
+        { label: 'OpenChat', img: data.openchat_qr },
+        { label: 'TikTok', img: data.tiktok_qr },
+      ].filter(q => q.img);
+      document.getElementById('homeQRList').innerHTML = qrs.map(q =>
+        `<div class="home-qr-item"><h4>${q.label}</h4><img src="${q.img}" alt="${q.label} QR"></div>`
+      ).join('');
+      document.getElementById('homeQR').style.display = qrs.length ? '' : 'none';
+    } catch { document.getElementById('homeQR').style.display = 'none'; }
+  },
+
   // ====== HOME ARTICLES ======
   async renderHomeArticles() {
     try {
