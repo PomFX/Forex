@@ -156,6 +156,14 @@ const App = {
       } else {
         qrWrap.style.display = 'none';
       }
+      const ocQRWrap = document.getElementById('contactOpenchatQRWrap');
+      const ocQRImg = document.getElementById('contactOpenchatQR');
+      if (data.openchat_qr) {
+        ocQRWrap.style.display = 'block';
+        ocQRImg.src = data.openchat_qr;
+      } else {
+        ocQRWrap.style.display = 'none';
+      }
     } catch {}
   },
 

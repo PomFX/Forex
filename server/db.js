@@ -90,7 +90,7 @@ async function initDB() {
     `);
     const contactExists = await client.query("SELECT COUNT(*) FROM site_settings WHERE key='contact'");
     if (parseInt(contactExists.rows[0].count) === 0) {
-      await client.query(`INSERT INTO site_settings (key, value) VALUES ('contact', '{"line_id":"@athtrader","phone":"","email":"contact@athtrader.com","qr_code":"","facebook":"","website":"","tiktok":"","youtube":"","openchat":""}')`);
+      await client.query(`INSERT INTO site_settings (key, value) VALUES ('contact', '{"line_id":"@athtrader","phone":"","email":"contact@athtrader.com","qr_code":"","facebook":"","website":"","tiktok":"","youtube":"","openchat":"","openchat_qr":""}')`);
     }
 
     console.log('Database initialized');
