@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..')));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // API routes
 app.use('/api/auth', require('./routes/auth'));
@@ -18,6 +19,7 @@ app.use('/api/articles', require('./routes/articles'));
 app.use('/api/brokers', require('./routes/brokers'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/stats', require('./routes/stats'));
+app.use('/api/upload', require('./routes/upload'));
 
 // SPA fallback
 app.get('*', (req, res) => {

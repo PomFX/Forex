@@ -4,3 +4,9 @@ node_modules/
 .DS_Store
 .vscode/
 .idea/
+.vercel
+uploads/*.jpg
+uploads/*.jpeg
+uploads/*.png
+uploads/*.webp
+!uploads/.gitkeep

@@ -1,0 +1,33 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const { initDB } = require('../server/db');
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+app.use('/api/auth', require('../server/routes/auth'));
+app.use('/api/signals', require('../server/routes/signals'));
+app.use('/api/articles', require('../server/routes/articles'));
+app.use('/api/brokers', require('../server/routes/brokers'));
+app.use('/api/users', require('../server/routes/users'));
+app.use('/api/stats', require('../server/routes/stats'));
+app.use('/api/upload', require('../server/routes/upload'));
+app.use('/uploads', express.static('/tmp/uploads'));
+
+app.get('/api/*', (req, res) => res.status(404).json({ error: 'API not found' }));
+
+let initialized = false;
+module.exports = async (req, res) => {
+  if (!initialized) {
+    try {
+      await initDB();
+      initialized = true;
+    } catch (err) {
+      console.error('DB init failed:', err);
+    }
+  }
+  app(req, res);
+};

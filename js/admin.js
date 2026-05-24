@@ -1,5 +1,52 @@
 // ====== ADMIN PANEL ======
 const Admin = {
+  // ====== UPLOAD ======
+  setupUploads() {
+    // Article image upload
+    document.getElementById('articleImageUpload').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      document.getElementById('articleImageName').textContent = 'กำลังอัปโหลด...';
+      try {
+        const url = await this.uploadFile(file);
+        document.getElementById('articleImage').value = url;
+        document.getElementById('articleImageName').textContent = '✔ อัปโหลดสำเร็จ';
+      } catch (err) {
+        document.getElementById('articleImageName').textContent = '✖ ล้มเหลว';
+        App.toast('อัปโหลดล้มเหลว', true);
+      }
+    });
+
+    // Broker logo upload
+    document.getElementById('brokerLogoUpload').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      document.getElementById('brokerLogoName').textContent = 'กำลังอัปโหลด...';
+      try {
+        const url = await this.uploadFile(file);
+        document.getElementById('brokerLogo').value = url;
+        document.getElementById('brokerLogoName').textContent = '✔ อัปโหลดสำเร็จ';
+      } catch (err) {
+        document.getElementById('brokerLogoName').textContent = '✖ ล้มเหลว';
+        App.toast('อัปโหลดล้มเหลว', true);
+      }
+    });
+  },
+
+  async uploadFile(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    const token = API.getToken();
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: token ? { 'Authorization': 'Bearer ' + token } : {},
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    return data.url;
+  },
+
   // ====== DASHBOARD ======
   async showDashboard() {
     try {

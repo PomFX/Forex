@@ -230,7 +230,14 @@
               <h3>เพิ่มบทความ</h3>
               <div class="form-group"><label>หัวข้อ</label><input type="text" id="articleTitle" required></div>
               <div class="form-group"><label>เนื้อหา</label><textarea id="articleContent" rows="5" required></textarea></div>
-              <div class="form-group"><label>รูปภาพ (URL)</label><input type="text" id="articleImage" placeholder="https://example.com/image.jpg"></div>
+              <div class="form-group"><label>รูปภาพ</label>
+  <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+    <input type="text" id="articleImage" placeholder="https://... หรืออัปโหลด" style="flex:1;min-width:200px">
+    <input type="file" id="articleImageUpload" accept="image/*" style="display:none">
+    <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('articleImageUpload').click()">เลือกไฟล์</button>
+    <span id="articleImageName" style="font-size:0.8rem;color:var(--text-muted)"></span>
+  </div>
+</div>
               <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
                 <button type="submit" class="btn btn-gold" id="articleSubmit">เพิ่มบทความ</button>
                 <button type="button" class="btn btn-outline" id="articleCancel" style="display:none">ยกเลิก</button>
@@ -251,7 +258,14 @@
               </div>
               <div class="form-group"><label>คำอธิบาย</label><textarea id="brokerDesc" rows="3" required></textarea></div>
               <div class="form-group"><label>IB Link</label><input type="url" id="brokerLink" placeholder="https://..." required></div>
-              <div class="form-group"><label>โลโก้ (URL)</label><input type="text" id="brokerLogo" placeholder="https://example.com/logo.png"></div>
+              <div class="form-group"><label>โลโก้</label>
+  <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+    <input type="text" id="brokerLogo" placeholder="https://... หรืออัปโหลด" style="flex:1;min-width:200px">
+    <input type="file" id="brokerLogoUpload" accept="image/*" style="display:none">
+    <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('brokerLogoUpload').click()">เลือกไฟล์</button>
+    <span id="brokerLogoName" style="font-size:0.8rem;color:var(--text-muted)"></span>
+  </div>
+</div>
               <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
                 <button type="submit" class="btn btn-gold" id="brokerSubmit">เพิ่มโบรกเกอร์</button>
                 <button type="button" class="btn btn-outline" id="brokerCancel" style="display:none">ยกเลิก</button>

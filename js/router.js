@@ -14,6 +14,7 @@ const Router = {
     Admin.setupArticleForm();
     Admin.setupBrokerForm();
     Admin.populatePairSelect();
+    Admin.setupUploads();
 
     window.addEventListener('hashchange', () => this.handleRoute());
     this.handleRoute();

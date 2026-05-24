@@ -1,8 +1,11 @@
 const { Pool } = require('pg');
 
+const connStr = process.env.DATABASE_URL;
+const isLocal = connStr && (connStr.includes('@localhost') || connStr.includes('host='));
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  connectionString: connStr,
+  ssl: isLocal ? false : { rejectUnauthorized: false },
 });
 
 async function initDB() {
@@ -14,9 +17,11 @@ async function initDB() {
         username VARCHAR(50) UNIQUE NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        vip_level VARCHAR(20) DEFAULT 'Free',
         created_at TIMESTAMP DEFAULT NOW()
       );
+    `);
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS vip_level VARCHAR(20) DEFAULT 'Free'`);
+    await client.query(`
       CREATE TABLE IF NOT EXISTS signals (
         id SERIAL PRIMARY KEY,
         pair VARCHAR(20) NOT NULL,
