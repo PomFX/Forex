@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATH Trader - Forex Trading Signals</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+</head>
+<body>
+
+  <!-- ====== PRELOADER ====== -->
+  <div id="preloader"><div class="spinner"></div></div>
+
+  <!-- ====== NAVBAR ====== -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-container">
+      <a href="#/" class="nav-logo"><span class="logo-icon">&#9650;</span> ATH <span>Trader</span></a>
+      <button class="nav-toggle" id="navToggle">&#9776;</button>
+      <div class="nav-links" id="navLinks">
+        <a href="#/" class="nav-link">หน้าแรก</a>
+        <a href="#/brokers" class="nav-link">โบรกเกอร์</a>
+        <a href="#/signals" class="nav-link">สัญญาณเทรด</a>
+        <a href="#/articles" class="nav-link">บทความ</a>
+        <a href="#/vip" class="nav-link">VIP</a>
+        <a href="#/login" class="nav-link" id="navLogin">เข้าสู่ระบบ</a>
+        <a href="#/register" class="nav-link btn-gold" id="navRegister">สมัครสมาชิก</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="app-container" id="app">
+
+    <!-- ====== HOME ====== -->
+    <section class="page active" id="page-home">
+      <div class="hero">
+        <div class="container">
+          <div class="hero-content">
+
+            <h1>เทรด Forex <span class="gold-text">อย่างมืออาชีพ</span></h1>
+            <p class="hero-sub">รับสัญญาณเทรดแม่นยำจากทีมวิเคราะห์ พร้อมโบรกเกอร์แนะนำและบทความให้ความรู้</p>
+            <a href="#/register" class="btn btn-gold-lg">เริ่มต้นเทรดวันนี้</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="stats-grid" id="homeStats">
+          <div class="stat-card"><div class="stat-icon">&#9679;</div><div class="stat-label">สัญญาณทั้งหมด</div><div class="stat-value" id="statTotalSignals">0</div></div>
+          <div class="stat-card gold"><div class="stat-icon">&#9650;</div><div class="stat-label">BUY ที่ชนะ</div><div class="stat-value" id="statBuyWins">0</div></div>
+          <div class="stat-card gold"><div class="stat-icon">&#9660;</div><div class="stat-label">SELL ที่ชนะ</div><div class="stat-value" id="statSellWins">0</div></div>
+          <div class="stat-card"><div class="stat-icon">&#9733;</div><div class="stat-label">สมาชิก VIP</div><div class="stat-value" id="statVipCount">0</div></div>
+        </div>
+
+        <section class="section">
+          <h2 class="section-title">สัญญาณเทรดล่าสุด</h2>
+          <div class="signal-list" id="homeSignals"></div>
+          <div style="text-align:center;margin-top:1rem"><a href="#/signals" class="btn btn-outline">ดูทั้งหมด</a></div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">บทความล่าสุด</h2>
+          <div class="article-grid" id="homeArticles"></div>
+          <div style="text-align:center;margin-top:1rem"><a href="#/articles" class="btn btn-outline">อ่านทั้งหมด</a></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ====== BROKERS ====== -->
+    <section class="page" id="page-brokers">
+      <div class="container">
+        <h1 class="page-title">โบรกเกอร์แนะนำ</h1>
+        <p class="page-subtitle">เลือกเทรดกับโบรกเกอร์ชั้นนำ พร้อม IB Link พิเศษ</p>
+        <div class="broker-grid" id="brokerList"></div>
+      </div>
+    </section>
+
+    <!-- ====== SIGNALS ====== -->
+    <section class="page" id="page-signals">
+      <div class="container">
+        <h1 class="page-title">สัญญาณเทรด</h1>
+        <p class="page-subtitle">สัญญาณเทรดเรียลไทม์จากทีมวิเคราะห์</p>
+        <div class="filter-bar">
+          <button class="filter-btn active" data-filter="all">ทั้งหมด</button>
+          <button class="filter-btn" data-filter="BUY">BUY</button>
+          <button class="filter-btn" data-filter="SELL">SELL</button>
+        </div>
+        <div class="signal-list" id="signalList"></div>
+      </div>
+    </section>
+
+    <!-- ====== ARTICLES ====== -->
+    <section class="page" id="page-articles">
+      <div class="container">
+        <h1 class="page-title">บทความ & ข่าวสาร</h1>
+        <p class="page-subtitle">ความรู้และข่าวสารวงการ Forex</p>
+        <div class="article-grid" id="articleList"></div>
+      </div>
+    </section>
+
+    <!-- ====== VIP ====== -->
+    <section class="page" id="page-vip">
+      <div class="container">
+        <h1 class="page-title">แผน VIP</h1>
+        <p class="page-subtitle">เลือกแผนที่เหมาะกับคุณ รับสิทธิพิเศษมากมาย</p>
+        <div class="vip-grid" id="vipPlans"></div>
+      </div>
+    </section>
+
+    <!-- ====== LOGIN ====== -->
+    <section class="page" id="page-login">
+      <div class="container auth-container">
+        <div class="auth-box">
+          <h2>เข้าสู่ระบบ</h2>
+          <form id="loginForm">
+            <div class="form-group">
+              <label>อีเมล</label>
+              <input type="email" id="loginEmail" required placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+              <label>รหัสผ่าน</label>
+              <input type="password" id="loginPassword" required placeholder="รหัสผ่าน">
+            </div>
+            <button type="submit" class="btn btn-gold-lg" style="width:100%">เข้าสู่ระบบ</button>
+            <p class="auth-link">ยังไม่มีบัญชี? <a href="#/register">สมัครสมาชิก</a></p>
+          </form>
+          <div id="loginError" class="auth-error"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== REGISTER ====== -->
+    <section class="page" id="page-register">
+      <div class="container auth-container">
+        <div class="auth-box">
+          <h2>สมัครสมาชิก</h2>
+          <form id="registerForm">
+            <div class="form-group">
+              <label>ชื่อผู้ใช้</label>
+              <input type="text" id="regUsername" required placeholder="username">
+            </div>
+            <div class="form-group">
+              <label>อีเมล</label>
+              <input type="email" id="regEmail" required placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+              <label>รหัสผ่าน</label>
+              <input type="password" id="regPassword" required placeholder="รหัสผ่าน (6 ตัวขึ้นไป)" minlength="6">
+            </div>
+            <div class="form-group">
+              <label>ยืนยันรหัสผ่าน</label>
+              <input type="password" id="regConfirm" required placeholder="ยืนยันรหัสผ่าน">
+            </div>
+            <button type="submit" class="btn btn-gold-lg" style="width:100%">สมัครสมาชิก</button>
+            <p class="auth-link">มีบัญชีแล้ว? <a href="#/login">เข้าสู่ระบบ</a></p>
+          </form>
+          <div id="registerError" class="auth-error"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== ADMIN PANEL ====== -->
+    <section class="page admin-page" id="page-admin">
+      <div class="admin-layout">
+        <aside class="admin-sidebar" id="adminSidebar">
+          <div class="admin-logo">ATH <span>Trader</span> Admin</div>
+          <button class="admin-toggle" id="adminToggle">&#9776;</button>
+          <nav class="admin-nav">
+            <a href="#/admin" class="admin-link active" data-page="dashboard">Dashboard</a>
+            <a href="#/admin/members" class="admin-link" data-page="members">สมาชิก</a>
+            <a href="#/admin/signals" class="admin-link" data-page="signals">สัญญาณเทรด</a>
+            <a href="#/admin/articles" class="admin-link" data-page="articles">บทความ</a>
+            <a href="#/admin/brokers" class="admin-link" data-page="brokers">โบรกเกอร์</a>
+            <a href="#/" class="admin-link admin-logout">กลับหน้าบ้าน</a>
+          </nav>
+        </aside>
+        <main class="admin-main" id="adminMain">
+          <!-- Dashboard -->
+          <div class="admin-page-content active" id="admin-dashboard">
+            <h1>Dashboard</h1>
+            <div class="admin-stats">
+              <div class="admin-stat-card"><h3>สมาชิกทั้งหมด</h3><p id="aTotalUsers">0</p></div>
+              <div class="admin-stat-card"><h3>สมาชิก VIP</h3><p id="aVipUsers">0</p></div>
+              <div class="admin-stat-card"><h3>สัญญาณทั้งหมด</h3><p id="aTotalSignals">0</p></div>
+              <div class="admin-stat-card"><h3>บทความทั้งหมด</h3><p id="aTotalArticles">0</p></div>
+              <div class="admin-stat-card"><h3>โบรกเกอร์</h3><p id="aTotalBrokers">0</p></div>
+            </div>
+          </div>
+
+          <!-- Members -->
+          <div class="admin-page-content" id="admin-members">
+            <h1>จัดการสมาชิก</h1>
+            <div class="table-wrapper"><table class="admin-table" id="membersTable"><thead><tr><th>ID</th><th>ชื่อผู้ใช้</th><th>อีเมล</th><th>ระดับ VIP</th><th>วันที่สมัคร</th><th>จัดการ</th></tr></thead><tbody id="membersBody"></tbody></table></div>
+          </div>
+
+          <!-- Signals -->
+          <div class="admin-page-content" id="admin-signals">
+            <h1>จัดการสัญญาณเทรด</h1>
+            <form class="admin-form" id="signalForm">
+              <h3>เพิ่มสัญญาณใหม่</h3>
+              <div class="form-row">
+                <div class="form-group"><label>คู่เงิน</label><select id="signalPair" required><option value="">เลือกคู่เงิน</option></select></div>
+                <div class="form-group"><label>ทิศทาง</label><select id="signalDirection" required><option value="">เลือกทิศทาง</option><option value="BUY">BUY</option><option value="SELL">SELL</option></select></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Entry Price</label><input type="text" id="signalEntry" placeholder="1.23456"></div>
+                <div class="form-group"><label>Take Profit 1</label><input type="text" id="signalTp1" placeholder="1.24000"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Take Profit 2</label><input type="text" id="signalTp2"></div>
+                <div class="form-group"><label>Take Profit 3</label><input type="text" id="signalTp3"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Stop Loss</label><input type="text" id="signalSl"></div>
+                <div class="form-group"><label>สถานะ</label><select id="signalStatus"><option value="active">Active</option><option value="win">Win</option><option value="loss">Loss</option></select></div>
+              </div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+                <button type="submit" class="btn btn-gold" id="signalSubmit">เพิ่มสัญญาณ</button>
+                <button type="button" class="btn btn-outline" id="signalCancel" style="display:none">ยกเลิก</button>
+              </div>
+              <input type="hidden" id="signalEditId" value="">
+            </form>
+            <div class="table-wrapper" style="margin-top:1.5rem"><table class="admin-table"><thead><tr><th>คู่เงิน</th><th>ทิศทาง</th><th>Entry</th><th>TP1/TP2/TP3</th><th>SL</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="signalsBody"></tbody></table></div>
+          </div>
+
+          <!-- Articles -->
+          <div class="admin-page-content" id="admin-articles">
+            <h1>จัดการบทความ</h1>
+            <form class="admin-form" id="articleForm">
+              <h3>เพิ่มบทความ</h3>
+              <div class="form-group"><label>หัวข้อ</label><input type="text" id="articleTitle" required></div>
+              <div class="form-group"><label>เนื้อหา</label><textarea id="articleContent" rows="5" required></textarea></div>
+              <div class="form-group"><label>รูปภาพ (URL)</label><input type="text" id="articleImage" placeholder="https://example.com/image.jpg"></div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+                <button type="submit" class="btn btn-gold" id="articleSubmit">เพิ่มบทความ</button>
+                <button type="button" class="btn btn-outline" id="articleCancel" style="display:none">ยกเลิก</button>
+              </div>
+              <input type="hidden" id="articleEditId" value="">
+            </form>
+            <div class="table-wrapper" style="margin-top:1.5rem"><table class="admin-table"><thead><tr><th>หัวข้อ</th><th>วันที่</th><th>จัดการ</th></tr></thead><tbody id="articlesBody"></tbody></table></div>
+          </div>
+
+          <!-- Brokers -->
+          <div class="admin-page-content" id="admin-brokers">
+            <h1>จัดการโบรกเกอร์</h1>
+            <form class="admin-form" id="brokerForm">
+              <h3>เพิ่มโบรกเกอร์</h3>
+              <div class="form-row">
+                <div class="form-group"><label>ชื่อโบรกเกอร์</label><input type="text" id="brokerName" required></div>
+                <div class="form-group"><label>คะแนน (1-5)</label><input type="number" id="brokerRating" min="1" max="5" step="0.1" required></div>
+              </div>
+              <div class="form-group"><label>คำอธิบาย</label><textarea id="brokerDesc" rows="3" required></textarea></div>
+              <div class="form-group"><label>IB Link</label><input type="url" id="brokerLink" placeholder="https://..." required></div>
+              <div class="form-group"><label>โลโก้ (URL)</label><input type="text" id="brokerLogo" placeholder="https://example.com/logo.png"></div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+                <button type="submit" class="btn btn-gold" id="brokerSubmit">เพิ่มโบรกเกอร์</button>
+                <button type="button" class="btn btn-outline" id="brokerCancel" style="display:none">ยกเลิก</button>
+              </div>
+              <input type="hidden" id="brokerEditId" value="">
+            </form>
+            <div class="table-wrapper" style="margin-top:1.5rem"><table class="admin-table"><thead><tr><th>ชื่อ</th><th>คะแนน</th><th>IB Link</th><th>จัดการ</th></tr></thead><tbody id="brokersBody"></tbody></table></div>
+          </div>
+        </main>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 ATH Trader. All rights reserved.</p>
+      <p class="footer-risk"><strong>คำเตือนความเสี่ยง:</strong> การเทรด Forex มีความเสี่ยงสูง โปรดศึกษาให้ดีก่อนลงทุน</p>
+    </div>
+  </footer>
+
+  <!-- ====== TOAST ====== -->
+  <div id="toast" class="toast"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/router.js"></script>
+</body>
+</html>

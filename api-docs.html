@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation - ATH Trader</title>
+  <style>
+    :root {
+      --gold: #FFD700;
+      --gold-dark: #B8860B;
+      --bg: #0a0a0a;
+      --bg-card: #111;
+      --bg-card2: #1a1a1a;
+      --text: #eee;
+      --text-muted: #999;
+      --border: #333;
+      --green: #00c853;
+      --red: #ff1744;
+      --radius: 8px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, monospace;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.3rem; }
+    h1 span { color: var(--gold); }
+    .sub { color: var(--text-muted); margin-bottom: 2rem; }
+    h2 {
+      font-size: 1.3rem;
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 2px solid var(--gold-dark);
+      color: var(--gold);
+    }
+    h3 { font-size: 1rem; margin: 1.5rem 0 0.5rem; color: #fff; }
+    .endpoint {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.2rem;
+      margin-bottom: 0.8rem;
+    }
+    .endpoint-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+    .method {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+    }
+    .GET { background: rgba(0,200,83,0.2); color: var(--green); }
+    .POST { background: rgba(255,215,0,0.2); color: var(--gold); }
+    .PUT { background: rgba(33,150,243,0.2); color: #2196f3; }
+    .DELETE { background: rgba(255,23,68,0.2); color: var(--red); }
+    .path {
+      font-family: monospace;
+      font-size: 0.95rem;
+      color: #fff;
+    }
+    .desc { font-size: 0.85rem; color: var(--text-muted); }
+    .auth-badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: var(--gold-dark);
+      color: #000;
+    }
+    pre {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.8rem;
+      color: #ccc;
+      margin-top: 0.5rem;
+    }
+    .param-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin: 0.5rem 0;
+    }
+    .param-table th, .param-table td {
+      padding: 0.4rem 0.6rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .param-table th { color: var(--gold); font-weight: 600; background: var(--bg-card2); }
+    .param-table td { color: var(--text-muted); }
+    .param-table td:first-child { font-family: monospace; color: #fff; }
+    .note {
+      font-size: 0.85rem;
+      color: var(--gold-dark);
+      padding: 0.5rem;
+      border-left: 3px solid var(--gold-dark);
+      background: rgba(255,215,0,0.03);
+      margin: 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ATH <span>Trader</span> API</h1>
+    <p class="sub">REST API Documentation — สำหรับเชื่อมต่อ AI, Bot, หรือระบบภายนอก</p>
+
+    <div class="note">
+      <strong>Base URL:</strong> http://localhost:8080/api<br>
+      <strong>Auth:</strong> ใช้ Bearer Token ใน Header <code style="color:var(--gold)">Authorization: Bearer &lt;token&gt;</code>
+    </div>
+
+    <!-- ====== AUTH ====== -->
+    <h2>Auth</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method POST">POST</span>
+        <span class="path">/api/auth/login</span>
+        <span class="auth-badge">NO AUTH</span>
+      </div>
+      <div class="desc">เข้าสู่ระบบ รับ JWT Token</div>
+      <table class="param-table">
+        <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+        <tr><td>email</td><td>string</td><td>yes</td><td>อีเมลผู้ใช้</td></tr>
+        <tr><td>password</td><td>string</td><td>yes</td><td>รหัสผ่าน</td></tr>
+      </table>
+      <pre>
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@athtrader.com","password":"admin123"}'
+
+# Response: {"ok":true,"token":"eyJ...","user":{...}}</pre>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method POST">POST</span>
+        <span class="path">/api/auth/register</span>
+        <span class="auth-badge">NO AUTH</span>
+      </div>
+      <div class="desc">สมัครสมาชิกใหม่</div>
+      <pre>
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"user1","email":"user1@mail.com","password":"123456"}'</pre>
+    </div>
+
+    <!-- ====== SIGNALS ====== -->
+    <h2>Signals (สัญญาณเทรด)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method GET">GET</span>
+        <span class="path">/api/signals</span>
+        <span class="auth-badge">NO AUTH</span>
+      </div>
+      <div class="desc">ดึงสัญญาณเทรดทั้งหมด (เรียงล่าสุดก่อน)</div>
+      <pre>
+curl http://localhost:8080/api/signals
+
+# Response: [{"id":1,"pair":"EUR/USD","direction":"BUY","entry":"1.08750",...}]</pre>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method POST">POST</span>
+        <span class="path">/api/signals</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">เพิ่มสัญญาณเทรดใหม่</div>
+      <table class="param-table">
+        <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+        <tr><td>pair</td><td>string</td><td>yes</td><td>คู่เงิน (EUR/USD, XAU/USD, ...)</td></tr>
+        <tr><td>direction</td><td>string</td><td>yes</td><td>BUY หรือ SELL</td></tr>
+        <tr><td>entry</td><td>string</td><td>no</td><td>ราคาเข้า</td></tr>
+        <tr><td>tp1</td><td>string</td><td>no</td><td>Take Profit 1</td></tr>
+        <tr><td>tp2</td><td>string</td><td>no</td><td>Take Profit 2</td></tr>
+        <tr><td>tp3</td><td>string</td><td>no</td><td>Take Profit 3</td></tr>
+        <tr><td>sl</td><td>string</td><td>no</td><td>Stop Loss</td></tr>
+        <tr><td>status</td><td>string</td><td>no</td><td>active / win / loss (default: active)</td></tr>
+      </table>
+      <pre>
+curl -X POST http://localhost:8080/api/signals \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"pair":"EUR/USD","direction":"BUY","entry":"1.08750","tp1":"1.09200","sl":"1.08400"}'</pre>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method PUT">PUT</span>
+        <span class="path">/api/signals/:id</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">แก้ไขสัญญาณเทรด (ส่งเฉพาะฟิลด์ที่ต้องการเปลี่ยน)</div>
+      <pre>
+curl -X PUT http://localhost:8080/api/signals/1 \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"win"}'</pre>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method DELETE">DELETE</span>
+        <span class="path">/api/signals/:id</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">ลบสัญญาณเทรด</div>
+      <pre>
+curl -X DELETE http://localhost:8080/api/signals/1 \
+  -H "Authorization: Bearer &lt;token&gt;"</pre>
+    </div>
+
+    <!-- ====== ARTICLES ====== -->
+    <h2>Articles (บทความ)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method GET">GET</span>
+        <span class="path">/api/articles</span>
+        <span class="auth-badge">NO AUTH</span>
+      </div>
+      <div class="desc">ดึงบทความทั้งหมด</div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method POST">POST</span>
+        <span class="path">/api/articles</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">เพิ่มบทความใหม่</div>
+      <table class="param-table">
+        <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+        <tr><td>title</td><td>string</td><td>yes</td><td>หัวข้อบทความ</td></tr>
+        <tr><td>content</td><td>string</td><td>yes</td><td>เนื้อหาบทความ</td></tr>
+        <tr><td>image</td><td>string</td><td>no</td><td>URL รูปภาพประกอบ</td></tr>
+      </table>
+      <pre>
+curl -X POST http://localhost:8080/api/articles \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "วิเคราะห์ EUR/USD ประจำวัน",
+    "content": "บทความวิเคราะห์โดย AI...",
+    "image": "https://example.com/chart.jpg"
+  }'</pre>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method PUT">PUT</span>
+        <span class="path">/api/articles/:id</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">แก้ไขบทความ</div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method DELETE">DELETE</span>
+        <span class="path">/api/articles/:id</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">ลบบทความ</div>
+    </div>
+
+    <!-- ====== BROKERS ====== -->
+    <h2>Brokers (โบรกเกอร์)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method GET">GET</span>
+        <span class="path">/api/brokers</span>
+        <span class="auth-badge">NO AUTH</span>
+      </div>
+      <div class="desc">ดึงรายชื่อโบรกเกอร์ทั้งหมด</div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method POST">POST</span>
+        <span class="path">/api/brokers</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">เพิ่มโบรกเกอร์ใหม่</div>
+      <table class="param-table">
+        <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+        <tr><td>name</td><td>string</td><td>yes</td><td>ชื่อโบรกเกอร์</td></tr>
+        <tr><td>description</td><td>string</td><td>no</td><td>คำอธิบาย</td></tr>
+        <tr><td>ibLink</td><td>string</td><td>no</td><td>IB Link URL</td></tr>
+        <tr><td>logo</td><td>string</td><td>no</td><td>URL โลโก้</td></tr>
+        <tr><td>rating</td><td>number</td><td>no</td><td>คะแนน 1-5</td></tr>
+      </table>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method PUT">PUT</span>
+        <span class="path">/api/brokers/:id</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">แก้ไขโบรกเกอร์</div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method DELETE">DELETE</span>
+        <span class="path">/api/brokers/:id</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">ลบโบรกเกอร์</div>
+    </div>
+
+    <!-- ====== USERS ====== -->
+    <h2>Users (สมาชิก — Admin only)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method GET">GET</span>
+        <span class="path">/api/users</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">ดึงรายชื่อสมาชิกทั้งหมด</div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method PUT">PUT</span>
+        <span class="path">/api/users/:id/vip</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">เปลี่ยนระดับ VIP ของสมาชิก</div>
+      <pre>
+curl -X PUT http://localhost:8080/api/users/1/vip \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"vipLevel":"Gold"}'</pre>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method DELETE">DELETE</span>
+        <span class="path">/api/users/:id</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">ลบสมาชิก</div>
+    </div>
+
+    <!-- ====== STATS ====== -->
+    <h2>Stats (สถิติ)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method GET">GET</span>
+        <span class="path">/api/stats/public</span>
+        <span class="auth-badge">NO AUTH</span>
+      </div>
+      <div class="desc">สถิติหน้าแรก (totalSignals, buyWins, sellWins, vipCount)</div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-row">
+        <span class="method GET">GET</span>
+        <span class="path">/api/stats</span>
+        <span class="auth-badge">ADMIN</span>
+      </div>
+      <div class="desc">สถิติ Dashboard Admin</div>
+    </div>
+
+    <!-- ====== วิธีใช้กับ AI ====== -->
+    <h2>ตัวอย่าง: ให้ AI โพสต์บทความ</h2>
+    <pre>
+import requests
+
+API = "http://localhost:8080/api"
+
+# 1. Login ได้ token
+res = requests.post(f"{API}/auth/login", json={
+    "email": "admin@athtrader.com",
+    "password": "admin123"
+})
+token = res.json()["token"]
+headers = {"Authorization": f"Bearer {token}"}
+
+# 2. AI เขียนบทความ
+article = {
+    "title": "วิเคราะห์ทองคำประจำวัน",
+    "content": "ราคาทองคำวันนี้เคลื่อนไหวในกรอบ...",
+    "image": "https://example.com/gold-chart.jpg"
+}
+
+# 3. โพสต์
+r = requests.post(f"{API}/articles", json=article, headers=headers)
+print(r.json())
+
+# หรือโพสต์สัญญาณเทรด
+signal = {
+    "pair": "XAU/USD",
+    "direction": "BUY",
+    "entry": "2035.00",
+    "tp1": "2042.00",
+    "sl": "2028.00",
+    "status": "active"
+}
+r = requests.post(f"{API}/signals", json=signal, headers=headers)
+print(r.json())</pre>
+
+    <div class="note" style="margin-top:2rem">
+      <strong>Tips:</strong> Token ไม่หมดอายุ (เว้นแต่เปลี่ยน JWT_SECRET) สามารถเก็บไว้ใช้ยาวๆ หรือ login ใหม่ทุกครั้งก็ได้
+    </div>
+
+  </div>
+</body>
+</html>
