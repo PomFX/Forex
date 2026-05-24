@@ -38,17 +38,21 @@ async function initDB() {
         id SERIAL PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
         content TEXT NOT NULL,
-        image VARCHAR(500) DEFAULT '',
+        image TEXT DEFAULT '',
         created_at TIMESTAMP DEFAULT NOW()
       );
+    `);
+    await client.query(`ALTER TABLE articles ALTER COLUMN image TYPE TEXT USING image::TEXT`);
+    await client.query(`
       CREATE TABLE IF NOT EXISTS brokers (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         description TEXT DEFAULT '',
         ib_link VARCHAR(500) DEFAULT '',
-        logo VARCHAR(500) DEFAULT '',
+        logo TEXT DEFAULT '',
         rating DECIMAL(2,1) DEFAULT 0
       );
+      ALTER TABLE brokers ALTER COLUMN logo TYPE TEXT USING logo::TEXT;
     `);
 
     // Seed data if empty
