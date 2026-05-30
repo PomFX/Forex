@@ -29,9 +29,10 @@ router.put('/:id/vip', authMiddleware, adminMiddleware, async (req, res) => {
 router.put('/:id/admin', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { isAdmin } = req.body;
+    const val = isAdmin ? 1 : 0;
     const result = await pool.query(
       'UPDATE users SET is_admin=$1 WHERE id=$2 RETURNING id, username, email, is_admin',
-      [isAdmin, req.params.id]
+      [val, req.params.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
     res.json(result.rows[0]);
