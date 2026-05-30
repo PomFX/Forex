@@ -61,8 +61,9 @@ router.post('/login', async (req, res) => {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(400).json({ error: 'รหัสผ่านไม่ถูกต้อง' });
 
-    const token = jwt.sign({ id: user.id, username: user.username, email: user.email, isAdmin: false }, JWT_SECRET);
-    res.json({ ok: true, token, user: { id: user.id, username: user.username, email: user.email, vipLevel: user.vip_level } });
+    const isAdmin = user.is_admin || false;
+    const token = jwt.sign({ id: user.id, username: user.username, email: user.email, isAdmin }, JWT_SECRET);
+    res.json({ ok: true, token, user: { id: user.id, username: user.username, email: user.email, vipLevel: user.vip_level, isAdmin } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

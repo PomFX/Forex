@@ -21,6 +21,7 @@ async function initDB() {
       );
     `);
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS vip_level VARCHAR(20) DEFAULT 'Free'`);
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false`);
     await client.query(`
       CREATE TABLE IF NOT EXISTS signals (
         id SERIAL PRIMARY KEY,

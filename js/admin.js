@@ -73,14 +73,18 @@ const Admin = {
               <td>${u.id}</td>
               <td>${u.username}</td>
               <td>${u.email}</td>
+              <td>${u.is_admin ? '<span style="color:var(--gold);font-weight:600">Admin</span>' : '-'}</td>
               <td>
                 <select class="vip-select" data-user-id="${u.id}" style="background:var(--bg-input);border:1px solid var(--border);border-radius:5px;padding:0.3rem;color:var(--text)">${vipOptions}</select>
               </td>
               <td>${date}</td>
-              <td><button class="btn btn-danger btn-xs" onclick="Admin.deleteUser(${u.id})">ลบ</button></td>
+              <td>
+                <button class="btn btn-outline btn-xs" onclick="Admin.toggleAdmin(${u.id}, ${u.is_admin})">${u.is_admin ? 'ลดสิทธิ์' : 'ตั้งเป็น Admin'}</button>
+                <button class="btn btn-danger btn-xs" onclick="Admin.deleteUser(${u.id})">ลบ</button>
+              </td>
             </tr>`;
           }).join('')
-        : '<tr><td colspan="6" style="text-align:center">ไม่มีสมาชิก</td></tr>';
+        : '<tr><td colspan="7" style="text-align:center">ไม่มีสมาชิก</td></tr>';
 
       document.querySelectorAll('.vip-select').forEach(sel => {
         sel.addEventListener('change', async () => {
@@ -97,6 +101,14 @@ const Admin = {
       await API.deleteUser(id);
       this.renderMembers();
       App.toast('ลบสมาชิกแล้ว');
+    } catch {}
+  },
+
+  async toggleAdmin(userId, current) {
+    try {
+      await API.updateAdminStatus(userId, !current);
+      this.renderMembers();
+      App.toast('อัปเดตสิทธิ์ Admin แล้ว');
     } catch {}
   },
 

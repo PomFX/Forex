@@ -93,6 +93,10 @@ const API = {
     return this._fetch('/users/' + userId + '/vip', { method: 'PUT', body: JSON.stringify({ vipLevel }) });
   },
 
+  async updateAdminStatus(userId, isAdmin) {
+    return this._fetch('/users/' + userId + '/admin', { method: 'PUT', body: JSON.stringify({ isAdmin }) });
+  },
+
   async deleteUser(userId) {
     return this._fetch('/users/' + userId, { method: 'DELETE' });
   },
