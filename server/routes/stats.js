@@ -36,9 +36,9 @@ router.get('/public', async (req, res) => {
     ]);
     res.json({
       totalSignals: parseInt(sigStats.rows[0].total),
-      buyWins: parseInt(sigStats.rows[0].buy_wins),
-      sellWins: parseInt(sigStats.rows[0].sell_wins),
-      vipCount: parseInt(vipStats.rows[0].count),
+      buyWins: parseInt(process.env.HOMEPAGE_BUY_WINS) || parseInt(sigStats.rows[0].buy_wins),
+      sellWins: parseInt(process.env.HOMEPAGE_SELL_WINS) || parseInt(sigStats.rows[0].sell_wins),
+      vipCount: parseInt(process.env.HOMEPAGE_VIP_COUNT) || parseInt(vipStats.rows[0].count),
     });
   } catch (err) {
     console.error('Get public stats error:', err.message);
