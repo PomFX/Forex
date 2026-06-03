@@ -5,7 +5,15 @@ const { initDB } = require('../server/db');
 
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
+    : '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 
 app.use('/api/auth', require('../server/routes/auth'));

@@ -17,7 +17,32 @@ const App = {
       document.getElementById('statBuyWins').textContent = stats.buyWins;
       document.getElementById('statSellWins').textContent = stats.sellWins;
       document.getElementById('statVipCount').textContent = stats.vipCount;
-    } catch { /* ignore */ }
+    } catch (err) { console.error('renderHomeStats:', err); }
+  },
+
+  // ====== HOME BROKERS ======
+  async renderHomeBrokers() {
+    try {
+      const brokers = await API.getBrokers();
+      const topBrokers = brokers.filter(b => b.rating >= 5);
+      const el = document.getElementById('homeBrokers');
+      const list = document.getElementById('homeBrokerList');
+      if (topBrokers.length === 0) {
+        el.style.display = 'none';
+        return;
+      }
+      el.style.display = '';
+      list.innerHTML = topBrokers.map(b => {
+        const fallback = this._brokerSvg(b.name);
+        return `<div class="broker-card">
+          <img src="${escHtml(b.logo || fallback)}" alt="${escHtml(b.name)}" onerror="this.src='${fallback}'">
+          <h3>${escHtml(b.name)}</h3>
+          <div class="rating">${'★'.repeat(Math.floor(b.rating))}${b.rating % 1 >= 0.5 ? '½' : ''} ${b.rating}</div>
+          <p>${escHtml(b.description)}</p>
+          <a href="${escHtml(b.ib_link)}" target="_blank" class="btn btn-gold btn-sm">สมัครผ่าน IB</a>
+        </div>`;
+      }).join('');
+    } catch (err) { console.error('renderHomeBrokers:', err); }
   },
 
   // ====== HOME SIGNALS ======
@@ -25,7 +50,7 @@ const App = {
     try {
       const signals = await API.getSignals();
       document.getElementById('homeSignals').innerHTML = signals.slice(0, 3).map(this.signalCardHTML).join('');
-    } catch { /* ignore */ }
+    } catch (err) { console.error('renderHomeSignals:', err); }
   },
 
   // ====== HOME QR ======
@@ -38,14 +63,14 @@ const App = {
         { label: 'TikTok', img: data.tiktok_qr, url: data.tiktok },
       ].filter(q => q.img);
       document.getElementById('homeQRList').innerHTML = qrs.map(q =>
-        `<div class="home-qr-item" ${q.url ? `onclick="window.open('${q.url}','_blank')"` : ''}>
-          <h4>${q.label}</h4>
-          <img src="${q.img}" alt="${q.label} QR">
+        `<div class="home-qr-item"${q.url ? ` onclick="window.open('${escHtml(q.url)}','_blank')"` : ''}>
+          <h4>${escHtml(q.label)}</h4>
+          <img src="${escHtml(q.img)}" alt="${escHtml(q.label)} QR">
           <p class="home-qr-click">คลิกที่นี้</p>
         </div>`
       ).join('');
       document.getElementById('homeQR').style.display = qrs.length ? '' : 'none';
-    } catch { document.getElementById('homeQR').style.display = 'none'; }
+    } catch (err) { document.getElementById('homeQR').style.display = 'none'; console.error('renderHomeQR:', err); }
   },
 
   // ====== HOME ARTICLES ======
@@ -53,12 +78,12 @@ const App = {
     try {
       const articles = await API.getArticles();
       document.getElementById('homeArticles').innerHTML = articles.slice(0, 3).map(this.articleCardHTML).join('');
-    } catch { /* ignore */ }
+    } catch (err) { console.error('renderHomeArticles:', err); }
   },
 
   // ====== BROKERS ======
   _brokerSvg(name) {
-    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="60" viewBox="0 0 100 60"><rect fill="#222" width="100" height="60"/><text x="50" y="35" text-anchor="middle" fill="#FFD700" font-size="11" font-weight="bold">' + name + '</text></svg>';
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="60" viewBox="0 0 100 60"><rect fill="#222" width="100" height="60"/><text x="50" y="35" text-anchor="middle" fill="#FFD700" font-size="11" font-weight="bold">' + escHtml(name) + '</text></svg>';
     return 'data:image/svg+xml,' + encodeURIComponent(svg);
   },
 
@@ -68,14 +93,14 @@ const App = {
       document.getElementById('brokerList').innerHTML = brokers.map(b => {
         const fallback = this._brokerSvg(b.name);
         return `<div class="broker-card">
-          <img src="${b.logo || fallback}" alt="${b.name}" onerror="this.src='${fallback}'">
-          <h3>${b.name}</h3>
+          <img src="${escHtml(b.logo || fallback)}" alt="${escHtml(b.name)}" onerror="this.src='${fallback}'">
+          <h3>${escHtml(b.name)}</h3>
           <div class="rating">${'★'.repeat(Math.floor(b.rating))}${b.rating % 1 >= 0.5 ? '½' : ''} ${b.rating}</div>
-          <p>${b.description}</p>
-          <a href="${b.ib_link}" target="_blank" class="btn btn-gold btn-sm">สมัครผ่าน IB</a>
+          <p>${escHtml(b.description)}</p>
+          <a href="${escHtml(b.ib_link)}" target="_blank" class="btn btn-gold btn-sm">สมัครผ่าน IB</a>
         </div>`;
       }).join('');
-    } catch { /* ignore */ }
+    } catch (err) { console.error('renderBrokers:', err); }
   },
 
   // ====== SIGNALS ======
@@ -86,8 +111,9 @@ const App = {
       document.getElementById('signalList').innerHTML = signals.length
         ? signals.map(this.signalCardHTML).join('')
         : '<p style="text-align:center;color:var(--text-muted);padding:2rem">ไม่มีสัญญาณเทรด</p>';
-    } catch {
+    } catch (err) {
       document.getElementById('signalList').innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:2rem">โหลดข้อมูลล้มเหลว</p>';
+      console.error('renderSignals:', err);
     }
   },
 
@@ -98,11 +124,11 @@ const App = {
       : '<span class="badge">ACTIVE</span>';
     return `
       <div class="signal-card">
-        <span class="pair">${s.pair}</span>
-        <span class="direction ${dirClass}">${s.direction}</span>
-        <span class="detail"><strong>Entry:</strong> ${s.entry}</span>
-        <span class="detail"><strong>TP:</strong> ${s.tp1}${s.tp2 ? '/' + s.tp2 : ''}${s.tp3 ? '/' + s.tp3 : ''}</span>
-        <span class="detail"><strong>SL:</strong> ${s.sl || '-'}</span>
+        <span class="pair">${escHtml(s.pair)}</span>
+        <span class="direction ${dirClass}">${escHtml(s.direction)}</span>
+        <span class="detail"><strong>Entry:</strong> ${escHtml(s.entry)}</span>
+        <span class="detail"><strong>TP:</strong> ${escHtml(s.tp1)}${s.tp2 ? '/' + escHtml(s.tp2) : ''}${s.tp3 ? '/' + escHtml(s.tp3) : ''}</span>
+        <span class="detail"><strong>SL:</strong> ${escHtml(s.sl || '-')}</span>
         ${statusBadge}
       </div>
     `;
@@ -115,8 +141,9 @@ const App = {
       document.getElementById('articleList').innerHTML = articles.length
         ? articles.map(this.articleCardHTML).join('')
         : '<p style="text-align:center;color:var(--text-muted);padding:2rem">ไม่มีบทความ</p>';
-    } catch {
+    } catch (err) {
       document.getElementById('articleList').innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:2rem">โหลดข้อมูลล้มเหลว</p>';
+      console.error('renderArticles:', err);
     }
   },
 
@@ -126,12 +153,12 @@ const App = {
     return `
       <div class="article-card">
         ${hasImg
-          ? `<img class="article-card-img" src="${a.image}" alt="${a.title}" onerror="this.parentElement.innerHTML='<div class=article-card-img style=background:linear-gradient(135deg,#1a1a0a,#222);display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--gold);font-size:0.9rem;font-weight:600>ATH Trader</div>'">`
+          ? `<img class="article-card-img" src="${escHtml(a.image)}" alt="${escHtml(a.title)}" onerror="this.parentElement.innerHTML='<div class=article-card-img style=background:linear-gradient(135deg,#1a1a0a,#222);display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--gold);font-size:0.9rem;font-weight:600>ATH Trader</div>'">`
           : `<div class="article-card-img" style="background:linear-gradient(135deg,#1a1a0a,#222);display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--gold);font-size:0.9rem;font-weight:600">ATH<br>Trader</div>`
         }
         <div class="article-card-body">
-          <h3>${a.title}</h3>
-          <p>${a.content}</p>
+          <h3>${escHtml(a.title)}</h3>
+          <p>${escHtml(a.content)}</p>
           <div class="meta">${date}</div>
         </div>
       </div>
@@ -149,9 +176,9 @@ const App = {
     document.getElementById('vipPlans').innerHTML = plans.map(p => `
       <div class="vip-card${p.featured ? ' featured' : ''}">
         ${p.featured ? '<span class="vip-badge">ยอดนิยม</span>' : ''}
-        <div class="vip-name">${p.name}</div>
-        <div class="vip-price">${p.price}</div>
-        <ul>${p.perks.map(x => '<li>' + x + '</li>').join('')}</ul>
+        <div class="vip-name">${escHtml(p.name)}</div>
+        <div class="vip-price">${escHtml(p.price)}</div>
+        <ul>${p.perks.map(x => '<li>' + escHtml(x) + '</li>').join('')}</ul>
         <button class="btn ${p.name === 'Free' ? 'btn-outline' : 'btn-gold'}" onclick="Router.navigate('register')">${p.name === 'Free' ? 'เริ่มต้นฟรี' : 'สมัครเลย'}</button>
       </div>
     `).join('');
@@ -220,7 +247,7 @@ const App = {
         const card = e.target.closest('.contact-card[data-href]');
         if (card) window.open(card.dataset.href, '_blank');
       };
-    } catch {}
+    } catch (err) { console.error('renderContact:', err); }
   },
 
   // ====== AUTH HANDLERS ======

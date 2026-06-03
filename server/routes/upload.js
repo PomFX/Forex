@@ -46,19 +46,17 @@ router.post('/', authMiddleware, adminMiddleware, upload.single('image'), async 
       // sharp not available — use original
     }
 
-    // Save to filesystem for local dev (also keep file serving for backward compat)
+    // Save to filesystem for local dev
     if (!isVercel) {
       const name = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.webp';
       fs.writeFileSync(path.join(UPLOAD_DIR, name), buffer);
     }
 
-    // Return data URL — works everywhere, survives cold starts
+    // Return data URL
     const b64 = buffer.toString('base64');
     const dataUrl = 'data:' + mime + ';base64,' + b64;
 
-    // Truncate if too large for DB (only keep file path for very large images)
     if (b64.length > 500000) {
-      // Too large for data URL — use file path (local only)
       if (isVercel) {
         return res.status(400).json({ error: 'รูปภาพใหญ่เกินไป (สูงสุด ~500KB หลังแปลง)' });
       }
@@ -69,7 +67,8 @@ router.post('/', authMiddleware, adminMiddleware, upload.single('image'), async 
 
     res.json({ url: dataUrl });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Upload error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
   }
 });
 
@@ -77,7 +76,7 @@ router.post('/', authMiddleware, adminMiddleware, upload.single('image'), async 
 router.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ error: 'ไฟล์ใหญ่เกินไป (สูงสุด 10MB)' });
-    return res.status(400).json({ error: err.message });
+    return res.status(400).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
   }
   if (err) return res.status(400).json({ error: err.message });
   next();

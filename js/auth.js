@@ -14,7 +14,7 @@ const Auth = {
       const data = await API.login(email, password);
       API.setToken(data.token);
       localStorage.setItem('athtrader_user', JSON.stringify(data.user));
-      return { ok: true, msg: 'เข้าสู่ระบบสําเร็จ', isAdmin: data.user.role === 'admin' };
+      return { ok: true, msg: 'เข้าสู่ระบบสําเร็จ', isAdmin: data.user.role === 'admin' || data.user.isAdmin === true };
     } catch (err) {
       return { ok: false, msg: err.message };
     }
@@ -32,7 +32,7 @@ const Auth = {
 
   isAdmin() {
     const u = this.getUser();
-    return u && u.role === 'admin';
+    return u && (u.role === 'admin' || u.isAdmin === true);
   },
 
   getUser() {

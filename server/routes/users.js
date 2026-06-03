@@ -8,7 +8,8 @@ router.get('/', authMiddleware, adminMiddleware, async (req, res) => {
     const result = await pool.query('SELECT id, username, email, vip_level, is_admin, created_at FROM users ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Get users error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
   }
 });
 
@@ -22,7 +23,8 @@ router.put('/:id/vip', authMiddleware, adminMiddleware, async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Update VIP error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
   }
 });
 
@@ -37,7 +39,8 @@ router.put('/:id/admin', authMiddleware, adminMiddleware, async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Update admin status error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
   }
 });
 
@@ -46,7 +49,8 @@ router.delete('/:id', authMiddleware, adminMiddleware, async (req, res) => {
     await pool.query('DELETE FROM users WHERE id=$1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Delete user error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
   }
 });
 

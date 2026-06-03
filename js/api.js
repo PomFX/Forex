@@ -1,4 +1,14 @@
 // ====== API CLIENT ======
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const API = {
   _token: localStorage.getItem('athtrader_token'),
 

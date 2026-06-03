@@ -10,7 +10,8 @@ router.get('/contact', async (req, res) => {
     if (result.rows.length === 0) return res.json({});
     res.json(JSON.parse(result.rows[0].value));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Get contact error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
   }
 });
 
@@ -22,7 +23,8 @@ router.put('/contact', authMiddleware, adminMiddleware, async (req, res) => {
     await pool.query("UPDATE site_settings SET value=$1 WHERE key='contact'", [data]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Update contact error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
   }
 });
 

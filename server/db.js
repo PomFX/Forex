@@ -1,11 +1,11 @@
 const { Pool } = require('pg');
 
 const connStr = process.env.DATABASE_URL;
-const isLocal = connStr && (connStr.includes('@localhost') || connStr.includes('host='));
+const isLocal = connStr && (connStr.includes('@localhost') || connStr.includes('host=') || connStr.includes('127.0.0.1'));
 
 const pool = new Pool({
   connectionString: connStr,
-  ssl: isLocal ? false : { rejectUnauthorized: false },
+  ssl: isLocal ? false : { rejectUnauthorized: process.env.PG_SSL_REJECT_UNAUTHORIZED !== 'false' },
 });
 
 async function initDB() {
@@ -43,7 +43,6 @@ async function initDB() {
         created_at TIMESTAMP DEFAULT NOW()
       );
     `);
-    await client.query(`ALTER TABLE articles ALTER COLUMN image TYPE TEXT USING image::TEXT`);
     await client.query(`
       CREATE TABLE IF NOT EXISTS brokers (
         id SERIAL PRIMARY KEY,
@@ -53,7 +52,6 @@ async function initDB() {
         logo TEXT DEFAULT '',
         rating DECIMAL(2,1) DEFAULT 0
       );
-      ALTER TABLE brokers ALTER COLUMN logo TYPE TEXT USING logo::TEXT;
     `);
 
     // Seed data if empty

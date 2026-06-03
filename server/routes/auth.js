@@ -4,7 +4,47 @@ const jwt = require('jsonwebtoken');
 const { pool } = require('../db');
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'ath-trader-secret-key-2026';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET environment variable is not set');
+  process.exit(1);
+}
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  console.error('FATAL: ADMIN_EMAIL and ADMIN_PASSWORD environment variables must be set');
+  process.exit(1);
+}
+
+// Rate limiter for auth endpoints
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW = 15 * 60 * 1000;
+const RATE_LIMIT_MAX = 10;
+
+function rateLimiter(req, res, next) {
+  const ip = req.ip || req.connection.remoteAddress || 'unknown';
+  const now = Date.now();
+  if (!rateLimitMap.has(ip)) {
+    rateLimitMap.set(ip, []);
+  }
+  const attempts = rateLimitMap.get(ip).filter(t => now - t < RATE_LIMIT_WINDOW);
+  if (attempts.length >= RATE_LIMIT_MAX) {
+    return res.status(429).json({ error: 'ขออภัย กรุณาลองใหม่อีกครั้งในภายหลัง' });
+  }
+  attempts.push(now);
+  rateLimitMap.set(ip, attempts);
+  next();
+}
+
+setInterval(() => {
+  const cutoff = Date.now() - RATE_LIMIT_WINDOW;
+  for (const [ip, attempts] of rateLimitMap) {
+    const filtered = attempts.filter(t => t > cutoff);
+    if (filtered.length === 0) rateLimitMap.delete(ip);
+    else rateLimitMap.set(ip, filtered);
+  }
+}, 60000);
 
 function authMiddleware(req, res, next) {
   const header = req.headers.authorization;
@@ -23,10 +63,16 @@ function adminMiddleware(req, res, next) {
   next();
 }
 
+const MIN_PASSWORD_LENGTH = 8;
+
 router.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบ' });
+
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      return res.status(400).json({ error: 'รหัสผ่านต้องมีอย่างน้อย ' + MIN_PASSWORD_LENGTH + ' ตัวอักษร' });
+    }
 
     const exist = await pool.query('SELECT id FROM users WHERE email=$1 OR username=$2', [email, username]);
     if (exist.rows.length > 0) return res.status(400).json({ error: 'อีเมลหรือชื่อผู้ใช้นี้มีอยู่แล้ว' });
@@ -38,20 +84,18 @@ router.post('/register', async (req, res) => {
     );
     res.json({ ok: true, user: result.rows[0] });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Register error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', rateLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Admin check
-    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@athtrader.com';
-    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
       const token = jwt.sign({ id: 0, username: 'Admin', email: ADMIN_EMAIL, isAdmin: true }, JWT_SECRET);
-      return res.json({ ok: true, token, user: { id: 0, username: 'Admin', email: ADMIN_EMAIL, vipLevel: 'Platinum', role: 'admin' } });
+      return res.json({ ok: true, token, user: { id: 0, username: 'Admin', email: ADMIN_EMAIL, vipLevel: 'Platinum', role: 'admin', isAdmin: true } });
     }
 
     const result = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
@@ -63,9 +107,10 @@ router.post('/login', async (req, res) => {
 
     const isAdmin = user.is_admin ? true : false;
     const token = jwt.sign({ id: user.id, username: user.username, email: user.email, isAdmin }, JWT_SECRET);
-    res.json({ ok: true, token, user: { id: user.id, username: user.username, email: user.email, vipLevel: user.vip_level, isAdmin } });
+    res.json({ ok: true, token, user: { id: user.id, username: user.username, email: user.email, vipLevel: user.vip_level, role: isAdmin ? 'admin' : 'user', isAdmin } });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Login error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
   }
 });
 

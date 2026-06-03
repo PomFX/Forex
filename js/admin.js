@@ -2,7 +2,6 @@
 const Admin = {
   // ====== UPLOAD ======
   setupUploads() {
-    // Article image upload
     document.getElementById('articleImageUpload').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -14,10 +13,10 @@ const Admin = {
       } catch (err) {
         document.getElementById('articleImageName').textContent = '✖ ล้มเหลว';
         App.toast('อัปโหลดล้มเหลว', true);
+        console.error('Upload article image error:', err);
       }
     });
 
-    // Broker logo upload
     document.getElementById('brokerLogoUpload').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -29,6 +28,7 @@ const Admin = {
       } catch (err) {
         document.getElementById('brokerLogoName').textContent = '✖ ล้มเหลว';
         App.toast('อัปโหลดล้มเหลว', true);
+        console.error('Upload broker logo error:', err);
       }
     });
   },
@@ -56,7 +56,7 @@ const Admin = {
       document.getElementById('aTotalSignals').textContent = stats.totalSignals;
       document.getElementById('aTotalArticles').textContent = stats.totalArticles;
       document.getElementById('aTotalBrokers').textContent = stats.totalBrokers;
-    } catch {}
+    } catch (err) { console.error('showDashboard:', err); }
   },
 
   // ====== MEMBERS ======
@@ -71,8 +71,8 @@ const Admin = {
             ).join('');
             return `<tr>
               <td>${u.id}</td>
-              <td>${u.username}</td>
-              <td>${u.email}</td>
+              <td>${escHtml(u.username)}</td>
+              <td>${escHtml(u.email)}</td>
               <td>${u.is_admin ? '<span style="color:var(--gold);font-weight:600">Admin</span>' : '-'}</td>
               <td>
                 <select class="vip-select" data-user-id="${u.id}" style="background:var(--bg-input);border:1px solid var(--border);border-radius:5px;padding:0.3rem;color:var(--text)">${vipOptions}</select>
@@ -92,7 +92,7 @@ const Admin = {
           App.toast('อัปเดตระดับ VIP แล้ว');
         });
       });
-    } catch {}
+    } catch (err) { console.error('renderMembers:', err); }
   },
 
   async deleteUser(id) {
@@ -101,7 +101,7 @@ const Admin = {
       await API.deleteUser(id);
       this.renderMembers();
       App.toast('ลบสมาชิกแล้ว');
-    } catch {}
+    } catch (err) { console.error('deleteUser:', err); }
   },
 
   async toggleAdmin(userId, current) {
@@ -109,7 +109,7 @@ const Admin = {
       await API.updateAdminStatus(userId, !current);
       this.renderMembers();
       App.toast('อัปเดตสิทธิ์ Admin แล้ว');
-    } catch {}
+    } catch (err) { console.error('toggleAdmin:', err); }
   },
 
   // ====== SIGNALS ======
@@ -147,6 +147,7 @@ const Admin = {
         this.renderSignals();
       } catch (err) {
         App.toast('เกิดข้อผิดพลาด', true);
+        console.error('Signal form error:', err);
       }
     });
   },
@@ -158,12 +159,12 @@ const Admin = {
         ? signals.map(s => {
             const statusColors = { active: 'var(--text-muted)', win: 'var(--green)', loss: 'var(--red)' };
             return `<tr>
-              <td>${s.pair}</td>
-              <td style="color:${s.direction === 'BUY' ? 'var(--green)' : 'var(--red)'};font-weight:600">${s.direction}</td>
-              <td>${s.entry}</td>
-              <td>${s.tp1}${s.tp2 ? ' / ' + s.tp2 : ''}${s.tp3 ? ' / ' + s.tp3 : ''}</td>
-              <td>${s.sl || '-'}</td>
-              <td style="color:${statusColors[s.status] || 'var(--text-muted)'};font-weight:600">${s.status.toUpperCase()}</td>
+              <td>${escHtml(s.pair)}</td>
+              <td style="color:${s.direction === 'BUY' ? 'var(--green)' : 'var(--red)'};font-weight:600">${escHtml(s.direction)}</td>
+              <td>${escHtml(s.entry)}</td>
+              <td>${escHtml(s.tp1)}${s.tp2 ? ' / ' + escHtml(s.tp2) : ''}${s.tp3 ? ' / ' + escHtml(s.tp3) : ''}</td>
+              <td>${escHtml(s.sl || '-')}</td>
+              <td style="color:${statusColors[s.status] || 'var(--text-muted)'};font-weight:600">${escHtml(s.status.toUpperCase())}</td>
               <td>
                 <button class="btn btn-outline btn-xs" onclick="Admin.editSignal(${s.id})">แก้ไข</button>
                 <button class="btn btn-danger btn-xs" onclick="Admin.deleteSignal(${s.id})">ลบ</button>
@@ -171,7 +172,7 @@ const Admin = {
             </tr>`;
           }).join('')
         : '<tr><td colspan="7" style="text-align:center">ไม่มีสัญญาณเทรด</td></tr>';
-    } catch {}
+    } catch (err) { console.error('renderSignals admin:', err); }
   },
 
   async editSignal(id) {
@@ -191,7 +192,7 @@ const Admin = {
       document.getElementById('signalSubmit').textContent = 'อัปเดตสัญญาณ';
       document.getElementById('signalCancel').style.display = 'inline-block';
       window.scrollTo({ top: document.getElementById('admin-signals').offsetTop - 60, behavior: 'smooth' });
-    } catch {}
+    } catch (err) { console.error('editSignal:', err); }
   },
 
   async deleteSignal(id) {
@@ -200,7 +201,7 @@ const Admin = {
       await API.deleteSignal(id);
       this.renderSignals();
       App.toast('ลบสัญญาณแล้ว');
-    } catch {}
+    } catch (err) { console.error('deleteSignal:', err); }
   },
 
   // ====== ARTICLES ======
@@ -225,7 +226,10 @@ const Admin = {
           e.target.reset();
         }
         this.renderArticles();
-      } catch {}
+      } catch (err) {
+        App.toast('เกิดข้อผิดพลาด', true);
+        console.error('Article form error:', err);
+      }
     });
   },
 
@@ -236,7 +240,7 @@ const Admin = {
         ? articles.map(a => {
             const date = new Date(a.created_at).toLocaleDateString('th-TH');
             return `<tr>
-              <td>${a.title}</td>
+              <td>${escHtml(a.title)}</td>
               <td>${date}</td>
               <td>
                 <button class="btn btn-outline btn-xs" onclick="Admin.editArticle(${a.id})">แก้ไข</button>
@@ -245,7 +249,7 @@ const Admin = {
             </tr>`;
           }).join('')
         : '<tr><td colspan="3" style="text-align:center">ไม่มีบทความ</td></tr>';
-    } catch {}
+    } catch (err) { console.error('renderArticles admin:', err); }
   },
 
   async editArticle(id) {
@@ -260,7 +264,7 @@ const Admin = {
       document.getElementById('articleSubmit').textContent = 'อัปเดตบทความ';
       document.getElementById('articleCancel').style.display = 'inline-block';
       window.scrollTo({ top: document.getElementById('admin-articles').offsetTop - 60, behavior: 'smooth' });
-    } catch {}
+    } catch (err) { console.error('editArticle:', err); }
   },
 
   async deleteArticle(id) {
@@ -269,7 +273,7 @@ const Admin = {
       await API.deleteArticle(id);
       this.renderArticles();
       App.toast('ลบบทความแล้ว');
-    } catch {}
+    } catch (err) { console.error('deleteArticle:', err); }
   },
 
   // ====== BROKERS ======
@@ -296,7 +300,10 @@ const Admin = {
           e.target.reset();
         }
         this.renderBrokers();
-      } catch {}
+      } catch (err) {
+        App.toast('เกิดข้อผิดพลาด', true);
+        console.error('Broker form error:', err);
+      }
     });
   },
 
@@ -305,16 +312,16 @@ const Admin = {
       const brokers = await API.getBrokers();
       document.getElementById('brokersBody').innerHTML = brokers.length
         ? brokers.map(b => `<tr>
-            <td>${b.name}</td>
+            <td>${escHtml(b.name)}</td>
             <td>${'★'.repeat(Math.floor(b.rating))} ${b.rating}</td>
-            <td><a href="${b.ib_link}" target="_blank" style="font-size:0.8rem">${b.ib_link}</a></td>
+            <td><a href="${escHtml(b.ib_link)}" target="_blank" style="font-size:0.8rem">${escHtml(b.ib_link)}</a></td>
             <td>
               <button class="btn btn-outline btn-xs" onclick="Admin.editBroker(${b.id})">แก้ไข</button>
               <button class="btn btn-danger btn-xs" onclick="Admin.deleteBroker(${b.id})">ลบ</button>
             </td>
           </tr>`).join('')
         : '<tr><td colspan="4" style="text-align:center">ไม่มีโบรกเกอร์</td></tr>';
-    } catch {}
+    } catch (err) { console.error('renderBrokers admin:', err); }
   },
 
   async editBroker(id) {
@@ -331,7 +338,7 @@ const Admin = {
       document.getElementById('brokerSubmit').textContent = 'อัปเดตโบรกเกอร์';
       document.getElementById('brokerCancel').style.display = 'inline-block';
       window.scrollTo({ top: document.getElementById('admin-brokers').offsetTop - 60, behavior: 'smooth' });
-    } catch {}
+    } catch (err) { console.error('editBroker:', err); }
   },
 
   async deleteBroker(id) {
@@ -340,7 +347,7 @@ const Admin = {
       await API.deleteBroker(id);
       this.renderBrokers();
       App.toast('ลบโบรกเกอร์แล้ว');
-    } catch {}
+    } catch (err) { console.error('deleteBroker:', err); }
   },
 
   // ====== CONTACT ======
@@ -362,10 +369,12 @@ const Admin = {
       try {
         await API.updateContact(data);
         App.toast('บันทึกช่องทางติดต่อแล้ว');
-      } catch {}
+      } catch (err) {
+        App.toast('เกิดข้อผิดพลาด', true);
+        console.error('Update contact error:', err);
+      }
     });
 
-    // QR upload Line
     document.getElementById('contactQRUpload').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -376,12 +385,12 @@ const Admin = {
         document.getElementById('contactQRName').textContent = '✔ อัปโหลดแล้ว';
         document.getElementById('contactQRPreview').src = url;
         document.getElementById('contactPreview').style.display = 'block';
-      } catch {
+      } catch (err) {
         document.getElementById('contactQRName').textContent = '✖ ล้มเหลว';
+        console.error('Contact QR upload error:', err);
       }
     });
 
-    // QR upload OpenChat
     document.getElementById('contactOpenchatQRUpload').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -392,12 +401,12 @@ const Admin = {
         document.getElementById('contactOpenchatQRName').textContent = '✔ อัปโหลดแล้ว';
         document.getElementById('contactOpenchatQRPreview').src = url;
         document.getElementById('contactOpenchatPreview').style.display = 'block';
-      } catch {
+      } catch (err) {
         document.getElementById('contactOpenchatQRName').textContent = '✖ ล้มเหลว';
+        console.error('OpenChat QR upload error:', err);
       }
     });
 
-    // QR upload TikTok
     document.getElementById('contactTiktokQRUpload').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -408,8 +417,9 @@ const Admin = {
         document.getElementById('contactTiktokQRName').textContent = '✔ อัปโหลดแล้ว';
         document.getElementById('contactTiktokQRPreview').src = url;
         document.getElementById('contactTiktokPreview').style.display = 'block';
-      } catch {
+      } catch (err) {
         document.getElementById('contactTiktokQRName').textContent = '✖ ล้มเหลว';
+        console.error('TikTok QR upload error:', err);
       }
     });
   },
@@ -439,6 +449,6 @@ const Admin = {
         document.getElementById('contactTiktokQRPreview').src = data.tiktok_qr;
         document.getElementById('contactTiktokPreview').style.display = 'block';
       }
-    } catch {}
+    } catch (err) { console.error('renderContactSettings:', err); }
   }
 };
