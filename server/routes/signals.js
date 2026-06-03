@@ -51,6 +51,34 @@ router.post('/ai', async (req, res) => {
   }
 });
 
+// AI evaluate endpoint — updates signal status using X-AI-Key
+router.patch('/ai/evaluate', async (req, res) => {
+  try {
+    const apiKey = req.headers['x-ai-key'];
+    const expectedKey = process.env.AI_SIGNAL_API_KEY;
+    if (!expectedKey || apiKey !== expectedKey) {
+      return res.status(403).json({ error: 'Invalid AI key' });
+    }
+    const { id, status } = req.body;
+    if (!id || !status) {
+      return res.status(400).json({ error: 'id and status required' });
+    }
+    if (!['win', 'loss'].includes(status)) {
+      return res.status(400).json({ error: 'status must be win or loss' });
+    }
+    const result = await pool.query(
+      'UPDATE signals SET status=$1 WHERE id=$2 AND status=\'active\' RETURNING *',
+      [status, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Not found or already evaluated' });
+    console.log(`AI evaluated signal ${id}: ${status}`);
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('AI evaluate error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
+  }
+});
+
 router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { pair, direction, entry, tp1, tp2, tp3, sl, status } = req.body;
