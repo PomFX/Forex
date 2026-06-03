@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const OpenAI = require('openai');
 
 const FOREX_MAP = {
   'EUR/USD': { from: 'EUR', to: 'USD' },
@@ -11,7 +11,6 @@ const FOREX_MAP = {
 };
 
 async function fetchMarketData() {
-  // Fetch forex rates from free API (no key needed)
   let forexData = {};
   try {
     const res = await fetch('https://open.er-api.com/v6/latest/USD');
@@ -27,23 +26,20 @@ async function fetchMarketData() {
   for (const [pair, { from, to }] of Object.entries(FOREX_MAP)) {
     let price = null;
     if (from === 'USD') {
-      // USD/JPY, USD/CHF, USD/CAD: rate is directly how many JPY/CHF/CAD per USD
       price = forexData[to] || null;
     } else {
-      // EUR/USD, GBP/USD, AUD/USD: need to invert (1 / how many EUR per USD)
       price = forexData[from] ? (1 / forexData[from]) : null;
     }
     if (price) {
-      results.push({ pair, price: parseFloat(price.toFixed(5)), high: price * 1.005, low: price * 0.995, change: 0 });
+      results.push({ pair, price: parseFloat(price.toFixed(5)), change: 0 });
     }
   }
 
-  // Try to get XAU/USD
   try {
     const res = await fetch('https://api.metals.live/v1/spot/gold');
     const data = await res.json();
     if (data && data.length > 0) {
-      results.push({ pair: 'XAU/USD', price: data[0].price || data[0].xauPrice || 2350, high: 0, low: 0, change: 0 });
+      results.push({ pair: 'XAU/USD', price: data[0].price || data[0].xauPrice || 2350, change: 0 });
     }
   } catch {}
 
@@ -51,11 +47,10 @@ async function fetchMarketData() {
 }
 
 async function generateSignal(marketData) {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   const marketTable = marketData.map(d =>
-    `${d.pair} | Price: ${d.price} | High: ${d.high} | Low: ${d.low} | Change: ${d.change.toFixed(2)}%`
+    `${d.pair} | Price: ${d.price} | Change: ${d.change.toFixed(2)}%`
   ).join('\n');
 
   const prompt = `You are a professional Forex analyst. Analyze the current market data and generate 1-3 trading signals.
@@ -64,14 +59,14 @@ Current Market Data:
 ${marketTable}
 
 Instructions:
-- Choose pairs with clear technical setups (support/resistance, trends, momentum)
+- Choose pairs with clear technical setups
 - For each signal provide: pair, direction (BUY/SELL), entry price, TP1, TP2, TP3, SL
 - Entry should be near current price with a reasonable spread
 - TP levels should be realistic (20-100 pips from entry depending on pair)
 - SL should be logical (15-50 pips opposite direction)
 - Status should be "active"
 
-Return ONLY a valid JSON array (no markdown, no code blocks):
+Return ONLY a valid JSON array (no markdown, no code blocks, no extra text):
 [
   {
     "pair": "EUR/USD",
@@ -84,8 +79,13 @@ Return ONLY a valid JSON array (no markdown, no code blocks):
   }
 ]`;
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text().trim();
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.7,
+  });
+
+  const text = completion.choices[0].message.content.trim();
   const cleaned = text.replace(/```json?/gi, '').replace(/```/g, '').trim();
   return JSON.parse(cleaned);
 }
@@ -129,8 +129,8 @@ async function postSignals(signals) {
 async function main() {
   console.log('=== AI Signal Generator ===\n');
 
-  if (!process.env.GEMINI_API_KEY) {
-    console.error('GEMINI_API_KEY not set');
+  if (!process.env.OPENAI_API_KEY) {
+    console.error('OPENAI_API_KEY not set');
     process.exit(1);
   }
 
