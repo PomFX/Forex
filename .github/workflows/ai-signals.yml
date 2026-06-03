@@ -1,0 +1,25 @@
+name: AI Signal Generator
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Run AI Signal Generator
+        run: node scripts/ai-signals.js
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          AI_SIGNAL_API_KEY: ${{ secrets.AI_SIGNAL_API_KEY }}
+          AI_API_URL: ${{ vars.AI_API_URL }}
