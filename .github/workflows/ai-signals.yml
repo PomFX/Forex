@@ -2,7 +2,7 @@ name: AI Signal Generator
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 */4 * * *'
   workflow_dispatch:
 
 jobs:
@@ -22,4 +22,4 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           AI_SIGNAL_API_KEY: ${{ secrets.AI_SIGNAL_API_KEY }}
-          AI_API_URL: ${{ vars.AI_API_URL }}
+          AI_API_URL: ${{ secrets.AI_API_URL }}
