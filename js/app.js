@@ -48,8 +48,9 @@ const App = {
   // ====== HOME SIGNALS ======
   async renderHomeSignals() {
     try {
-      const signals = await API.getSignals();
-      document.getElementById('homeSignals').innerHTML = signals.slice(0, 3).map(this.signalCardHTML).join('');
+      const [signals, prices] = await Promise.all([API.getSignals(), API.getMarketPrices()]);
+      this._prices = prices;
+      document.getElementById('homeSignals').innerHTML = signals.slice(0, 3).map(s => this.signalCardHTML(s)).join('');
     } catch (err) { console.error('renderHomeSignals:', err); }
   },
 
@@ -106,10 +107,11 @@ const App = {
   // ====== SIGNALS ======
   async renderSignals(filter = 'all') {
     try {
-      let signals = await API.getSignals();
+      const [signals, prices] = await Promise.all([API.getSignals(), API.getMarketPrices()]);
+      this._prices = prices;
       if (filter !== 'all') signals = signals.filter(s => s.direction === filter);
       document.getElementById('signalList').innerHTML = signals.length
-        ? signals.map(this.signalCardHTML).join('')
+        ? signals.map(s => this.signalCardHTML(s)).join('')
         : '<p style="text-align:center;color:var(--text-muted);padding:2rem">ไม่มีสัญญาณเทรด</p>';
     } catch (err) {
       document.getElementById('signalList').innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:2rem">โหลดข้อมูลล้มเหลว</p>';
@@ -126,6 +128,8 @@ const App = {
       : '<span class="badge">ACTIVE</span>';
     const time = s.created_at || s.createdAt;
     const timeStr = time ? new Date(time).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', hour12: false }) : '';
+    const livePrice = this._prices && this._prices[s.pair];
+    const livePriceStr = livePrice ? (isGold ? livePrice.toLocaleString(undefined, {minimumFractionDigits:2}) : livePrice.toFixed(5)) : '';
     return `
       <div class="signal-card${isGold ? ' gold-signal' : ''}">
         <span class="pair">${escHtml(s.pair)}${goldBadge}</span>
@@ -134,6 +138,7 @@ const App = {
         <span class="detail"><strong>TP:</strong> ${escHtml(s.tp1)}${s.tp2 ? '/' + escHtml(s.tp2) : ''}${s.tp3 ? '/' + escHtml(s.tp3) : ''}</span>
         <span class="detail"><strong>SL:</strong> ${escHtml(s.sl || '-')}</span>
         ${statusBadge}
+        ${livePriceStr ? `<span class="detail live-price"><strong>ปัจจุบัน:</strong> ${livePriceStr}</span>` : ''}
         <span class="detail signal-time">${timeStr}</span>
       </div>
     `;

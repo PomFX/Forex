@@ -11,8 +11,8 @@ const corsOptions = {
   origin: process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
     : '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-AI-Key'],
 };
 
 app.use(cors(corsOptions));
@@ -29,6 +29,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/stats', require('./routes/stats'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/settings', require('./routes/settings'));
+app.use('/api/market', require('./routes/market'));
 
 // SPA fallback
 app.get('*', (req, res) => {

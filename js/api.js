@@ -128,4 +128,9 @@ const API = {
   async updateContact(data) {
     return this._fetch('/settings/contact', { method: 'PUT', body: JSON.stringify(data) });
   },
+
+  // Market
+  async getMarketPrices() {
+    return this._fetch('/market/prices');
+  },
 };
