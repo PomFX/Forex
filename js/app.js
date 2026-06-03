@@ -119,12 +119,14 @@ const App = {
 
   signalCardHTML(s) {
     const dirClass = s.direction === 'BUY' ? 'buy' : 'sell';
+    const isGold = s.pair === 'XAU/USD';
+    const goldBadge = isGold ? ' <span style="color:#FFD700;font-size:0.7rem;background:#1a1a0a;padding:0.1rem 0.4rem;border-radius:3px;border:1px solid #FFD700;margin-left:0.3rem">ทองคำ</span>' : '';
     const statusBadge = s.status === 'win' ? '<span class="badge win">WIN</span>'
       : s.status === 'loss' ? '<span class="badge loss">LOSS</span>'
       : '<span class="badge">ACTIVE</span>';
     return `
-      <div class="signal-card">
-        <span class="pair">${escHtml(s.pair)}</span>
+      <div class="signal-card${isGold ? ' gold-signal' : ''}">
+        <span class="pair">${escHtml(s.pair)}${goldBadge}</span>
         <span class="direction ${dirClass}">${escHtml(s.direction)}</span>
         <span class="detail"><strong>Entry:</strong> ${escHtml(s.entry)}</span>
         <span class="detail"><strong>TP:</strong> ${escHtml(s.tp1)}${s.tp2 ? '/' + escHtml(s.tp2) : ''}${s.tp3 ? '/' + escHtml(s.tp3) : ''}</span>

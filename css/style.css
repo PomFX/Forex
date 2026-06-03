@@ -216,6 +216,8 @@ img { max-width: 100%; height: auto; }
 }
 .signal-card .badge.win { background: rgba(0,200,83,0.2); color: var(--green); }
 .signal-card .badge.loss { background: rgba(255,23,68,0.2); color: var(--red); }
+.signal-card.gold-signal { border-color: #FFD700; background: linear-gradient(135deg, rgba(255,215,0,0.05), rgba(255,215,0,0.02)); }
+.signal-card.gold-signal .pair { color: #FFD700; }
 
 /* ====== ARTICLE CARDS ====== */
 .article-grid {

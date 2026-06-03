@@ -23,6 +23,16 @@ async function fetchMarketData() {
   }
 
   const results = [];
+
+  // XAU/USD always first
+  try {
+    const res = await fetch('https://api.metals.live/v1/spot/gold');
+    const data = await res.json();
+    if (data && data.length > 0) {
+      results.push({ pair: 'XAU/USD', price: data[0].price || data[0].xauPrice || 2350, change: 0 });
+    }
+  } catch {}
+
   for (const [pair, { from, to }] of Object.entries(FOREX_MAP)) {
     let price = null;
     if (from === 'USD') {
@@ -35,14 +45,6 @@ async function fetchMarketData() {
     }
   }
 
-  try {
-    const res = await fetch('https://api.metals.live/v1/spot/gold');
-    const data = await res.json();
-    if (data && data.length > 0) {
-      results.push({ pair: 'XAU/USD', price: data[0].price || data[0].xauPrice || 2350, change: 0 });
-    }
-  } catch {}
-
   return results;
 }
 
@@ -53,29 +55,29 @@ async function generateSignal(marketData) {
     `${d.pair} | Price: ${d.price} | Change: ${d.change.toFixed(2)}%`
   ).join('\n');
 
-  const prompt = `You are a professional Forex analyst. Analyze the current market data and generate 1-3 trading signals.
+  const prompt = `You are a professional Forex analyst specializing in XAU/USD (Gold). Analyze the current market data and generate 1-3 trading signals. CRITICAL: You MUST include at least one XAU/USD (Gold) signal in every response.
 
 Current Market Data:
 ${marketTable}
 
 Instructions:
-- Choose pairs with clear technical setups
+- ALWAYS include XAU/USD (Gold) as the first signal — this is mandatory
+- Choose additional pairs if market conditions warrant
 - For each signal provide: pair, direction (BUY/SELL), entry price, TP1, TP2, TP3, SL
 - Entry should be near current price with a reasonable spread
 - TP levels should be realistic (20-100 pips from entry depending on pair)
 - SL should be logical (15-50 pips opposite direction)
-- Status should be "active"
 
 Return ONLY a valid JSON array (no markdown, no code blocks, no extra text):
 [
   {
-    "pair": "EUR/USD",
+    "pair": "XAU/USD",
     "direction": "BUY",
-    "entry": "1.08750",
-    "tp1": "1.09200",
-    "tp2": "1.09500",
-    "tp3": "1.09800",
-    "sl": "1.08400"
+    "entry": "2350.00",
+    "tp1": "2360.00",
+    "tp2": "2370.00",
+    "tp3": "2385.00",
+    "sl": "2340.00"
   }
 ]`;
 

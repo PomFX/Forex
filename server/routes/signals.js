@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM signals ORDER BY created_at DESC');
+    const result = await pool.query("SELECT * FROM signals ORDER BY CASE WHEN pair='XAU/USD' THEN 0 ELSE 1 END, created_at DESC");
     res.json(result.rows);
   } catch (err) {
     console.error('Get signals error:', err.message);
