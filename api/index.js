@@ -9,8 +9,8 @@ const corsOptions = {
   origin: process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
     : '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-AI-Key'],
 };
 
 app.use(cors(corsOptions));
@@ -24,6 +24,7 @@ app.use('/api/users', require('../server/routes/users'));
 app.use('/api/stats', require('../server/routes/stats'));
 app.use('/api/upload', require('../server/routes/upload'));
 app.use('/api/settings', require('../server/routes/settings'));
+app.use('/api/market', require('../server/routes/market'));
 app.use('/uploads', express.static('/tmp/uploads'));
 
 app.get('/api/*', (req, res) => res.status(404).json({ error: 'API not found' }));
