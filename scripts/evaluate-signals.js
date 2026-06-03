@@ -32,10 +32,10 @@ async function fetchCurrentPrices() {
   }
 
   try {
-    const res = await fetch('https://api.metals.live/v1/spot/gold');
+    const res = await fetch('https://api.gold-api.com/price/XAU');
     const data = await res.json();
-    if (data && data.length > 0) {
-      prices['XAU/USD'] = data[0].price || data[0].xauPrice || 2350;
+    if (data && data.price) {
+      prices['XAU/USD'] = data.price;
     }
   } catch {}
 

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const FOREX_API = 'https://open.er-api.com/v6/latest/USD';
-const GOLD_API = 'https://api.metals.live/v1/spot/gold';
+const GOLD_API = 'https://api.gold-api.com/price/XAU';
 
 const FOREX_MAP = {
   'EUR/USD': { from: 'EUR', to: 'USD' },
@@ -34,8 +34,8 @@ router.get('/prices', async (req, res) => {
     try {
       const goldRes = await fetch(GOLD_API);
       const goldData = await goldRes.json();
-      if (goldData && goldData.length > 0) {
-        prices['XAU/USD'] = goldData[0].price || goldData[0].xauPrice || null;
+      if (goldData && goldData.price) {
+        prices['XAU/USD'] = goldData.price;
       }
     } catch {}
 

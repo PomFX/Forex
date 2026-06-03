@@ -26,10 +26,10 @@ async function fetchMarketData() {
 
   // XAU/USD always first
   try {
-    const res = await fetch('https://api.metals.live/v1/spot/gold');
+    const res = await fetch('https://api.gold-api.com/price/XAU');
     const data = await res.json();
-    if (data && data.length > 0) {
-      results.push({ pair: 'XAU/USD', price: data[0].price || data[0].xauPrice || 2350, change: 0 });
+    if (data && data.price) {
+      results.push({ pair: 'XAU/USD', price: data.price, change: 0 });
     }
   } catch {}
 
