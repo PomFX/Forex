@@ -124,6 +124,8 @@ const App = {
     const statusBadge = s.status === 'win' ? '<span class="badge win">WIN</span>'
       : s.status === 'loss' ? '<span class="badge loss">LOSS</span>'
       : '<span class="badge">ACTIVE</span>';
+    const time = s.created_at || s.createdAt;
+    const timeStr = time ? new Date(time).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', hour12: false }) : '';
     return `
       <div class="signal-card${isGold ? ' gold-signal' : ''}">
         <span class="pair">${escHtml(s.pair)}${goldBadge}</span>
@@ -132,6 +134,7 @@ const App = {
         <span class="detail"><strong>TP:</strong> ${escHtml(s.tp1)}${s.tp2 ? '/' + escHtml(s.tp2) : ''}${s.tp3 ? '/' + escHtml(s.tp3) : ''}</span>
         <span class="detail"><strong>SL:</strong> ${escHtml(s.sl || '-')}</span>
         ${statusBadge}
+        <span class="detail signal-time">${timeStr}</span>
       </div>
     `;
   },

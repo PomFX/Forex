@@ -158,6 +158,8 @@ const Admin = {
       document.getElementById('signalsBody').innerHTML = signals.length
         ? signals.map(s => {
             const statusColors = { active: 'var(--text-muted)', win: 'var(--green)', loss: 'var(--red)' };
+            const time = s.created_at || s.createdAt;
+            const timeStr = time ? new Date(time).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', hour12: false }) : '';
             return `<tr>
               <td>${escHtml(s.pair)}</td>
               <td style="color:${s.direction === 'BUY' ? 'var(--green)' : 'var(--red)'};font-weight:600">${escHtml(s.direction)}</td>
@@ -165,13 +167,14 @@ const Admin = {
               <td>${escHtml(s.tp1)}${s.tp2 ? ' / ' + escHtml(s.tp2) : ''}${s.tp3 ? ' / ' + escHtml(s.tp3) : ''}</td>
               <td>${escHtml(s.sl || '-')}</td>
               <td style="color:${statusColors[s.status] || 'var(--text-muted)'};font-weight:600">${escHtml(s.status.toUpperCase())}</td>
+              <td style="font-size:0.8rem;color:var(--text-muted)">${timeStr}</td>
               <td>
                 <button class="btn btn-outline btn-xs" onclick="Admin.editSignal(${s.id})">แก้ไข</button>
                 <button class="btn btn-danger btn-xs" onclick="Admin.deleteSignal(${s.id})">ลบ</button>
               </td>
             </tr>`;
           }).join('')
-        : '<tr><td colspan="7" style="text-align:center">ไม่มีสัญญาณเทรด</td></tr>';
+        : '<tr><td colspan="8" style="text-align:center">ไม่มีสัญญาณเทรด</td></tr>';
     } catch (err) { console.error('renderSignals admin:', err); }
   },
 
