@@ -1,5 +1,6 @@
 require('dotenv').config();
 const OpenAI = require('openai');
+const { sendSignalMessage } = require('./line');
 
 const FOREX_MAP = {
   'EUR/USD': { from: 'EUR', to: 'USD' },
@@ -115,6 +116,7 @@ async function postSignals(signals) {
       const data = await res.json();
       if (res.ok) {
         console.log(`✔ ${s.pair} ${s.direction} saved (id: ${data.id})`);
+        await sendSignalMessage({ ...s, id: data.id }, 'created');
         results.push({ ok: true, data });
       } else {
         console.error(`✖ ${s.pair}: ${data.error}`);

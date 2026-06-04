@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { sendSignalMessage } = require('./line');
 
 const FOREX_MAP = {
   'EUR/USD': { from: 'EUR', to: 'USD' },
@@ -101,6 +102,7 @@ async function evaluateAndUpdate(signal, prices) {
     const data = await res.json();
     if (res.ok) {
       console.log(`  ✔ #${signal.id} ${signal.pair} ${signal.direction} → ${newStatus} (price: ${currentPrice}, TP1: ${tp1}, SL: ${sl})`);
+      await sendSignalMessage(signal, newStatus);
     } else {
       console.log(`  ✖ #${signal.id}: ${data.error}`);
     }
