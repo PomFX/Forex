@@ -456,13 +456,27 @@ const Admin = {
   },
 
   setupBannerForm() {
+    // Tab switching
+    document.querySelectorAll('.banner-tab').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        document.querySelectorAll('.banner-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const side = btn.dataset.side;
+        document.getElementById('bannerSide').value = side;
+        document.getElementById('bannerSideLabel').textContent = side === 'left' ? 'ซ้าย' : 'ขวา';
+        document.getElementById('bannerHtmlLabel').textContent = side === 'left' ? '(ซ้าย)' : '(ขวา)';
+        await this.renderBannerSettings(side);
+      });
+    });
+
     document.getElementById('bannerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       try {
+        const side = document.getElementById('bannerSide').value;
         await API.updateBanner({
           html: document.getElementById('bannerHtmlInput').value,
           enabled: document.getElementById('bannerEnabled').checked,
-        });
+        }, side);
         App.toast('บันทึกแบนเนอร์แล้ว');
         App.renderSideBanner();
       } catch (err) {
@@ -472,9 +486,10 @@ const Admin = {
     });
   },
 
-  async renderBannerSettings() {
+  async renderBannerSettings(side) {
     try {
-      const data = await API.getBanner();
+      side = side || 'right';
+      const data = await API.getBanner(side);
       document.getElementById('bannerEnabled').checked = data.enabled || false;
       document.getElementById('bannerHtmlInput').value = data.html || '';
     } catch (err) { console.error('renderBannerSettings:', err); }

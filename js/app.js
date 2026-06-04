@@ -22,16 +22,21 @@ const App = {
 
   // ====== SIDE BANNER ======
   async renderSideBanner() {
+    await this._renderBanner('left');
+    await this._renderBanner('right');
+  },
+
+  async _renderBanner(side) {
     try {
-      const banner = await API.getBanner();
-      const el = document.getElementById('sideBanner');
+      const banner = await API.getBanner(side);
+      const el = document.getElementById('sideBanner' + (side === 'left' ? 'Left' : 'Right'));
       if (!banner.enabled || !banner.html) { el.style.display = 'none'; return; }
-      el.innerHTML = banner.html + '<button class="banner-close" id="bannerClose">&times;</button>';
+      el.innerHTML = banner.html + '<button class="banner-close" id="bannerClose' + side + '">&times;</button>';
       el.style.display = 'flex';
-      document.getElementById('bannerClose').addEventListener('click', () => {
+      document.getElementById('bannerClose' + side).addEventListener('click', () => {
         el.style.display = 'none';
       });
-    } catch (err) { document.getElementById('sideBanner').style.display = 'none'; }
+    } catch (err) { document.getElementById('sideBanner' + (side === 'left' ? 'Left' : 'Right')).style.display = 'none'; }
   },
 
   // ====== HOME GOLD STATS ======

@@ -32,8 +32,9 @@
 
   <div class="app-container" id="app">
 
-    <!-- ====== SIDE BANNER ====== -->
-    <div class="side-banner" id="sideBanner"></div>
+    <!-- ====== SIDE BANNERS ====== -->
+    <div class="side-banner side-banner-left" id="sideBannerLeft"></div>
+    <div class="side-banner side-banner-right" id="sideBannerRight"></div>
 
     <!-- ====== HOME ====== -->
     <section class="page active" id="page-home">
@@ -420,11 +421,16 @@
           <div class="admin-page-content" id="admin-banner">
             <h1>จัดการแบนเนอร์ข้างเว็บ</h1>
             <form class="admin-form" id="bannerForm">
+              <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+                <button type="button" class="btn btn-outline btn-sm banner-tab active" data-side="right">ด้านขวา</button>
+                <button type="button" class="btn btn-outline btn-sm banner-tab" data-side="left">ด้านซ้าย</button>
+              </div>
+              <input type="hidden" id="bannerSide" value="right">
               <div class="form-group">
-                <label>เปิดใช้งานแบนเนอร์</label>
+                <label>เปิดใช้งานแบนเนอร์ (<span id="bannerSideLabel">ขวา</span>)</label>
                 <label class="switch"><input type="checkbox" id="bannerEnabled"><span class="slider"></span></label>
               </div>
-              <div class="form-group"><label>โค้ด HTML แบนเนอร์</label><textarea id="bannerHtmlInput" rows="6" placeholder="&lt;a href=&quot;...&quot;&gt;&lt;img src=&quot;...&quot;&gt;&lt;/a&gt;"></textarea></div>
+              <div class="form-group"><label>โค้ด HTML แบนเนอร์ <span id="bannerHtmlLabel">(ขวา)</span></label><textarea id="bannerHtmlInput" rows="6" placeholder="&lt;a href=&quot;...&quot;&gt;&lt;img src=&quot;...&quot;&gt;&lt;/a&gt;"></textarea></div>
               <button type="submit" class="btn btn-gold">บันทึกแบนเนอร์</button>
             </form>
           </div>

@@ -139,11 +139,11 @@ const API = {
   },
 
   // Banner
-  async getBanner() {
-    return this._fetch('/settings/banner');
+  async getBanner(side) {
+    return this._fetch('/settings/banner?side=' + (side || 'right'));
   },
 
-  async updateBanner(data) {
-    return this._fetch('/settings/banner', { method: 'PUT', body: JSON.stringify(data) });
+  async updateBanner(data, side) {
+    return this._fetch('/settings/banner?side=' + (side || 'right'), { method: 'PUT', body: JSON.stringify(data) });
   },
 };
