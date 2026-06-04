@@ -1,7 +1,7 @@
 const LINE_API = 'https://api.line.me/v2/bot/message/push';
 
 const TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-const USER_ID = process.env.LINE_USER_ID;
+const TARGET = process.env.LINE_GROUP_ID || process.env.LINE_USER_ID;
 
 function formatSignalText(s, action) {
   const emoji = action === 'created' ? '🆕' : action === 'win' ? '✅' : action === 'loss' ? '❌' : '🔔';
@@ -23,8 +23,8 @@ ${dirEmoji} ${s.pair}
 }
 
 async function sendSignalMessage(s, action) {
-  if (!TOKEN || !USER_ID) {
-    console.warn('LINE notify: TOKEN or USER_ID not set');
+  if (!TOKEN || !TARGET) {
+    console.warn('LINE notify: TOKEN or TARGET not set');
     return;
   }
   if (s.pair !== 'XAU/USD') return;
@@ -37,7 +37,7 @@ async function sendSignalMessage(s, action) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        to: USER_ID,
+        to: TARGET,
         messages: [{ type: 'text', text: formatSignalText(s, action) }],
       }),
     });

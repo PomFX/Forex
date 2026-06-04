@@ -25,6 +25,7 @@ app.use('/api/stats', require('../server/routes/stats'));
 app.use('/api/upload', require('../server/routes/upload'));
 app.use('/api/settings', require('../server/routes/settings'));
 app.use('/api/market', require('../server/routes/market'));
+app.use('/api/line', require('../server/routes/line'));
 app.use('/uploads', express.static('/tmp/uploads'));
 
 app.get('/api/*', (req, res) => res.status(404).json({ error: 'API not found' }));
