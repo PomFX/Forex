@@ -12,6 +12,17 @@
 | **Contact Channel** | ช่องทางติดต่อ (Line, Phone, Email, Facebook, TikTok, YouTube, OpenChat) พร้อม QR Code |
 | **Admin** | ผู้ดูแลระบบ — มี 2 ประเภท: (1) Super Admin ผ่าน env vars (`ADMIN_EMAIL` + `ADMIN_PASSWORD`), (2) Admin ปกติที่มี `is_admin = true` ใน `users` table |
 
+## Side Banner
+
+| Detail | Value |
+|--------|-------|
+| **Position** | `position: fixed` ชิดขอบจอ (`left: 0` / `right: 0`) กึ่งกลางแนวตั้ง |
+| **Image Source** | อัปโหลดที่ ImgBB → ใช้ Direct Link (`https://i.ibb.co/...`) |
+| **Why not pipaffiliates direct?** | `ads.pipaffiliates.com` คืน HTML page ไม่ใช่ raw image |
+| **Why not Base64?** | Banner รับ HTML code อิสระ (ไม่ใช่แค่รูป) — ต้องใช้ external image hosting |
+| **Admin** | แท็บซ้าย/ขวา พร้อม toggle เปิด/ปิด, รับ raw HTML |
+| **Banner HTML** | `<a href="...affiliate..."><img src="...imgbb..." width="120" height="600"></a>` |
+
 ## Architecture
 
 | Term | Definition |
