@@ -149,8 +149,8 @@ img { max-width: 100%; height: auto; }
   flex-direction: column;
   align-items: flex-start;
 }
-.side-banner-right { right: 0; align-items: flex-end; }
-.side-banner-left { left: 0; align-items: flex-start; }
+.side-banner-right { right: max(0px, calc((100vw - 1200px) / 2)); align-items: flex-end; }
+.side-banner-left { left: max(0px, calc((100vw - 1200px) / 2)); align-items: flex-start; }
 .side-banner a { display: block; }
 .side-banner img {
   max-width: 200px;
