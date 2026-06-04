@@ -27,6 +27,30 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
   }
 });
 
+// AI article endpoint (authenticated via API key)
+router.post('/ai', async (req, res) => {
+  try {
+    const apiKey = req.headers['x-ai-key'];
+    const expectedKey = process.env.AI_SIGNAL_API_KEY;
+    if (!expectedKey || apiKey !== expectedKey) {
+      return res.status(403).json({ error: 'Invalid AI key' });
+    }
+    const { title, content, image } = req.body;
+    if (!title || !content) {
+      return res.status(400).json({ error: 'title and content required' });
+    }
+    const result = await pool.query(
+      'INSERT INTO articles (title, content, image) VALUES ($1,$2,$3) RETURNING *',
+      [title, content, image || '']
+    );
+    console.log('AI article saved: ' + title);
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('AI article error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
+  }
+});
+
 router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { title, content, image } = req.body;

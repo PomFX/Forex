@@ -44,3 +44,19 @@ jobs:
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           LINE_GROUP_ID: ${{ secrets.LINE_GROUP_ID }}
           LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
+
+  article:
+    runs-on: ubuntu-latest
+    needs: evaluate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Generate Gold Analysis Article
+        run: node scripts/ai-article.js
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AI_SIGNAL_API_KEY: ${{ secrets.AI_SIGNAL_API_KEY }}
+          AI_API_URL: ${{ secrets.AI_API_URL }}
