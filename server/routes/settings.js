@@ -28,4 +28,28 @@ router.put('/contact', authMiddleware, adminMiddleware, async (req, res) => {
   }
 });
 
+// Banner settings
+router.get('/banner', async (req, res) => {
+  try {
+    const result = await pool.query("SELECT value FROM site_settings WHERE key='banner'");
+    if (result.rows.length === 0) return res.json({ image: '', link: '', enabled: false });
+    res.json(JSON.parse(result.rows[0].value));
+  } catch (err) {
+    console.error('Get banner error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
+  }
+});
+
+router.put('/banner', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { image, link, enabled } = req.body;
+    const data = JSON.stringify({ image: image || '', link: link || '', enabled: !!enabled });
+    await pool.query("UPDATE site_settings SET value=$1 WHERE key='banner'", [data]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Update banner error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
+  }
+});
+
 module.exports = router;

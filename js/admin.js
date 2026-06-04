@@ -453,5 +453,32 @@ const Admin = {
         document.getElementById('contactTiktokPreview').style.display = 'block';
       }
     } catch (err) { console.error('renderContactSettings:', err); }
+  },
+
+  setupBannerForm() {
+    document.getElementById('bannerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await API.updateBanner({
+          image: document.getElementById('bannerImageInput').value,
+          link: document.getElementById('bannerLinkInput').value,
+          enabled: document.getElementById('bannerEnabled').checked,
+        });
+        App.toast('บันทึกแบนเนอร์แล้ว');
+        App.renderSideBanner();
+      } catch (err) {
+        App.toast('เกิดข้อผิดพลาด', true);
+        console.error('Update banner error:', err);
+      }
+    });
+  },
+
+  async renderBannerSettings() {
+    try {
+      const data = await API.getBanner();
+      document.getElementById('bannerEnabled').checked = data.enabled || false;
+      document.getElementById('bannerImageInput').value = data.image || '';
+      document.getElementById('bannerLinkInput').value = data.link || '';
+    } catch (err) { console.error('renderBannerSettings:', err); }
   }
 };

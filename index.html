@@ -32,6 +32,14 @@
 
   <div class="app-container" id="app">
 
+    <!-- ====== SIDE BANNER ====== -->
+    <div class="side-banner" id="sideBanner" style="display:none">
+      <a href="#" id="bannerLink" target="_blank" rel="noopener">
+        <img id="bannerImg" src="" alt="โฆษณา">
+      </a>
+      <button class="banner-close" id="bannerClose">&times;</button>
+    </div>
+
     <!-- ====== HOME ====== -->
     <section class="page active" id="page-home">
       <div class="hero">
@@ -251,6 +259,7 @@
             <a href="#/admin/articles" class="admin-link" data-page="articles">บทความ</a>
             <a href="#/admin/brokers" class="admin-link" data-page="brokers">โบรกเกอร์</a>
             <a href="#/admin/contact" class="admin-link" data-page="contact">ติดต่อ</a>
+            <a href="#/admin/banner" class="admin-link" data-page="banner">แบนเนอร์</a>
             <a href="#/" class="admin-link admin-logout">กลับหน้าบ้าน</a>
           </nav>
         </aside>
@@ -410,6 +419,20 @@
               <p style="color:var(--text-muted);margin-bottom:0.5rem">ตัวอย่าง QR TikTok</p>
               <img id="contactTiktokQRPreview" src="" style="max-width:200px;border-radius:8px">
             </div>
+          </div>
+
+          <!-- Banner Settings -->
+          <div class="admin-page-content" id="admin-banner">
+            <h1>จัดการแบนเนอร์ข้างเว็บ</h1>
+            <form class="admin-form" id="bannerForm">
+              <div class="form-group">
+                <label>เปิดใช้งานแบนเนอร์</label>
+                <label class="switch"><input type="checkbox" id="bannerEnabled"><span class="slider"></span></label>
+              </div>
+              <div class="form-group"><label>URL รูปภาพ</label><input type="text" id="bannerImageInput" placeholder="https://example.com/banner.png"></div>
+              <div class="form-group"><label>ลิงก์ปลายทาง</label><input type="text" id="bannerLinkInput" placeholder="https://example.com"></div>
+              <button type="submit" class="btn btn-gold">บันทึกแบนเนอร์</button>
+            </form>
           </div>
         </main>
       </div>

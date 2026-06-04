@@ -20,6 +20,18 @@ const App = {
     } catch (err) { console.error('renderHomeStats:', err); }
   },
 
+  // ====== SIDE BANNER ======
+  async renderSideBanner() {
+    try {
+      const banner = await API.getBanner();
+      const el = document.getElementById('sideBanner');
+      if (!banner.enabled || !banner.image) { el.style.display = 'none'; return; }
+      document.getElementById('bannerImg').src = banner.image;
+      document.getElementById('bannerLink').href = banner.link || '#';
+      el.style.display = 'flex';
+    } catch (err) { document.getElementById('sideBanner').style.display = 'none'; }
+  },
+
   // ====== HOME GOLD STATS ======
   async renderHomeGoldStats() {
     try {

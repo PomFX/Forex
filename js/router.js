@@ -16,12 +16,19 @@ const Router = {
     Admin.populatePairSelect();
     Admin.setupUploads();
     Admin.setupContactForm();
+    Admin.setupBannerForm();
 
     window.addEventListener('hashchange', () => this.handleRoute());
     this.handleRoute();
 
     window.addEventListener('load', () => {
       document.getElementById('preloader').classList.add('hidden');
+    });
+
+    // Load banner on every page
+    App.renderSideBanner();
+    document.getElementById('bannerClose').addEventListener('click', () => {
+      document.getElementById('sideBanner').style.display = 'none';
     });
   },
 
@@ -53,6 +60,7 @@ const Router = {
         case 'articles': await Admin.renderArticles(); break;
         case 'brokers': await Admin.renderBrokers(); break;
         case 'contact': await Admin.renderContactSettings(); break;
+        case 'banner': await Admin.renderBannerSettings(); break;
         default: await Admin.showDashboard(); break;
       }
       return;

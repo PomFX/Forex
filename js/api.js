@@ -137,4 +137,13 @@ const API = {
   async getMarketPrices() {
     return this._fetch('/market/prices');
   },
+
+  // Banner
+  async getBanner() {
+    return this._fetch('/settings/banner');
+  },
+
+  async updateBanner(data) {
+    return this._fetch('/settings/banner', { method: 'PUT', body: JSON.stringify(data) });
+  },
 };
