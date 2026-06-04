@@ -20,6 +20,21 @@ const App = {
     } catch (err) { console.error('renderHomeStats:', err); }
   },
 
+  // ====== HOME GOLD STATS ======
+  async renderHomeGoldStats() {
+    try {
+      const stats = await API.getGoldStats();
+      const el = document.getElementById('homeGoldStats');
+      if (stats.total === 0) { el.style.display = 'none'; return; }
+      el.style.display = '';
+      document.getElementById('goldTotalSignals').textContent = stats.total;
+      document.getElementById('goldWins').textContent = stats.wins;
+      document.getElementById('goldLosses').textContent = stats.losses;
+      document.getElementById('goldWinRate').textContent = stats.winRate + '%';
+      document.getElementById('goldActive').textContent = stats.active;
+    } catch (err) { document.getElementById('homeGoldStats').style.display = 'none'; console.error('renderHomeGoldStats:', err); }
+  },
+
   // ====== HOME BROKERS ======
   async renderHomeBrokers() {
     try {

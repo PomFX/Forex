@@ -116,6 +116,10 @@ const API = {
     return this._fetch('/stats');
   },
 
+  async getGoldStats() {
+    return this._fetch('/stats/gold');
+  },
+
   async getPublicStats() {
     return this._fetch('/stats/public');
   },

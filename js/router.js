@@ -64,6 +64,7 @@ const Router = {
     switch (page) {
       case 'home':
         await App.renderHomeStats();
+        await App.renderHomeGoldStats();
         await App.renderHomeBrokers();
         await App.renderHomeSignals();
         await App.renderHomeQR();

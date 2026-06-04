@@ -46,4 +46,23 @@ router.get('/public', async (req, res) => {
   }
 });
 
+// Gold (XAU/USD) stats
+router.get('/gold', async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE status='win') as wins, COUNT(*) FILTER (WHERE status='loss') as losses, COUNT(*) FILTER (WHERE status='active') as active FROM signals WHERE pair='XAU/USD'"
+    );
+    const r = result.rows[0];
+    const total = parseInt(r.total);
+    const wins = parseInt(r.wins);
+    const losses = parseInt(r.losses);
+    const active = parseInt(r.active);
+    const winRate = total > 0 ? ((wins / (wins + losses)) * 100).toFixed(1) : 0;
+    res.json({ total, wins, losses, active, winRate: parseFloat(winRate) });
+  } catch (err) {
+    console.error('Get gold stats error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
+  }
+});
+
 module.exports = router;

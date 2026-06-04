@@ -163,6 +163,34 @@ img { max-width: 100%; height: auto; }
 .stat-label { font-size: 0.85rem; color: var(--text-muted); }
 .stat-value { font-size: 2rem; font-weight: 800; color: var(--gold); margin-top: 0.3rem; }
 
+/* ====== GOLD STATS ====== */
+.gold-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.gold-stat-card {
+  background: linear-gradient(135deg, #1a1a0a, #111);
+  border: 1px solid #FFD700;
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  text-align: center;
+  transition: var(--transition);
+}
+.gold-stat-card:hover { transform: translateY(-3px); box-shadow: 0 4px 20px rgba(255,215,0,0.2); }
+.gold-stat-card.win { border-color: var(--green); }
+.gold-stat-card.loss { border-color: var(--red); }
+.gold-stat-card.rate { border-color: var(--gold-dark); }
+.gold-stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #FFD700;
+}
+.gold-stat-card.win .gold-stat-value { color: var(--green); }
+.gold-stat-card.loss .gold-stat-value { color: var(--red); }
+.gold-stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem; }
+
 /* ====== SECTIONS ====== */
 .section { padding: 2.5rem 0; }
 .section-title {
