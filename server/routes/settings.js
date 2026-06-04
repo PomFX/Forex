@@ -42,8 +42,8 @@ router.get('/banner', async (req, res) => {
 
 router.put('/banner', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { image, link, enabled } = req.body;
-    const data = JSON.stringify({ image: image || '', link: link || '', enabled: !!enabled });
+    const { html, enabled } = req.body;
+    const data = JSON.stringify({ html: html || '', enabled: !!enabled });
     await pool.query("UPDATE site_settings SET value=$1 WHERE key='banner'", [data]);
     res.json({ ok: true });
   } catch (err) {

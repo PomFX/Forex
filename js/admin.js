@@ -460,8 +460,7 @@ const Admin = {
       e.preventDefault();
       try {
         await API.updateBanner({
-          image: document.getElementById('bannerImageInput').value,
-          link: document.getElementById('bannerLinkInput').value,
+          html: document.getElementById('bannerHtmlInput').value,
           enabled: document.getElementById('bannerEnabled').checked,
         });
         App.toast('บันทึกแบนเนอร์แล้ว');
@@ -477,8 +476,7 @@ const Admin = {
     try {
       const data = await API.getBanner();
       document.getElementById('bannerEnabled').checked = data.enabled || false;
-      document.getElementById('bannerImageInput').value = data.image || '';
-      document.getElementById('bannerLinkInput').value = data.link || '';
+      document.getElementById('bannerHtmlInput').value = data.html || '';
     } catch (err) { console.error('renderBannerSettings:', err); }
   }
 };

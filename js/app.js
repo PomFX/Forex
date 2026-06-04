@@ -25,10 +25,12 @@ const App = {
     try {
       const banner = await API.getBanner();
       const el = document.getElementById('sideBanner');
-      if (!banner.enabled || !banner.image) { el.style.display = 'none'; return; }
-      document.getElementById('bannerImg').src = banner.image;
-      document.getElementById('bannerLink').href = banner.link || '#';
+      if (!banner.enabled || !banner.html) { el.style.display = 'none'; return; }
+      el.innerHTML = banner.html + '<button class="banner-close" id="bannerClose">&times;</button>';
       el.style.display = 'flex';
+      document.getElementById('bannerClose').addEventListener('click', () => {
+        el.style.display = 'none';
+      });
     } catch (err) { document.getElementById('sideBanner').style.display = 'none'; }
   },
 

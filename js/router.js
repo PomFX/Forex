@@ -27,9 +27,6 @@ const Router = {
 
     // Load banner on every page
     App.renderSideBanner();
-    document.getElementById('bannerClose').addEventListener('click', () => {
-      document.getElementById('sideBanner').style.display = 'none';
-    });
   },
 
   async handleRoute() {
