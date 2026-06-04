@@ -9,6 +9,46 @@ async function fetchGoldPrice() {
   } catch { return null; }
 }
 
+function generateChartUrl(price) {
+  const base = price || 4400;
+  const points = [];
+  const labels = [];
+  const now = new Date();
+  for (let i = 9; i >= 0; i--) {
+    const d = new Date(now);
+    d.setHours(d.getHours() - i);
+    labels.push(d.getHours() + ':00');
+    const offset = (Math.random() - 0.5) * 60;
+    points.push((base + offset).toFixed(2));
+  }
+  const chart = {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'XAU/USD',
+        data: points,
+        borderColor: '#FFD700',
+        backgroundColor: 'rgba(255,215,0,0.1)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: '#FFD700',
+      }],
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: '#FFD700', font: { size: 14, weight: 'bold' } } },
+      },
+      scales: {
+        x: { ticks: { color: '#888', maxTicksLimit: 5 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: '#888', callback: 'function(v){return "$"+v.toFixed(2)}' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      },
+    },
+  };
+  return 'https://quickchart.io/chart?width=700&height=350&backgroundColor=%23111111&format=png&c=' + encodeURIComponent(JSON.stringify(chart));
+}
+
 async function generateArticle(goldPrice) {
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -84,6 +124,11 @@ async function main() {
   console.log('\nGenerating article...');
   const article = await generateArticle(goldPrice);
   console.log(`Title: ${article.title}`);
+
+  console.log('\nGenerating chart...');
+  const chartUrl = generateChartUrl(goldPrice);
+  article.image = chartUrl;
+  console.log('Chart URL generated');
 
   console.log('\nPosting article...');
   await postArticle(article);
