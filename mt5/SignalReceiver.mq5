@@ -435,13 +435,6 @@ int OnInit()
    Print("  Magic    : ", MAGIC_NUMBER);
    Print("  TP Mode  : ", TP_MODE);
    Print("══════════════════════════════════════════════");
-   Print("  IMPORTANT: Add URL to MT5 allowed list:");
-   Print("  Tools -> Options -> Expert Advisors -> Allow WebRequest");
-   Print("  Add: ", API_URL);
-
-   // Cancel any stale pending orders from previous EA session
-   CancelAllPending();
-
    EventSetTimer(POLL_INTERVAL);
    ProcessSignal();
    return INIT_SUCCEEDED;
