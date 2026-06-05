@@ -48,3 +48,16 @@
 |------|------------|
 | **Image Storage** | รูปภาพทั้งหมดถูกเก็บเป็น Base64 Data URL (ข้อความยาวใน Database) เพื่อรองรับการ Deploy บน Vercel serverless |
 | **Auth Model** | Super Admin ยืนยันตัวตนผ่าน env vars; Admin ปกติยืนยันผ่าน Database (`users` table) โดยตรวจสอบคอลัมน์ `is_admin`; ผู้ใช้ทั่วไปยืนยันผ่าน Database เช่นกัน |
+
+## Status (2026-06-05)
+
+| Item | Status |
+|------|--------|
+| **Vercel Deploy** | ✅ Live at `https://forex-rouge-gamma.vercel.app` |
+| **AI Signals** | ✅ ทำงานได้จริง (generate → evaluate → article) |
+| **Reason Field** | ✅ ครบทั้งระบบ (DB, API, Admin, Frontend) |
+| **Side Banners** | ✅ HTML + Admin ซ้าย/ขวา |
+| **LINE Messaging API** | ✅ Token + UserID + GroupID ใส่ใน Vercel env แล้ว |
+| **LINE Webhook** | ✅ ตั้งที่ LINE Developers Console แล้ว, Group ID: `C6db4f5de05652d30ccbc307960c851cf` |
+| **GitHub Secrets** | ✅ ตั้งแล้ว (OPENAI_API_KEY, AI_SIGNAL_API_KEY, AI_API_URL, LINE_CHANNEL_ACCESS_TOKEN, LINE_USER_ID, LINE_GROUP_ID) |
+| **Database** | ✅ ใช้งานได้ (production DB, ได้จาก Vercel env) |

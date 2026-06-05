@@ -10,3 +10,4 @@ uploads/*.jpeg
 uploads/*.png
 uploads/*.webp
 !uploads/.gitkeep
+.env*
