@@ -51,10 +51,15 @@ function generateChartUrl(price) {
 
 async function generateArticle(goldPrice) {
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const today = new Date().toLocaleDateString('th-TH', {
+    year: 'numeric', month: 'long', day: 'numeric',
+    timeZone: 'Asia/Bangkok'
+  });
 
   const prompt = `บทบาทของคุณคือ "นักวิเคราะห์ราคาทองคำมืออาชีพ" ช่วยทำการวิเคราะห์แนวโน้มราคาทองคำ (XAU/USD) ประจำรายชั่วโมง (กรอบเวลา H1) เพื่อใช้ประกอบการตัดสินใจซื้อขายในระยะสั้น (Day Trading)
 
 Current Gold Price: $${goldPrice ? goldPrice.toFixed(2) : 'N/A'}
+Today's Date: ${today}
 
 กรุณาวิเคราะห์และจัดทำรายงานตามหัวข้อต่อไปนี้:
 
@@ -79,7 +84,7 @@ Current Gold Price: $${goldPrice ? goldPrice.toFixed(2) : 'N/A'}
 
 Return ONLY valid JSON (no markdown, no code blocks):
 {
-  "title": "บทวิเคราะห์ทองคำประจำวันที่ ...",
+  "title": "บทวิเคราะห์ทองคำประจำวันที่ ${today}",
   "content": "เขียนเนื้อหาบทวิเคราะห์ทั้ง 4 หัวข้อด้านบนเป็นข้อความภาษาไทย กระชับ ตรงประเด็น แบ่งเป็นข้อๆ"
 }`;
 
