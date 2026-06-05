@@ -134,7 +134,20 @@ bool FetchSignal(string &json)
                   + "Accept: application/json\r\n";
 
    int res = WebRequest("GET", API_URL, headers, 5000, data, result, resultHeaders);
-   if(res != 200) return false;
+
+   if(res == -1)
+   {
+      int err = GetLastError();
+      Print("[SignalReceiver] WebRequest FAILED | LastError=", err, " | Possible cause: URL not allowed in MT5 WebRequest settings");
+      Print("[SignalReceiver] Go to Tools -> Options -> Expert Advisors -> Allow WebRequest for: https://forex-rouge-gamma.vercel.app");
+      return false;
+   }
+
+   if(res != 200)
+   {
+      Print("[SignalReceiver] WebRequest error: HTTP ", res);
+      return false;
+   }
 
    json = CharArrayToString(result);
    return true;
@@ -333,6 +346,7 @@ void ProcessSignal()
 {
    if(g_isBusy) return;
    g_isBusy = true;
+   Print("[SignalReceiver] Checking for new signal...");
 
    string json;
    if(!FetchSignal(json))
