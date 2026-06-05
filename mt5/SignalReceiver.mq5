@@ -44,7 +44,7 @@ string FindSymbol(string pair)
    if(base == "XAUUSD")
       if(TrySymbol("GOLD"))  { CacheAdd(pair, "GOLD"); return "GOLD"; }
 
-   string suffixes[] = {".m", ".pro", ".r", ".ecn", ".x", ".c", ".f", ".a", ".b", ".t", ".raw"};
+    string suffixes[] = {".m", ".pro", ".r", ".ecn", ".x", ".c", ".f", ".a", ".b", ".t", ".raw", "u"};
    for(int s = 0; s < ArraySize(suffixes); s++)
    {
       string candidate = base + suffixes[s];
