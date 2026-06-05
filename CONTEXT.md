@@ -23,6 +23,16 @@
 | **Admin** | แท็บซ้าย/ขวา พร้อม toggle เปิด/ปิด, รับ raw HTML |
 | **Banner HTML** | `<a href="...affiliate..."><img src="...imgbb..." width="120" height="600"></a>` |
 
+## AI Article — Gold Analysis Prompt
+
+| Detail | Value |
+|--------|-------|
+| **Model** | `gpt-4o-mini` (OpenAI) |
+| **Role** | "นักวิเคราะห์ราคาทองคำมืออาชีพ" — H1 analysis for Day Trading |
+| **Sections** | (1) Current Market Snapshot, (2) H1 Technical Analysis (Support/Resistance, RSI, MACD, EMA, Candlestick Patterns), (3) Intraday Drivers & Catalyst (DXY, Bond Yield, Economic Data), (4) Hourly Trading Strategy (Buy/Sell, SL, TP, Risk-Reward) |
+| **Output Format** | JSON `{ title, content }` — ภาษาไทย กระชับตรงประเด็น |
+| **Image** | QuickChart.io line chart (10-hour simulated trend, dark theme, $XAU/USD) |
+
 ## Architecture
 
 | Term | Definition |
