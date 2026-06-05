@@ -33,6 +33,7 @@ async function initDB() {
         tp3 VARCHAR(20),
         sl VARCHAR(20),
         status VARCHAR(20) DEFAULT 'active',
+        reason TEXT DEFAULT '',
         created_at TIMESTAMP DEFAULT NOW()
       );
       CREATE TABLE IF NOT EXISTS articles (
@@ -71,6 +72,9 @@ async function initDB() {
         ('XAU/USD', 'BUY', '2035.00', '2042.00', '2048.00', '2055.00', '2028.00', 'win'),
         ('USD/JPY', 'SELL', '150.200', '149.800', '149.500', '149.200', '150.600', 'loss')`);
     }
+
+    // Add reason column for existing databases
+    await client.query(`ALTER TABLE signals ADD COLUMN IF NOT EXISTS reason TEXT DEFAULT ''`);
 
     const articleCount = await client.query('SELECT COUNT(*) FROM articles');
     if (parseInt(articleCount.rows[0].count) === 0) {

@@ -15,10 +15,10 @@ router.get('/', async (req, res) => {
 
 router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { pair, direction, entry, tp1, tp2, tp3, sl, status } = req.body;
+    const { pair, direction, entry, tp1, tp2, tp3, sl, status, reason } = req.body;
     const result = await pool.query(
-      'INSERT INTO signals (pair, direction, entry, tp1, tp2, tp3, sl, status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
-      [pair, direction, entry || '', tp1 || '', tp2 || '', tp3 || '', sl || '', status || 'active']
+      'INSERT INTO signals (pair, direction, entry, tp1, tp2, tp3, sl, status, reason) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
+      [pair, direction, entry || '', tp1 || '', tp2 || '', tp3 || '', sl || '', status || 'active', reason || '']
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -35,13 +35,13 @@ router.post('/ai', async (req, res) => {
     if (!expectedKey || apiKey !== expectedKey) {
       return res.status(403).json({ error: 'Invalid AI key' });
     }
-    const { pair, direction, entry, tp1, tp2, tp3, sl } = req.body;
+    const { pair, direction, entry, tp1, tp2, tp3, sl, reason } = req.body;
     if (!pair || !direction) {
       return res.status(400).json({ error: 'pair and direction required' });
     }
     const result = await pool.query(
-      "INSERT INTO signals (pair, direction, entry, tp1, tp2, tp3, sl, status) VALUES ($1,$2,$3,$4,$5,$6,$7,'active') RETURNING *",
-      [pair, direction, entry || '', tp1 || '', tp2 || '', tp3 || '', sl || '']
+      "INSERT INTO signals (pair, direction, entry, tp1, tp2, tp3, sl, status, reason) VALUES ($1,$2,$3,$4,$5,$6,$7,'active',$8) RETURNING *",
+      [pair, direction, entry || '', tp1 || '', tp2 || '', tp3 || '', sl || '', reason || '']
     );
     console.log(`AI signal saved: ${pair} ${direction}`);
     res.json(result.rows[0]);
@@ -81,10 +81,10 @@ router.patch('/ai/evaluate', async (req, res) => {
 
 router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { pair, direction, entry, tp1, tp2, tp3, sl, status } = req.body;
+    const { pair, direction, entry, tp1, tp2, tp3, sl, status, reason } = req.body;
     const result = await pool.query(
-      'UPDATE signals SET pair=$1, direction=$2, entry=$3, tp1=$4, tp2=$5, tp3=$6, sl=$7, status=$8 WHERE id=$9 RETURNING *',
-      [pair, direction, entry || '', tp1 || '', tp2 || '', tp3 || '', sl || '', status, req.params.id]
+      'UPDATE signals SET pair=$1, direction=$2, entry=$3, tp1=$4, tp2=$5, tp3=$6, sl=$7, status=$8, reason=$9 WHERE id=$10 RETURNING *',
+      [pair, direction, entry || '', tp1 || '', tp2 || '', tp3 || '', sl || '', status, reason || '', req.params.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
     res.json(result.rows[0]);

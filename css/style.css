@@ -282,6 +282,7 @@ img { max-width: 100%; height: auto; }
 .signal-card .detail strong { color: var(--text); }
 .signal-card .live-price { color: var(--gold); font-weight: 600; }
 .signal-card .signal-time { font-size: 0.75rem; width: 100%; text-align: right; opacity: 0.6; margin-top: 0.2rem; order: 99; }
+.signal-reason { width: 100%; font-size: 0.8rem; color: var(--text-muted); background: rgba(255,255,255,0.03); border-left: 2px solid var(--gold); padding: 0.4rem 0.6rem; margin-top: 0.3rem; border-radius: 0 4px 4px 0; line-height: 1.5; }
 .signal-card .badge {
   font-size: 0.75rem;
   padding: 0.15rem 0.5rem;

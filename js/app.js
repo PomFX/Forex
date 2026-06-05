@@ -164,6 +164,7 @@ const App = {
     const timeStr = time ? new Date(time).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', hour12: false }) : '';
     const livePrice = this._prices && this._prices[s.pair];
     const livePriceStr = livePrice ? (isGold ? livePrice.toLocaleString(undefined, {minimumFractionDigits:2}) : livePrice.toFixed(5)) : '';
+    const reasonHtml = s.reason ? `<div class="signal-reason">${escHtml(s.reason).replace(/\n/g, '<br>')}</div>` : '';
     return `
       <div class="signal-card${isGold ? ' gold-signal' : ''}">
         <span class="pair">${escHtml(s.pair)}${goldBadge}</span>
@@ -173,6 +174,7 @@ const App = {
         <span class="detail"><strong>SL:</strong> ${escHtml(s.sl || '-')}</span>
         ${statusBadge}
         ${livePriceStr ? `<span class="detail live-price"><strong>ปัจจุบัน:</strong> ${livePriceStr}</span>` : ''}
+        ${reasonHtml}
         <span class="detail signal-time">${timeStr}</span>
       </div>
     `;

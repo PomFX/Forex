@@ -299,13 +299,14 @@
                 <div class="form-group"><label>Stop Loss</label><input type="text" id="signalSl"></div>
                 <div class="form-group"><label>สถานะ</label><select id="signalStatus"><option value="active">Active</option><option value="win">Win</option><option value="loss">Loss</option></select></div>
               </div>
+              <div class="form-group"><label>เหตุผลทางเทคนิค (Technical Reason)</label><textarea id="signalReason" rows="3" placeholder="แนวโน้ม H4: ...&#10;Indicator: ...&#10;Price Action: ..."></textarea></div>
               <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
                 <button type="submit" class="btn btn-gold" id="signalSubmit">เพิ่มสัญญาณ</button>
                 <button type="button" class="btn btn-outline" id="signalCancel" style="display:none">ยกเลิก</button>
               </div>
               <input type="hidden" id="signalEditId" value="">
             </form>
-            <div class="table-wrapper" style="margin-top:1.5rem"><table class="admin-table"><thead><tr><th>คู่เงิน</th><th>ทิศทาง</th><th>Entry</th><th>TP1/TP2/TP3</th><th>SL</th><th>สถานะ</th><th>เวลา</th><th>จัดการ</th></tr></thead><tbody id="signalsBody"></tbody></table></div>
+            <div class="table-wrapper" style="margin-top:1.5rem"><table class="admin-table"><thead><tr><th>คู่เงิน</th><th>ทิศทาง</th><th>Entry</th><th>TP1/TP2/TP3</th><th>SL</th><th>สถานะ</th><th>เหตุผล</th><th>เวลา</th><th>จัดการ</th></tr></thead><tbody id="signalsBody"></tbody></table></div>
           </div>
 
           <!-- Articles -->

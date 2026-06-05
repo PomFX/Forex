@@ -132,6 +132,7 @@ const Admin = {
         tp3: document.getElementById('signalTp3').value,
         sl: document.getElementById('signalSl').value,
         status: document.getElementById('signalStatus').value,
+        reason: document.getElementById('signalReason').value,
       };
 
       try {
@@ -167,6 +168,7 @@ const Admin = {
               <td>${escHtml(s.tp1)}${s.tp2 ? ' / ' + escHtml(s.tp2) : ''}${s.tp3 ? ' / ' + escHtml(s.tp3) : ''}</td>
               <td>${escHtml(s.sl || '-')}</td>
               <td style="color:${statusColors[s.status] || 'var(--text-muted)'};font-weight:600">${escHtml(s.status.toUpperCase())}</td>
+              <td style="font-size:0.75rem;color:var(--text-muted);max-width:180px;white-space:normal;line-height:1.3">${escHtml(s.reason || '-')}</td>
               <td style="font-size:0.8rem;color:var(--text-muted)">${timeStr}</td>
               <td>
                 <button class="btn btn-outline btn-xs" onclick="Admin.editSignal(${s.id})">แก้ไข</button>
@@ -174,7 +176,7 @@ const Admin = {
               </td>
             </tr>`;
           }).join('')
-        : '<tr><td colspan="8" style="text-align:center">ไม่มีสัญญาณเทรด</td></tr>';
+        : '<tr><td colspan="9" style="text-align:center">ไม่มีสัญญาณเทรด</td></tr>';
     } catch (err) { console.error('renderSignals admin:', err); }
   },
 
@@ -191,6 +193,7 @@ const Admin = {
       document.getElementById('signalTp3').value = s.tp3 || '';
       document.getElementById('signalSl').value = s.sl || '';
       document.getElementById('signalStatus').value = s.status || 'active';
+      document.getElementById('signalReason').value = s.reason || '';
       document.getElementById('signalEditId').value = s.id;
       document.getElementById('signalSubmit').textContent = 'อัปเดตสัญญาณ';
       document.getElementById('signalCancel').style.display = 'inline-block';

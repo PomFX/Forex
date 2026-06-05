@@ -68,6 +68,10 @@ Instructions:
 - Entry should be near current price with a reasonable spread
 - TP levels should be realistic (20-100 pips from entry depending on pair)
 - SL should be logical (15-50 pips opposite direction)
+- Also provide a "reason" field (in Thai, max 3 lines) explaining:
+  1. แนวโน้มหลักในกราฟ H4 (Bullish / Bearish / Sideways)
+  2. สัญญาณจาก Indicator (RSI, MACD, EMA หรือการทดสอบแนวรับ-แนวต้าน)
+  3. พฤติกรรมราคา (Price Action) เช่น แท่งเทียนกลับตัว, Breakout, Fakeout
 
 Return ONLY a valid JSON array (no markdown, no code blocks, no extra text):
 [
@@ -78,7 +82,8 @@ Return ONLY a valid JSON array (no markdown, no code blocks, no extra text):
     "tp1": "2360.00",
     "tp2": "2370.00",
     "tp3": "2385.00",
-    "sl": "2340.00"
+    "sl": "2340.00",
+    "reason": "แนวโน้มหลัก H4: Bullish ทะลุแนวต้านสำคัญ\nRSI อยู่ที่ 62 ยังมีแรงซื้อต่อเนื่อง\nแท่งเทียน Engulfing ขาขึ้นยืนยัน Momentum"
   }
 ]`;
 
