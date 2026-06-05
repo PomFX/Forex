@@ -229,6 +229,8 @@ bool ExecuteTrade(string pair, string direction, double entry, double tp, double
    double bid     = SymbolInfoDouble(symbol, SYMBOL_BID);
    double point   = SymbolInfoDouble(symbol, SYMBOL_POINT);
    int    digits  = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+   int    stopLvl = (int)SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL);
+   double stopDist = stopLvl * point;
 
    // Validate prices
    if(entry <= 0)
@@ -240,16 +242,64 @@ bool ExecuteTrade(string pair, string direction, double entry, double tp, double
    if(direction == "BUY")
    {
       orderType = ORDER_TYPE_BUY;
-      price     = ask;
-      slPrice   = (sl > 0) ? NormalizeDouble(sl, digits) : 0;
-      tpPrice   = (tp > 0) ? NormalizeDouble(tp, digits) : 0;
+      price     = NormalizeDouble(ask, digits);
+
+      // MT5 validates: SL < BID (SL executes as SELL at BID)
+      if(sl > 0)
+      {
+         slPrice = NormalizeDouble(sl, digits);
+         double minSL = NormalizeDouble(bid - stopDist * 2, digits);
+         if(slPrice > minSL)
+         {
+            Print("[SignalReceiver] BUY SL too close (SL=", slPrice, " min=", minSL, " stopLvl=", stopLvl, "pts), adjusting...");
+            slPrice = minSL;
+         }
+      }
+      else slPrice = 0;
+
+      // MT5 validates: TP > ASK (TP executes as SELL at BID, need buffer above ASK)
+      if(tp > 0)
+      {
+         tpPrice = NormalizeDouble(tp, digits);
+         double minTP = NormalizeDouble(bid + stopDist * 2, digits);
+         if(tpPrice < minTP)
+         {
+            Print("[SignalReceiver] BUY TP too close or behind (TP=", tpPrice, " min=", minTP, "). Skipping TP...");
+            tpPrice = 0;
+         }
+      }
+      else tpPrice = 0;
    }
    else if(direction == "SELL")
    {
       orderType = ORDER_TYPE_SELL;
-      price     = bid;
-      slPrice   = (sl > 0) ? NormalizeDouble(sl, digits) : 0;
-      tpPrice   = (tp > 0) ? NormalizeDouble(tp, digits) : 0;
+      price     = NormalizeDouble(bid, digits);
+
+      // MT5 validates: SL > ASK (SL executes as BUY at ASK)
+      if(sl > 0)
+      {
+         slPrice = NormalizeDouble(sl, digits);
+         double maxSL = NormalizeDouble(ask + stopDist * 2, digits);
+         if(slPrice < maxSL)
+         {
+            Print("[SignalReceiver] SELL SL too close (SL=", slPrice, " max=", maxSL, " stopLvl=", stopLvl, "pts), adjusting...");
+            slPrice = maxSL;
+         }
+      }
+      else slPrice = 0;
+
+      // MT5 validates: TP < BID (TP executes as BUY at ASK, need buffer below BID)
+      if(tp > 0)
+      {
+         tpPrice = NormalizeDouble(tp, digits);
+         double maxTP = NormalizeDouble(ask - stopDist * 2, digits);
+         if(tpPrice > maxTP)
+         {
+            Print("[SignalReceiver] SELL TP too close or behind (TP=", tpPrice, " max=", maxTP, "). Skipping TP...");
+            tpPrice = 0;
+         }
+      }
+      else tpPrice = 0;
    }
    else
    {
@@ -279,6 +329,18 @@ bool ExecuteTrade(string pair, string direction, double entry, double tp, double
    }
 
    lotSize = NormalizeDouble(lotSize, 2);
+
+   // Debug: print exact order details
+   Print("══════════════════════════════════════════════");
+   Print("[SignalReceiver] SENDING ORDER:");
+   Print("  Symbol   : ", symbol, " (digits=", digits, " point=", point, " stopLvl=", stopLvl, ")");
+   Print("  Type     : ", (orderType == ORDER_TYPE_BUY ? "BUY" : "SELL"));
+   Print("  Price    : ", price, " (Ask=", ask, " Bid=", bid, ")");
+   Print("  SL       : ", slPrice, " (raw=", sl, ")");
+   Print("  TP       : ", tpPrice, " (raw=", tp, ")");
+   Print("  Lot      : ", lotSize);
+   Print("  Magic    : ", MAGIC_NUMBER);
+   Print("══════════════════════════════════════════════");
 
    // Prepare trade request
    MqlTradeRequest request  = {};
@@ -397,50 +459,8 @@ void ProcessSignal()
       case 3: tp = tp3; break;
    }
 
-    // Validate SL/TP vs current price
-    string symbol = FindSymbol(pair);
-    if(symbol == "")
-    {
-       Print("[SignalReceiver] Symbol not found for SL/TP validation, trading anyway");
-       // Still allow trade even without validation
-    }
-    else
-    {
-      double currentBid = SymbolInfoDouble(symbol, SYMBOL_BID);
-      double currentAsk = SymbolInfoDouble(symbol, SYMBOL_ASK);
-      int    stopLevel  = (int)SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL);
-      double stopDist   = stopLevel * SymbolInfoDouble(symbol, SYMBOL_POINT);
-
-      if(direction == "BUY")
-      {
-         if(sl > 0 && (currentAsk - sl) < stopDist)
-         {
-            Print("[SignalReceiver] SL too close to market. Adjusting SL...");
-            sl = currentAsk - stopDist * 2;
-         }
-         if(tp > 0 && (tp - currentAsk) < stopDist)
-         {
-            Print("[SignalReceiver] TP too close to market. Skipping TP...");
-            tp = 0;
-         }
-      }
-      else
-      {
-         if(sl > 0 && (sl - currentBid) < stopDist)
-         {
-            Print("[SignalReceiver] SL too close to market. Adjusting SL...");
-            sl = currentBid + stopDist * 2;
-         }
-         if(tp > 0 && (currentBid - tp) < stopDist)
-         {
-            Print("[SignalReceiver] TP too close to market. Skipping TP...");
-            tp = 0;
-         }
-      }
-    }
-
-    // Execute trade
-   if(ExecuteTrade(pair, direction, entry, tp, sl, signalId))
+    // Execute trade (ExecuteTrade handles all SL/TP validation internally)
+    if(ExecuteTrade(pair, direction, entry, tp, sl, signalId))
    {
       g_lastSignalId = signalId;
       g_lastPollTime = TimeCurrent();
