@@ -63,6 +63,18 @@
 | **Output Format** | JSON `{ title, content }` — ภาษาไทย กระชับตรงประเด็น |
 | **Image** | QuickChart.io line chart (10-hour simulated trend, dark theme, $XAU/USD) |
 
+## MT5 Integration
+
+| Term | Definition |
+|------|------------|
+| **MT5 EA** | Expert Advisor (`SignalReceiver.mq5`) ที่ติดตั้งใน MetaTrader 5 — ดึง Signal ทองคำจาก API แล้วเปิด Pending Order อัตโนมัติ |
+| **MT5 Signal Filter** | EA รับเฉพาะ Signal ที่ `pair = XAU/USD` และ `status = active` เท่านั้น — API endpoint `/api/signals/mt5` กรองให้ตั้งแต่ต้นทาง |
+| **Pending Order** | คำสั่งตั้งรอราคาใน MT5 — EA เลือก BUY LIMIT / BUY STOP / SELL LIMIT / SELL STOP อัตโนมัติ โดยเทียบ `entry` กับราคาตลาดปัจจุบัน |
+| **Order Replacement** | เมื่อมี Signal ใหม่ EA จะยกเลิก Pending Order เก่าทั้งหมด (Magic Number เดียวกัน) แล้วเปิด Pending Order ใหม่ตาม Signal ล่าสุด |
+| **Signal Expiry** | Pending Order ไม่มีวันหมดอายุ — จะถูกยกเลิกเมื่อมี Signal ใหม่เข้ามา หรือเมื่อ Signal ต้นทางถูก evaluate เป็น win/loss (API คืน null) |
+| **Symbol Resolution** | EA รองรับชื่อ Symbol หลายรูปแบบ: `XAUUSD`, `GOLD`, `XAUUSD.m`, `XAUUSD.pro`, `XAUUSD.r`, `XAUUSD.ecn` ฯลฯ — ค้นหาอัตโนมัติจากรายชื่อ Symbol ของ Broker |
+| **Auth** | API endpoint ใช้ `X-MT5-Key` header — key ถูกเก็บใน `MT5_API_KEY` env var |
+
 ## Architecture
 
 | Term | Definition |
