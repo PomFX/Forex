@@ -195,38 +195,45 @@ void DrawPendingLines(string symbol, double entry, double sl, double tp, string 
 
    // Entry line
    string entryName = "SR_" + IntegerToString(MAGIC_NUMBER) + "_entry";
-   if(ObjectFind(0, entryName) < 0)
-      ObjectCreate(0, entryName, OBJ_HLINE, 0, 0, entry);
-   ObjectSetDouble(0, entryName, OBJPROP_PRICE, entry);
+   ObjectDelete(0, entryName);
+   ObjectCreate(0, entryName, OBJ_HLINE, 0, 0, entry);
    ObjectSetInteger(0, entryName, OBJPROP_COLOR, clrEntry);
    ObjectSetInteger(0, entryName, OBJPROP_WIDTH, 2);
    ObjectSetInteger(0, entryName, OBJPROP_STYLE, STYLE_DASHDOT);
+   ObjectSetInteger(0, entryName, OBJPROP_BACK, false);
+   ObjectSetInteger(0, entryName, OBJPROP_SELECTABLE, false);
+   ObjectSetInteger(0, entryName, OBJPROP_HIDDEN, false);
 
    // SL line
    if(sl > 0)
    {
       string slName = "SR_" + IntegerToString(MAGIC_NUMBER) + "_sl";
-      if(ObjectFind(0, slName) < 0)
-         ObjectCreate(0, slName, OBJ_HLINE, 0, 0, sl);
-      ObjectSetDouble(0, slName, OBJPROP_PRICE, sl);
+      ObjectDelete(0, slName);
+      ObjectCreate(0, slName, OBJ_HLINE, 0, 0, sl);
       ObjectSetInteger(0, slName, OBJPROP_COLOR, clrSL);
       ObjectSetInteger(0, slName, OBJPROP_WIDTH, 2);
       ObjectSetInteger(0, slName, OBJPROP_STYLE, STYLE_DASHDOT);
+      ObjectSetInteger(0, slName, OBJPROP_BACK, false);
+      ObjectSetInteger(0, slName, OBJPROP_SELECTABLE, false);
+      ObjectSetInteger(0, slName, OBJPROP_HIDDEN, false);
    }
 
    // TP line
    if(tp > 0)
    {
       string tpName = "SR_" + IntegerToString(MAGIC_NUMBER) + "_tp";
-      if(ObjectFind(0, tpName) < 0)
-         ObjectCreate(0, tpName, OBJ_HLINE, 0, 0, tp);
-      ObjectSetDouble(0, tpName, OBJPROP_PRICE, tp);
+      ObjectDelete(0, tpName);
+      ObjectCreate(0, tpName, OBJ_HLINE, 0, 0, tp);
       ObjectSetInteger(0, tpName, OBJPROP_COLOR, clrTP);
       ObjectSetInteger(0, tpName, OBJPROP_WIDTH, 2);
       ObjectSetInteger(0, tpName, OBJPROP_STYLE, STYLE_DASHDOT);
+      ObjectSetInteger(0, tpName, OBJPROP_BACK, false);
+      ObjectSetInteger(0, tpName, OBJPROP_SELECTABLE, false);
+      ObjectSetInteger(0, tpName, OBJPROP_HIDDEN, false);
    }
 
    ChartRedraw(0);
+   Print("[SignalReceiver] Chart lines drawn: Entry=", entry, " SL=", sl, " TP=", tp);
 }
 
 //+------------------------------------------------------------------+
