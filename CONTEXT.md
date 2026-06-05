@@ -18,6 +18,7 @@
 |--------|-------|
 | **Position** | `position: fixed` ชิดขอบจอ (`left: 0` / `right: 0`) กึ่งกลางแนวตั้ง |
 | **Image Source** | อัปโหลดที่ ImgBB → ใช้ Direct Link (`https://i.ibb.co/...`) |
+| **Middle Banner** | 300×250px Medium Rectangle วางระหว่างสัญญาณเทรดล่าสุดกับบทความล่าสุด, Admin จัดการแท็บ "กลาง" |
 | **Why not pipaffiliates direct?** | `ads.pipaffiliates.com` คืน HTML page ไม่ใช่ raw image |
 | **Why not Base64?** | Banner รับ HTML code อิสระ (ไม่ใช่แค่รูป) — ต้องใช้ external image hosting |
 | **Admin** | แท็บซ้าย/ขวา พร้อม toggle เปิด/ปิด, รับ raw HTML |
@@ -81,3 +82,6 @@
 | **LINE Webhook** | ✅ ตั้งที่ LINE Developers Console แล้ว, Group ID: `C6db4f5de05652d30ccbc307960c851cf` |
 | **GitHub Secrets** | ✅ ตั้งแล้ว (OPENAI_API_KEY, AI_SIGNAL_API_KEY, AI_API_URL, LINE_CHANNEL_ACCESS_TOKEN, LINE_USER_ID, LINE_GROUP_ID) |
 | **Database** | ✅ ใช้งานได้ (production DB, ได้จาก Vercel env) |
+| **VIP Auto-Count** | ✅ เริ่ม 109 + เพิ่มวันละ 5-10 คน (deterministic cycle) |
+| **Middle Banner** | ✅ 300×250px Medium Rectangle, Admin แท็บ "กลาง" |
+| **AI Signals (SMC)** | ✅ M15 SMC: Market Structure, OB, FVG, Liquidity |
