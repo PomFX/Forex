@@ -10,7 +10,7 @@ const corsOptions = {
     ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
     : '*',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-AI-Key'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-AI-Key', 'X-MT5-Key'],
 };
 
 app.use(cors(corsOptions));
