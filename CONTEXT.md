@@ -39,8 +39,9 @@
 | Detail | Value |
 |--------|-------|
 | **Workflow** | `ai-signals.yml` — 3 jobs (generate → evaluate → article) |
-| **Frequency** | วันละ 4 รอบ: 08:00 / 13:00 / 18:00 / 22:00 (เวลาไทย UTC+7) |
-| **Cron** | `0 1,6,11,15 * * *` (UTC) |
+| **Frequency** | ทุก 1 ชั่วโมง (ตรวจสอบ SMC setup รายชั่วโมง) |
+| **Cron** | `0 * * * *` (UTC) |
+| **Model** | `gpt-4o-mini` (OpenAI) |
 | **Manual** | `workflow_dispatch` — กดรันเองได้ที่ GitHub Actions |
 
 ## Signal Analysis — SMC (Smart Money Concepts)
@@ -50,7 +51,7 @@
 | **Timeframe** | M15 |
 | **Method** | SMC — Market Structure (HH/HL, LH/LL, CHoCH, BOS), Order Block, Fair Value Gap, Liquidity |
 | **Condition** | สร้างสัญญาณเมื่อ SMC setup ครบเท่านั้น (BOS/CHoCH + OB/FVG + Liquidity sweep) |
-| **Max/Day** | ไม่เกิน 4 สัญญาณ/วัน (1 ต่อรอบ) |
+| **Max/Day** | ไม่เกิน 4 สัญญาณ/วัน |
 | **Reason** | 3 บรรทัดภาษาไทย: (1) Market Structure (2) OB/FVG (3) Liquidity + เหตุผลเข้า |
 
 ## AI Article — Gold Analysis Prompt
