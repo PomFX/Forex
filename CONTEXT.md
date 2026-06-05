@@ -38,9 +38,29 @@
 | Detail | Value |
 |--------|-------|
 | **Workflow** | `ai-signals.yml` — 3 jobs (generate → evaluate → article) |
-| **Frequency** | วันละ 3 รอบ: 08:00 / 13:00 / 18:00 (เวลาไทย UTC+7) |
-| **Cron** | `0 1,6,11 * * *` (UTC) |
+| **Frequency** | วันละ 4 รอบ: 08:00 / 13:00 / 18:00 / 22:00 (เวลาไทย UTC+7) |
+| **Cron** | `0 1,6,11,15 * * *` (UTC) |
 | **Manual** | `workflow_dispatch` — กดรันเองได้ที่ GitHub Actions |
+
+## Signal Analysis — SMC (Smart Money Concepts)
+
+| Detail | Value |
+|--------|-------|
+| **Timeframe** | M15 |
+| **Method** | SMC — Market Structure (HH/HL, LH/LL, CHoCH, BOS), Order Block, Fair Value Gap, Liquidity |
+| **Condition** | สร้างสัญญาณเมื่อ SMC setup ครบเท่านั้น (BOS/CHoCH + OB/FVG + Liquidity sweep) |
+| **Max/Day** | ไม่เกิน 4 สัญญาณ/วัน (1 ต่อรอบ) |
+| **Reason** | 3 บรรทัดภาษาไทย: (1) Market Structure (2) OB/FVG (3) Liquidity + เหตุผลเข้า |
+
+## AI Article — Gold Analysis Prompt
+
+| Detail | Value |
+|--------|-------|
+| **Model** | `gpt-4o-mini` (OpenAI) |
+| **Role** | "นักวิเคราะห์ราคาทองคำมืออาชีพ" — H1 analysis for Day Trading |
+| **Sections** | (1) Current Market Snapshot, (2) H1 Technical Analysis (Support/Resistance, RSI, MACD, EMA, Candlestick Patterns), (3) Intraday Drivers & Catalyst (DXY, Bond Yield, Economic Data), (4) Hourly Trading Strategy (Buy/Sell, SL, TP, Risk-Reward) |
+| **Output Format** | JSON `{ title, content }` — ภาษาไทย กระชับตรงประเด็น |
+| **Image** | QuickChart.io line chart (10-hour simulated trend, dark theme, $XAU/USD) |
 
 ## Architecture
 
