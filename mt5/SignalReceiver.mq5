@@ -169,7 +169,64 @@ void CancelAllPending()
          }
       }
    }
+   DeleteAllLines();
    g_pendingPlaced = false;
+}
+
+//+------------------------------------------------------------------+
+//| Draw/Delete pending order lines on chart                          |
+//+------------------------------------------------------------------+
+void DeleteAllLines()
+{
+   int total = ObjectsTotal(0, 0, -1);
+   for(int i = total - 1; i >= 0; i--)
+   {
+      string name = ObjectName(0, i, 0, -1);
+      if(StringFind(name, "SR_") >= 0)
+         ObjectDelete(0, name);
+   }
+}
+
+void DrawPendingLines(string symbol, double entry, double sl, double tp, string direction)
+{
+   color clrEntry = (direction == "BUY") ? clrLimeGreen : clrOrangeRed;
+   color clrSL    = clrIndianRed;
+   color clrTP    = clrMediumSeaGreen;
+
+   // Entry line
+   string entryName = "SR_" + IntegerToString(MAGIC_NUMBER) + "_entry";
+   if(ObjectFind(0, entryName) < 0)
+      ObjectCreate(0, entryName, OBJ_HLINE, 0, 0, entry);
+   ObjectSetDouble(0, entryName, OBJPROP_PRICE, entry);
+   ObjectSetInteger(0, entryName, OBJPROP_COLOR, clrEntry);
+   ObjectSetInteger(0, entryName, OBJPROP_WIDTH, 2);
+   ObjectSetInteger(0, entryName, OBJPROP_STYLE, STYLE_DASHDOT);
+
+   // SL line
+   if(sl > 0)
+   {
+      string slName = "SR_" + IntegerToString(MAGIC_NUMBER) + "_sl";
+      if(ObjectFind(0, slName) < 0)
+         ObjectCreate(0, slName, OBJ_HLINE, 0, 0, sl);
+      ObjectSetDouble(0, slName, OBJPROP_PRICE, sl);
+      ObjectSetInteger(0, slName, OBJPROP_COLOR, clrSL);
+      ObjectSetInteger(0, slName, OBJPROP_WIDTH, 2);
+      ObjectSetInteger(0, slName, OBJPROP_STYLE, STYLE_DASHDOT);
+   }
+
+   // TP line
+   if(tp > 0)
+   {
+      string tpName = "SR_" + IntegerToString(MAGIC_NUMBER) + "_tp";
+      if(ObjectFind(0, tpName) < 0)
+         ObjectCreate(0, tpName, OBJ_HLINE, 0, 0, tp);
+      ObjectSetDouble(0, tpName, OBJPROP_PRICE, tp);
+      ObjectSetInteger(0, tpName, OBJPROP_COLOR, clrTP);
+      ObjectSetInteger(0, tpName, OBJPROP_WIDTH, 2);
+      ObjectSetInteger(0, tpName, OBJPROP_STYLE, STYLE_DASHDOT);
+   }
+
+   ChartRedraw(0);
 }
 
 //+------------------------------------------------------------------+
@@ -317,6 +374,7 @@ bool PlacePending(string symbol, string direction, double entry, double tp, doub
    if(OrderSend(request, result))
    {
       Print("[SignalReceiver] PENDING ORDER PLACED | Ticket=", result.order);
+      DrawPendingLines(symbol, entry, slPrice, tpPrice, direction);
       return true;
    }
    else
