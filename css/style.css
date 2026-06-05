@@ -180,7 +180,7 @@ img { max-width: 100%; height: auto; }
   width: 300px;
   height: 250px;
   border-radius: var(--radius);
-  object-fit: cover;
+  object-fit: fill;
 }
 .home-banner-middle img:hover { opacity: 0.9; }
 .banner-close {
