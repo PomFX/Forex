@@ -169,71 +169,7 @@ void CancelAllPending()
          }
       }
    }
-   DeleteAllLines();
    g_pendingPlaced = false;
-}
-
-//+------------------------------------------------------------------+
-//| Draw/Delete pending order lines on chart                          |
-//+------------------------------------------------------------------+
-void DeleteAllLines()
-{
-   int total = ObjectsTotal(0, 0, -1);
-   for(int i = total - 1; i >= 0; i--)
-   {
-      string name = ObjectName(0, i, 0, -1);
-      if(StringFind(name, "SR_") >= 0)
-         ObjectDelete(0, name);
-   }
-}
-
-void DrawPendingLines(string symbol, double entry, double sl, double tp, string direction)
-{
-   color clrEntry = (direction == "BUY") ? clrLimeGreen : clrOrangeRed;
-   color clrSL    = clrIndianRed;
-   color clrTP    = clrMediumSeaGreen;
-
-   // Entry line
-   string entryName = "SR_" + IntegerToString(MAGIC_NUMBER) + "_entry";
-   ObjectDelete(0, entryName);
-   ObjectCreate(0, entryName, OBJ_HLINE, 0, 0, entry);
-   ObjectSetInteger(0, entryName, OBJPROP_COLOR, clrEntry);
-   ObjectSetInteger(0, entryName, OBJPROP_WIDTH, 2);
-   ObjectSetInteger(0, entryName, OBJPROP_STYLE, STYLE_DASHDOT);
-   ObjectSetInteger(0, entryName, OBJPROP_BACK, false);
-   ObjectSetInteger(0, entryName, OBJPROP_SELECTABLE, false);
-   ObjectSetInteger(0, entryName, OBJPROP_HIDDEN, false);
-
-   // SL line
-   if(sl > 0)
-   {
-      string slName = "SR_" + IntegerToString(MAGIC_NUMBER) + "_sl";
-      ObjectDelete(0, slName);
-      ObjectCreate(0, slName, OBJ_HLINE, 0, 0, sl);
-      ObjectSetInteger(0, slName, OBJPROP_COLOR, clrSL);
-      ObjectSetInteger(0, slName, OBJPROP_WIDTH, 2);
-      ObjectSetInteger(0, slName, OBJPROP_STYLE, STYLE_DASHDOT);
-      ObjectSetInteger(0, slName, OBJPROP_BACK, false);
-      ObjectSetInteger(0, slName, OBJPROP_SELECTABLE, false);
-      ObjectSetInteger(0, slName, OBJPROP_HIDDEN, false);
-   }
-
-   // TP line
-   if(tp > 0)
-   {
-      string tpName = "SR_" + IntegerToString(MAGIC_NUMBER) + "_tp";
-      ObjectDelete(0, tpName);
-      ObjectCreate(0, tpName, OBJ_HLINE, 0, 0, tp);
-      ObjectSetInteger(0, tpName, OBJPROP_COLOR, clrTP);
-      ObjectSetInteger(0, tpName, OBJPROP_WIDTH, 2);
-      ObjectSetInteger(0, tpName, OBJPROP_STYLE, STYLE_DASHDOT);
-      ObjectSetInteger(0, tpName, OBJPROP_BACK, false);
-      ObjectSetInteger(0, tpName, OBJPROP_SELECTABLE, false);
-      ObjectSetInteger(0, tpName, OBJPROP_HIDDEN, false);
-   }
-
-   ChartRedraw(0);
-   Print("[SignalReceiver] Chart lines drawn: Entry=", entry, " SL=", sl, " TP=", tp);
 }
 
 //+------------------------------------------------------------------+
@@ -381,7 +317,6 @@ bool PlacePending(string symbol, string direction, double entry, double tp, doub
    if(OrderSend(request, result))
    {
       Print("[SignalReceiver] PENDING ORDER PLACED | Ticket=", result.order);
-      DrawPendingLines(symbol, entry, slPrice, tpPrice, direction);
       return true;
    }
    else
