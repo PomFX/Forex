@@ -73,6 +73,7 @@ const Router = {
         await App.renderHomeGoldStats();
         await App.renderHomeBrokers();
         await App.renderHomeSignals();
+        await App.renderMiddleBanner();
         await App.renderHomeQR();
         await App.renderHomeArticles();
         break;

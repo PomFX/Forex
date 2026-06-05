@@ -168,6 +168,20 @@ img { max-width: 100%; height: auto; }
   border-left: none;
 }
 .side-banner img:hover { opacity: 0.9; }
+
+.home-banner-middle {
+  max-width: 728px;
+  margin: 2rem auto;
+  text-align: center;
+  padding: 0 1rem;
+}
+.home-banner-middle a { display: block; }
+.home-banner-middle img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+.home-banner-middle img:hover { opacity: 0.9; }
 .banner-close {
   background: var(--gold);
   color: #000;

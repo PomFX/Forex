@@ -483,8 +483,9 @@ const Admin = {
         btn.classList.add('active');
         const side = btn.dataset.side;
         document.getElementById('bannerSide').value = side;
-        document.getElementById('bannerSideLabel').textContent = side === 'left' ? 'ซ้าย' : 'ขวา';
-        document.getElementById('bannerHtmlLabel').textContent = side === 'left' ? '(ซ้าย)' : '(ขวา)';
+        const label = { left: 'ซ้าย', right: 'ขวา', middle: 'กลาง' }[side] || side;
+        document.getElementById('bannerSideLabel').textContent = label;
+        document.getElementById('bannerHtmlLabel').textContent = '(' + label + ')';
         await this.renderBannerSettings(side);
       });
     });
@@ -499,6 +500,7 @@ const Admin = {
         }, side);
         App.toast('บันทึกแบนเนอร์แล้ว');
         App.renderSideBanner();
+        if (side === 'middle') App.renderMiddleBanner();
       } catch (err) {
         App.toast('เกิดข้อผิดพลาด', true);
         console.error('Update banner error:', err);

@@ -84,6 +84,8 @@
           <div style="text-align:center;margin-top:1rem"><a href="#/signals" class="btn btn-outline">ดูทั้งหมด</a></div>
         </section>
 
+        <div class="home-banner-middle" id="homeBannerMiddle"></div>
+
         <section class="section">
           <h2 class="section-title">บทความล่าสุด</h2>
           <div class="article-grid" id="homeArticles"></div>
@@ -422,9 +424,10 @@
           <div class="admin-page-content" id="admin-banner">
             <h1>จัดการแบนเนอร์ข้างเว็บ</h1>
             <form class="admin-form" id="bannerForm">
-              <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+              <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
                 <button type="button" class="btn btn-outline btn-sm banner-tab active" data-side="right">ด้านขวา</button>
                 <button type="button" class="btn btn-outline btn-sm banner-tab" data-side="left">ด้านซ้าย</button>
+                <button type="button" class="btn btn-outline btn-sm banner-tab" data-side="middle">กลาง</button>
               </div>
               <input type="hidden" id="bannerSide" value="right">
               <div class="form-group">

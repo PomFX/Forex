@@ -39,6 +39,17 @@ const App = {
     } catch (err) { document.getElementById('sideBanner' + (side === 'left' ? 'Left' : 'Right')).style.display = 'none'; }
   },
 
+  // ====== MIDDLE BANNER ======
+  async renderMiddleBanner() {
+    try {
+      const banner = await API.getBanner('middle');
+      const el = document.getElementById('homeBannerMiddle');
+      if (!banner.enabled || !banner.html) { el.style.display = 'none'; return; }
+      el.innerHTML = banner.html;
+      el.style.display = 'block';
+    } catch (err) { document.getElementById('homeBannerMiddle').style.display = 'none'; }
+  },
+
   // ====== HOME GOLD STATS ======
   async renderHomeGoldStats() {
     try {
