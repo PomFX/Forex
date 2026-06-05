@@ -170,16 +170,17 @@ img { max-width: 100%; height: auto; }
 .side-banner img:hover { opacity: 0.9; }
 
 .home-banner-middle {
-  max-width: 728px;
+  max-width: 300px;
   margin: 2rem auto;
   text-align: center;
   padding: 0 1rem;
 }
 .home-banner-middle a { display: block; }
 .home-banner-middle img {
-  max-width: 100%;
-  height: auto;
+  width: 300px;
+  height: 250px;
   border-radius: var(--radius);
+  object-fit: cover;
 }
 .home-banner-middle img:hover { opacity: 0.9; }
 .banner-close {
