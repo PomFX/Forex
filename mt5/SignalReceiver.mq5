@@ -135,17 +135,20 @@ bool FetchSignal(string &json)
 
    int res = WebRequest("GET", API_URL, headers, 5000, data, result, resultHeaders);
 
-   if(res == -1)
+   if(res == -1 || res > 599 || res < 100)
    {
       int err = GetLastError();
-      Print("[SignalReceiver] WebRequest FAILED | LastError=", err, " | Possible cause: URL not allowed in MT5 WebRequest settings");
-      Print("[SignalReceiver] Go to Tools -> Options -> Expert Advisors -> Allow WebRequest for: https://forex-rouge-gamma.vercel.app");
+      Print("[SignalReceiver] WebRequest FAILED | res=", res, " LastError=", err);
+      if(err == 4014)
+         Print("[SignalReceiver] ERROR 4014: URL not in allowed list!");
+      else
+         Print("[SignalReceiver] Go to Tools -> Options -> Expert Advisors -> Allow WebRequest for: https://forex-rouge-gamma.vercel.app");
       return false;
    }
 
    if(res != 200)
    {
-      Print("[SignalReceiver] WebRequest error: HTTP ", res);
+      Print("[SignalReceiver] WebRequest HTTP ", res, " | Server returned error");
       return false;
    }
 
