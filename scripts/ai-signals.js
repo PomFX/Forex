@@ -56,34 +56,66 @@ async function generateSignal(marketData) {
     `${d.pair} | Price: ${d.price} | Change: ${d.change.toFixed(2)}%`
   ).join('\n');
 
-  const prompt = `You are a professional Forex analyst specializing in XAU/USD (Gold). Analyze the current market data and generate 1-3 trading signals. CRITICAL: You MUST include at least one XAU/USD (Gold) signal in every response.
+  const prompt = `You are a professional Smart Money Concepts (SMC) analyst specializing in XAU/USD (Gold). Analyze the H1 chart structure and determine if there is a valid SMC entry setup.
 
 Current Market Data:
 ${marketTable}
 
-Instructions:
-- ALWAYS include XAU/USD (Gold) as the first signal — this is mandatory
-- Choose additional pairs if market conditions warrant
-- For each signal provide: pair, direction (BUY/SELL), entry price, TP1, TP2, TP3, SL
-- Entry should be near current price with a reasonable spread
-- TP levels should be realistic (20-100 pips from entry depending on pair)
-- SL should be logical (15-50 pips opposite direction)
-- Also provide a "reason" field (in Thai, max 3 lines) explaining:
-  1. แนวโน้มหลักในกราฟ H4 (Bullish / Bearish / Sideways)
-  2. สัญญาณจาก Indicator (RSI, MACD, EMA หรือการทดสอบแนวรับ-แนวต้าน)
-  3. พฤติกรรมราคา (Price Action) เช่น แท่งเทียนกลับตัว, Breakout, Fakeout
+SMC Analysis Framework (H1 Timeframe):
+
+1. Market Structure (โครงสร้างตลาด)
+   - Identify recent HH/HL (uptrend) or LH/LL (downtrend)
+   - Look for CHoCH (Change of Character) — last break of structure before reversal
+   - Look for BOS (Break of Structure) — price breaks previous HH or LL
+
+2. Order Block (OB) — โซนคำสั่งสถาบัน
+   - Bullish OB: last bearish candle before a strong upward move
+   - Bearish OB: last bullish candle before a strong downward move
+   - Is price currently near a valid OB?
+
+3. Fair Value Gap (FVG) — ช่องว่างราคาที่น่าสนใจ
+   - 3-candle imbalance gap
+   - Is there an unfilled FVG that price may retest?
+
+4. Liquidity (สภาพคล่อง)
+   - Above recent highs (Buy-side liquidity / Stop hunts)
+   - Below recent lows (Sell-side liquidity)
+   - Any liquidity sweep happened recently?
+
+5. Entry Condition — ONLY generate signal if BOTH conditions are met:
+   A. Clear market structure (BOS or CHoCH confirmed)
+   B. Price is at a valid OB or FVG zone with liquidity taken
+
+CRITICAL: If there is NO clear SMC setup — return an empty array [].
+Only generate 1 signal (XAU/USD only) when ALL SMC conditions align.
+
+For each signal provide:
+- pair: always "XAU/USD"
+- direction: BUY or SELL
+- entry: price at the OB/FVG zone
+- tp1: first liquidity target (nearest HH/HL or structural level)
+- tp2: second target
+- tp3: third target
+- sl: beyond the opposite side of the OB (below OB low for buy, above OB high for sell)
+- reason: in Thai (3 lines max) explaining:
+  1. Market Structure + BOS/CHoCH ที่เกิดขึ้น
+  2. Order Block หรือ FVG ที่ราคากำลังทดสอบ
+  3. Liquidity ถูกเก็บ + เหตุผลการเข้าเทรด
 
 Return ONLY a valid JSON array (no markdown, no code blocks, no extra text):
+[] — if no valid SMC setup
+
+Or if conditions met:
 [
   {
     "pair": "XAU/USD",
     "direction": "BUY",
-    "entry": "2350.00",
-    "tp1": "2360.00",
-    "tp2": "2370.00",
-    "tp3": "2385.00",
-    "sl": "2340.00",
-    "reason": "แนวโน้มหลัก H4: Bullish ทะลุแนวต้านสำคัญ\nRSI อยู่ที่ 62 ยังมีแรงซื้อต่อเนื่อง\nแท่งเทียน Engulfing ขาขึ้นยืนยัน Momentum"
+    "entry": "4450.00",
+    "tp1": "4470.00",
+    "tp2": "4485.00",
+    "tp3": "4500.00",
+    "sl": "4440.00",
+    "reason": "BOS เกิดขึ้น ทะลุ High เดิม 4450\nราคากำลัง Retest Order Block โซน 4440-4450\nLiquidity ถูกเก็บด้านล่าง 4430 ก่อนดีดตัวขึ้น"
   }
 ]`;
 
@@ -154,6 +186,11 @@ async function main() {
   console.log('\nGenerating AI signals...');
   const signals = await generateSignal(marketData);
   console.log(`Generated ${signals.length} signal(s)\n`);
+
+  if (signals.length === 0) {
+    console.log('No valid SMC setup found — skipping');
+    return;
+  }
 
   console.log('Posting to API...');
   await postSignals(signals);
