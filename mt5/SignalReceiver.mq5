@@ -51,20 +51,20 @@ string FindSymbol(string pair)
       if(TrySymbol(candidate)) { CacheAdd(pair, candidate); return candidate; }
    }
 
-   int total = SymbolsTotal(false);
-   for(int j = 0; j < total; j++)
-   {
-      string sym = SymbolName(j, false);
-      if(StringFind(sym, base) >= 0)
-      {
-         SymbolSelect(sym, true);
-         if(SymbolInfoDouble(sym, SYMBOL_BID) > 0)
-         {
-            CacheAdd(pair, sym);
-            return sym;
-         }
-      }
-   }
+    int total = SymbolsTotal(false);
+    for(int j = 0; j < total; j++)
+    {
+       string sym = SymbolName(j, false);
+       if(StringFind(sym, base) >= 0 || StringFind(sym, "GOLD") >= 0 || StringFind(sym, "XAU") >= 0)
+       {
+          SymbolSelect(sym, true);
+          if(SymbolInfoDouble(sym, SYMBOL_BID) > 0)
+          {
+             CacheAdd(pair, sym);
+             return sym;
+          }
+       }
+    }
 
    Print("[FindSymbol] NOT FOUND: ", pair);
    return "";
