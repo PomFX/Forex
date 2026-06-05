@@ -168,7 +168,7 @@ const Admin = {
               <td>${escHtml(s.tp1)}${s.tp2 ? ' / ' + escHtml(s.tp2) : ''}${s.tp3 ? ' / ' + escHtml(s.tp3) : ''}</td>
               <td>${escHtml(s.sl || '-')}</td>
               <td style="color:${statusColors[s.status] || 'var(--text-muted)'};font-weight:600">${escHtml(s.status.toUpperCase())}</td>
-              <td style="font-size:0.75rem;color:var(--text-muted);max-width:180px;white-space:normal;line-height:1.3">${escHtml(s.reason || '-')}</td>
+              <td style="font-size:0.75rem;color:var(--text-muted);max-width:180px;white-space:normal;line-height:1.3;cursor:pointer" onclick="Admin.showReason(${s.id})" title="คลิกดูเหตุผล">${escHtml((s.reason || '-').substring(0, 60))}${s.reason && s.reason.length > 60 ? '...' : ''}</td>
               <td style="font-size:0.8rem;color:var(--text-muted)">${timeStr}</td>
               <td>
                 <button class="btn btn-outline btn-xs" onclick="Admin.editSignal(${s.id})">แก้ไข</button>
@@ -199,6 +199,23 @@ const Admin = {
       document.getElementById('signalCancel').style.display = 'inline-block';
       window.scrollTo({ top: document.getElementById('admin-signals').offsetTop - 60, behavior: 'smooth' });
     } catch (err) { console.error('editSignal:', err); }
+  },
+
+  async showReason(id) {
+    try {
+      const signals = await API.getSignals();
+      const s = signals.find(x => x.id === id);
+      if (!s || !s.reason) return;
+      document.getElementById('reasonModalBody').textContent = s.reason;
+      document.getElementById('reasonModal').classList.add('open');
+    } catch (err) { console.error('showReason:', err); }
+  },
+
+  // Close modal on overlay click
+  setupModal() {
+    document.getElementById('reasonModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) e.target.classList.remove('open');
+    });
   },
 
   async deleteSignal(id) {

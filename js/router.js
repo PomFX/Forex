@@ -17,6 +17,7 @@ const Router = {
     Admin.setupUploads();
     Admin.setupContactForm();
     Admin.setupBannerForm();
+    Admin.setupModal();
 
     window.addEventListener('hashchange', () => this.handleRoute());
     this.handleRoute();

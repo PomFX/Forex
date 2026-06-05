@@ -452,6 +452,15 @@
   <!-- ====== TOAST ====== -->
   <div id="toast" class="toast"></div>
 
+  <!-- ====== MODAL ====== -->
+  <div class="modal-overlay" id="reasonModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="document.getElementById('reasonModal').classList.remove('open')">&times;</button>
+      <h3>เหตุผลทางเทคนิค</h3>
+      <div class="modal-body" id="reasonModalBody"></div>
+    </div>
+  </div>
+
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/app.js"></script>

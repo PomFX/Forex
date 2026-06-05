@@ -641,6 +641,42 @@ img { max-width: 100%; height: auto; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--gold-dark); }
 
+/* ====== MODAL ====== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+.modal-box h3 { margin-bottom: 0.8rem; color: var(--gold); }
+.modal-box .modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.8rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+.modal-box .modal-close:hover { color: #fff; }
+.modal-body { font-size: 0.9rem; line-height: 1.6; color: var(--text); white-space: pre-line; }
+
 /* ====== TOGGLE SWITCH ====== */
 .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
 .switch input { opacity: 0; width: 0; height: 0; }
