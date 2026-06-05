@@ -33,6 +33,15 @@
 | **Output Format** | JSON `{ title, content }` — ภาษาไทย กระชับตรงประเด็น |
 | **Image** | QuickChart.io line chart (10-hour simulated trend, dark theme, $XAU/USD) |
 
+## Schedule (GitHub Actions)
+
+| Detail | Value |
+|--------|-------|
+| **Workflow** | `ai-signals.yml` — 3 jobs (generate → evaluate → article) |
+| **Frequency** | วันละ 3 รอบ: 08:00 / 13:00 / 18:00 (เวลาไทย UTC+7) |
+| **Cron** | `0 1,6,11 * * *` (UTC) |
+| **Manual** | `workflow_dispatch` — กดรันเองได้ที่ GitHub Actions |
+
 ## Architecture
 
 | Term | Definition |
