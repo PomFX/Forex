@@ -4,9 +4,9 @@
 //|          รับ Signal เฉพาะ XAU/USD เปิด Pending Order อัตโนมัติ        |
 //+------------------------------------------------------------------+
 #property copyright "ATH Trader"
-#property version   "2.1"
-#property description "Gold-only Pending Order EA — reads signal.json from Common Files"
-#property description "PowerShell task: scripts/fetch_signal.ps1"
+#property version   "2.0"
+#property description "Gold-only Pending Order EA — XAU/USD signals from API"
+#property description "Docs: https://forex-rouge-gamma.vercel.app"
 
 //--- Input Parameters
 input string   API_URL          = "https://forex-rouge-gamma.vercel.app/api/signals/mt5";
@@ -123,24 +123,36 @@ string JsonExtract(string json, string key)
 }
 
 //+------------------------------------------------------------------+
-//| Read signal from local file (written by PowerShell scheduled task) |
+//| Fetch signal from API                                            |
 //+------------------------------------------------------------------+
 bool FetchSignal(string &json)
 {
-   int handle = FileOpen("signal.json", FILE_COMMON|FILE_TXT|FILE_READ);
-   if(handle == INVALID_HANDLE)
+   char   data[];
+   char   result[];
+   string resultHeaders;
+   string headers = "X-MT5-Key: " + API_KEY + "\r\n"
+                  + "Accept: application/json\r\n";
+
+   int res = WebRequest("GET", API_URL, headers, 5000, data, result, resultHeaders);
+
+   if(res == -1 || res > 599 || res < 100)
    {
-      Print("[SignalReceiver] signal.json not found in Common Files");
+      int err = GetLastError();
+      Print("[SignalReceiver] WebRequest FAILED | res=", res, " LastError=", err);
+      if(err == 4014)
+         Print("[SignalReceiver] ERROR 4014: URL not in allowed list!");
+      else
+         Print("[SignalReceiver] Go to Tools -> Options -> Expert Advisors -> Allow WebRequest for: https://forex-rouge-gamma.vercel.app");
       return false;
    }
 
-   json = "";
-   while(!FileIsEnding(handle))
-      json += FileReadString(handle) + "\n";
+   if(res != 200)
+   {
+      Print("[SignalReceiver] WebRequest HTTP ", res, " | Server returned error");
+      return false;
+   }
 
-   FileClose(handle);
-   StringTrimRight(json);
-   Print("[SignalReceiver] Read signal from local file (", StringLen(json), " bytes)");
+   json = CharArrayToString(result);
    return true;
 }
 
@@ -433,8 +445,8 @@ void ProcessSignal()
 int OnInit()
 {
    Print("══════════════════════════════════════════════");
-   Print("[SignalReceiver v2.1] GOLD-ONLY PENDING ORDER EA");
-   Print("  Source   : signal.json (Common Files)");
+   Print("[SignalReceiver v2.0] GOLD-ONLY PENDING ORDER EA");
+   Print("  API URL  : ", API_URL);
    Print("  Interval : ", POLL_INTERVAL, " seconds");
    Print("  Lot Size : ", LOT_SIZE);
    Print("  Magic    : ", MAGIC_NUMBER);
