@@ -52,23 +52,30 @@ function generateChartUrl(price) {
 async function generateArticle(goldPrice) {
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  const prompt = `You are a professional gold (XAU/USD) market analyst. Write a daily gold analysis article in Thai language.
+  const prompt = `บทบาทของคุณคือ "นักวิเคราะห์ราคาทองคำมืออาชีพ" ช่วยทำการวิเคราะห์แนวโน้มราคาทองคำ (XAU/USD) ประจำรายชั่วโมง (กรอบเวลา H1) เพื่อใช้ประกอบการตัดสินใจซื้อขายในระยะสั้น (Day Trading)
 
 Current Gold Price: $${goldPrice ? goldPrice.toFixed(2) : 'N/A'}
 
-The article should include:
-1. A catchy title (in Thai) about today's gold market
-2. Content covering:
-   - Current gold price and daily movement
-   - Key factors affecting gold today (e.g., USD strength, geopolitical events, Fed policy)
-   - Technical analysis (support/resistance levels)
-   - Outlook for today/this week
-   - Trading recommendation (for short-term and medium-term)
+กรุณาวิเคราะห์และจัดทำรายงานตามหัวข้อต่อไปนี้:
 
-Format: Return a JSON object with title and content fields.
-- Title should be engaging, max 80 chars
-- Content should be 3-5 paragraphs, well-formatted in Thai
-- Do NOT use markdown in the content, use plain text with newlines
+1. สถานการณ์ปัจจุบัน (Current Market Snapshot)
+- ราคา Spot ล่าสุด, ราคาทองคำแท่งไทย (ถ้ามี)
+- แรงซื้อ/แรงขายในชั่วโมงที่ผ่านมา (Bullish / Bearish / Sideways)
+
+2. การวิเคราะห์ทางเทคนิครายชั่วโมง (H1 Technical Analysis)
+- แนวรับ (Support) และ แนวต้าน (Resistance) ที่สำคัญใน 1-3 ชั่วโมงข้างหน้า
+- สัญญาณจากเครื่องมือทางเทคนิค (เช่น RSI อยู่ในเขต Overbought/Oversold หรือยัง?, MACD, หรือเส้น EMA 50/200 ในกรอบ H1 แสดงแนวโน้มอย่างไร?)
+- รูปแบบแท่งเทียน (Candlestick Patterns) ที่น่าสนใจในกราฟรายชั่วโมง เช่น Pin Bar, Engulfing
+
+3. ปัจจัยขับเคลื่อนและข่าวสารระหว่างวัน (Intraday Drivers & Catalyst)
+- ดัชนีดอลลาร์ (Dollar Index - DXY) และอัตราผลตอบแทนพันธบัตรสหรัฐฯ (Bond Yield) กำลังเคลื่อนไหวไปในทิศทางใดและส่งผลต่อทองคำอย่างไรในชั่วโมงนี้?
+- มีการประกาศตัวเลขเศรษฐกิจสำคัญของสหรัฐฯ หรือภูมิภาคอื่น (เช่น CPI, Non-Farm, Jobless Claims, หรือถ้อยแถลงของ Fed) ที่กำลังจะเกิดขึ้นในอีกไม่กี่ชั่วโมงข้างหน้าหรือไม่?
+
+4. กลยุทธ์การเทรดรายชั่วโมง (Hourly Trading Strategy)
+- แนะนำแผนการเข้าซื้อ (Buy) หรือ ขาย (Sell) ที่เหมาะสมตามแนวรับ-แนวต้าน (เช่น Buy on Dip หรือ Breakout)
+- จุดตัดขาดทุน (Stop Loss) และ จุดทำกำไร (Take Profit) ที่คุ้มค่าต่อความเสี่ยง (Risk-Reward Ratio)
+
+รูปแบบการตอบกลับ: ขอข้อมูลที่กระชับ ตรงประเด็น แบ่งเป็นข้อๆ ชัดเจน และเข้าใจง่ายเพื่อให้พร้อมสำหรับการเทรดทันที
 
 Return ONLY valid JSON (no markdown, no code blocks):
 {
