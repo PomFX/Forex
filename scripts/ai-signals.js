@@ -56,12 +56,12 @@ async function generateSignal(marketData) {
     `${d.pair} | Price: ${d.price} | Change: ${d.change.toFixed(2)}%`
   ).join('\n');
 
-  const prompt = `You are a professional Smart Money Concepts (SMC) analyst specializing in XAU/USD (Gold). Analyze the H1 chart structure and determine if there is a valid SMC entry setup.
+  const prompt = `You are a professional Smart Money Concepts (SMC) analyst specializing in XAU/USD (Gold). Analyze the M15 chart structure and determine if there is a valid SMC entry setup.
 
 Current Market Data:
 ${marketTable}
 
-SMC Analysis Framework (H1 Timeframe):
+SMC Analysis Framework (M15 Timeframe):
 
 1. Market Structure (โครงสร้างตลาด)
    - Identify recent HH/HL (uptrend) or LH/LL (downtrend)
