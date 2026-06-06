@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>คู่มือ Auto Signal — ATH Trader</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:-apple-system,'Segoe UI',sans-serif;
+    background:#0d0d0d; color:#e0e0e0;
+    display:flex; min-height:100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width:260px; background:#151515;
+    border-right:1px solid #222;
+    padding:1.5rem 0; position:sticky; top:0; height:100vh; overflow-y:auto;
+    flex-shrink:0;
+  }
+  .sidebar h2 {
+    color:#d4a017; font-size:1rem; text-align:center;
+    padding:0 1rem 1rem; border-bottom:1px solid #222; margin-bottom:0.5rem;
+  }
+  .sidebar a {
+    display:block; padding:0.6rem 1.2rem;
+    color:#999; text-decoration:none; font-size:0.85rem;
+    transition:0.2s; border-left:3px solid transparent;
+  }
+  .sidebar a:hover { color:#d4a017; background:rgba(212,160,23,0.05); }
+  .sidebar a.active { color:#d4a017; border-left-color:#d4a017; background:rgba(212,160,23,0.08); }
+  .sidebar .cat { color:#666; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; padding:1rem 1.2rem 0.3rem; }
+
+  /* Main */
+  .main { flex:1; padding:2rem 2.5rem; max-width:900px; }
+  .main h1 { color:#d4a017; font-size:1.6rem; margin-bottom:0.3rem; }
+  .main .sub { color:#888; font-size:0.9rem; margin-bottom:2rem; }
+  .main section { margin-bottom:2.5rem; }
+  .main h2 { color:#d4a017; font-size:1.2rem; margin-bottom:1rem; padding-bottom:0.3rem; border-bottom:1px solid #222; }
+  .main h3 { color:#f0e6c0; font-size:1rem; margin:1.2rem 0 0.5rem; }
+  .main p, .main li { font-size:0.9rem; line-height:1.7; color:#ccc; }
+  .main ul, .main ol { padding-left:1.2rem; }
+  .main li { margin-bottom:0.3rem; }
+  .main code {
+    background:#1a1a1a; border:1px solid #333; border-radius:4px;
+    padding:0.15rem 0.4rem; font-size:0.8rem; color:#d4a017;
+  }
+  .main pre {
+    background:#111; border:1px solid #333; border-radius:6px;
+    padding:1rem; font-size:0.8rem; color:#aaa; overflow-x:auto;
+    margin:0.5rem 0;
+  }
+  .box {
+    background:#1a1a1a; border:1px solid #333; border-radius:8px;
+    padding:1rem; margin:0.8rem 0;
+  }
+  .box.gold { border-color:#d4a017; background:rgba(212,160,23,0.05); }
+  .box.green { border-color:#2a5a2a; background:rgba(34,139,34,0.05); }
+  .box .label { font-size:0.7rem; text-transform:uppercase; color:#888; margin-bottom:0.3rem; }
+  .badge { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.7rem; font-weight:600; }
+  .badge.gold { background:#d4a017; color:#111; }
+  .badge.green { background:#2a5a2a; color:#8f8; }
+  .badge.gray { background:#333; color:#aaa; }
+  table { width:100%; border-collapse:collapse; font-size:0.85rem; margin:0.5rem 0; }
+  th, td { padding:0.5rem 0.8rem; text-align:left; border-bottom:1px solid #222; }
+  th { color:#d4a017; font-weight:600; }
+  td { color:#ccc; }
+
+  @media (max-width:768px) {
+    body { flex-direction:column; }
+    .sidebar { width:100%; height:auto; position:static; border-right:none; border-bottom:1px solid #222; padding:0.8rem; }
+    .sidebar a { padding:0.4rem 0.8rem; font-size:0.8rem; }
+    .main { padding:1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <h2>📘 Auto Signal Guide</h2>
+
+  <div class="cat">เริ่มต้น</div>
+  <a href="#intro" class="active">แนะนำ</a>
+  <a href="#access">การเข้าใช้งาน</a>
+
+  <div class="cat">การตั้งค่า</div>
+  <a href="#pairs">เลือกคู่เงิน</a>
+  <a href="#auto-mode">โหมด Auto</a>
+  <a href="#interval">ช่วงเวลา</a>
+
+  <div class="cat">การวิเคราะห์</div>
+  <a href="#smc">SMC คืออะไร</a>
+  <a href="#analyze">วิเคราะห์ SMC</a>
+  <a href="#result">อ่านผลลัพธ์</a>
+
+  <div class="cat">การส่ง Signal</div>
+  <a href="#manual">ส่งแบบ Manual</a>
+  <a href="#auto-send">ส่งแบบ Auto</a>
+  <a href="#confirm">ยืนยัน/ยกเลิก</a>
+
+  <div class="cat">การทำงานอัตโนมัติ</div>
+  <a href="#github">GitHub Actions</a>
+  <a href="#monitor">ตรวจสอบสถานะ</a>
+  <a href="#troubleshoot">แก้ปัญหาเบื้องต้น</a>
+</nav>
+
+<!-- Main -->
+<div class="main">
+
+  <h1>📡 Auto Signal — คู่มือการใช้งาน</h1>
+  <p class="sub">Smart Money Concepts (SMC) analysis framework on M15 timeframe — รองรับทุกคู่เงิน</p>
+
+  <!-- ====== INTRO ====== -->
+  <section id="intro">
+    <h2>แนะนำ</h2>
+    <p>Auto Signal เป็นระบบวิเคราะห์ทางเทคนิคโดยใช้ <strong>Smart Money Concepts (SMC)</strong> บนกรอบเวลา M15 เพื่อวิเคราะห์และสร้างสัญญาณเทรดอัตโนมัติ รองรับการวิเคราะห์หลายคู่เงินในครั้งเดียว</p>
+
+    <div class="box gold">
+      <div class="label">Key Features</div>
+      <ul>
+        <li><strong>ครอบคลุมทุกคู่:</strong> Commodities (ทอง, เงิน), Forex (คู่หลัก), Crypto (BTC, ETH, XRP)</li>
+        <li><strong>SMC M15:</strong> วิเคราะห์ Market Structure, Order Block, FVG, Liquidity</li>
+        <li><strong>เลือกคู่:</strong> เลือกเฉพาะคู่ที่ต้องการ เปิด/ปิด ได้ทุกคู่</li>
+        <li><strong>Manual Mode:</strong> วิเคราะห์เอง → ตรวจสอบ → ยืนยันส่ง</li>
+        <li><strong>Auto Mode:</strong> ตั้งเวลาปล่อยให้รันอัตโนมัติ</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ====== ACCESS ====== -->
+  <section id="access">
+    <h2>การเข้าใช้งาน</h2>
+    <ol>
+      <li>เข้าสู่ระบบด้วยบัญชี <strong>Admin</strong></li>
+      <li>คลิกที่เมนู <strong>Auto Signal</strong> ในแถบเมนูของ Admin Panel</li>
+      <li>หรือพิมพ์ URL: <code>/#/admin/autosignal</code></li>
+    </ol>
+  </section>
+
+  <!-- ====== PAIRS ====== -->
+  <section id="pairs">
+    <h2>เลือกคู่เงิน</h2>
+    <p>ในหน้า Auto Signal จะมีรายการคู่เงินแบ่งตามหมวดหมู่:</p>
+
+    <table>
+      <tr><th>หมวด</th><th>คู่เงิน</th><th>รายละเอียด</th></tr>
+      <tr><td>🏆 Commodities</td><td>XAU/USD, XAG/USD</td><td>ทองคำและเงิน</td></tr>
+      <tr><td>💱 Forex</td><td>EUR/USD, GBP/USD, USD/JPY, USD/CHF, AUD/USD, NZD/USD, USD/CAD</td><td>คู่เงินหลักทั้งหมด</td></tr>
+      <tr><td>🪙 Crypto</td><td>BTC/USD, ETH/USD, XRP/USD</td><td>สกุลเงินดิจิทัล</td></tr>
+    </table>
+
+    <p>Toggle เปิด/ปิด ได้ตามต้องการ — คู่ที่เปิด <span class="badge green">✅ ส่ง</span> จะถูกนำไปวิเคราะห์ คู่ที่ปิด <span class="badge gray">⛔ ไม่ส่ง</span> จะถูกข้ามไป</p>
+  </section>
+
+  <!-- ====== AUTO MODE ====== -->
+  <section id="auto-mode">
+    <h2>โหมด Auto</h2>
+    <p>โหมด Auto จะอยู่ด้านบนของหน้า Auto Signal ประกอบด้วย:</p>
+
+    <div class="box">
+      <table>
+        <tr><th>ตัวเลือก</th><th>ค่า</th><th>คำอธิบาย</th></tr>
+        <tr><td>Switch Auto Mode</td><td>ON / OFF</td><td>เปิดเพื่อให้ระบบทำงานอัตโนมัติ ปิดเพื่อวิเคราะห์แบบ Manual</td></tr>
+        <tr><td>Interval</td><td>15/30/60/120/180/240 นาที</td><td>ความถี่ในการวิเคราะห์และส่งสัญญาณ</td></tr>
+      </table>
+    </div>
+
+    <div class="box gold">
+      <strong>💡 Tips:</strong> Auto mode จะทำงานเมื่อมีการเรียกจาก <strong>GitHub Actions</strong> ทุก 15 นาที — ถึงตั้ง interval ไว้สูงกว่านั้น ระบบจะเช็คว่าครบกำหนดรันหรือยัง ถ้ายังก็จะข้ามไป
+    </div>
+  </section>
+
+  <!-- ====== INTERVAL ====== -->
+  <section id="interval">
+    <h2>ช่วงเวลา (Interval)</h2>
+    <p>ช่วงเวลาที่ระบบจะทำการวิเคราะห์ SMC และส่ง Signal อัตโนมัติ</p>
+
+    <table>
+      <tr><th>Interval</th><th>รอบ/วัน</th><th>เหมาะสำหรับ</th></tr>
+      <tr><td>15 นาที</td><td>96 ครั้ง</td><td>Scalping ต้องการสัญญาณถี่</td></tr>
+      <tr><td>30 นาที</td><td>48 ครั้ง</td><td>Day Trading ปานกลาง</td></tr>
+      <tr><td>1 ชั่วโมง</td><td>24 ครั้ง</td><td>Day Trading (ค่าเริ่มต้น)</td></tr>
+      <tr><td>2 ชั่วโมง</td><td>12 ครั้ง</td><td>Swing เล็กน้อย</td></tr>
+      <tr><td>3 ชั่วโมง</td><td>8 ครั้ง</td><td>Swing</td></tr>
+      <tr><td>4 ชั่วโมง</td><td>6 ครั้ง</td><td>Swing ใหญ่</td></tr>
+    </table>
+
+    <div class="box green">
+      <strong>⚠️ ข้อควรระวัง:</strong> แต่ละรอบการวิเคราะห์มีค่าใช้จ่าย OpenAI (~$0.0015/คู่) ยิ่งถี่และหลายคู่ ยิ่งเสียค่าใช้จ่ายมากขึ้น
+    </div>
+  </section>
+
+  <!-- ====== SMC ====== -->
+  <section id="smc">
+    <h2>SMC (Smart Money Concepts) คืออะไร</h2>
+    <p>SMC เป็นแนวคิดการวิเคราะห์ทางเทคนิคที่มองว่าราคามีการเคลื่อนไหวตาม "เงินใหญ่" (Smart Money) — สถาบันการเงิน นักลงทุนรายใหญ่ ฯลฯ</p>
+
+    <h3>5 องค์ประกอบหลักที่ใช้วิเคราะห์</h3>
+
+    <div class="box">
+      <table>
+        <tr><th>องค์ประกอบ</th><th>คำอธิบาย</th></tr>
+        <tr><td>1. Market Structure</td><td>โครงสร้างตลาด — HH/HL (แนวโน้มขาขึ้น), LH/LL (แนวโน้มขาลง), CHoCH (เปลี่ยนแนวโน้ม), BOS (ทะลุโครงสร้าง)</td></tr>
+        <tr><td>2. Order Block (OB)</td><td>โซนที่ราคามีคำสั่งซื้อ/ขายขนาดใหญ่สะสม — Bullish OB / Bearish OB</td></tr>
+        <tr><td>3. Fair Value Gap (FVG)</td><td>ช่องว่างของราคาที่เกิดจาก 3 แท่งเทียน — แสดงถึงความไม่สมดุลของแรงซื้อแรงขาย</td></tr>
+        <tr><td>4. Liquidity</td><td>โซนสภาพคล่อง — จุดที่ราคามักจะไป "เก็บสภาพคล่อง" ก่อนกลับตัว (Stop Hunt)</td></tr>
+        <tr><td>5. Entry Condition</td><td>ต้องครบทั้ง 2 เงื่อนไข: (A) โครงสร้างตลาดเปลี่ยน (BOS/CHoCH) และ (B) ราคาอยู่ที่ OB/FVG + เก็บสภาพคล่องแล้ว</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ====== ANALYZE ====== -->
+  <section id="analyze">
+    <h2>วิเคราะห์ SMC</h2>
+    <p>เมื่อเลือกคู่เงินที่ต้องการแล้ว กดปุ่ม <strong>🔍 วิเคราะห์ SMC</strong></p>
+
+    <div class="box gold">
+      <div class="label">ขั้นตอนการทำงาน</div>
+      <ol>
+        <li>ระบบบันทึกการตั้งค่าปัจจุบัน (คู่ที่เลือก, auto mode, interval)</li>
+        <li>เรียก <strong>OpenAI gpt-4o-mini</strong> เพื่อวิเคราะห์ SMC ทีละคู่</li>
+        <li>AI วิเคราะห์ Market Structure, OB, FVG, Liquidity บน M15</li>
+        <li>แสดงผลลัพธ์ — คู่ที่มี Setup และคู่ที่ไม่มี</li>
+        <li>รอให้ Admin ยืนยันหรือยกเลิก</li>
+      </ol>
+    </div>
+
+    <p>การวิเคราะห์ 1 คู่ใช้เวลา ~5-15 วินาที ยิ่งหลายคู่ยิ่งนานตามลำดับ</p>
+  </section>
+
+  <!-- ====== RESULT ====== -->
+  <section id="result">
+    <h2>อ่านผลลัพธ์</h2>
+    <p>ผลการวิเคราะห์จะแสดงเป็นกล่องๆ แยกตามคู่เงิน:</p>
+
+    <div class="box green">
+      <p><strong>🟢 มี SMC Setup</strong> — แสดง:</p>
+      <ul>
+        <li>คู่เงิน + ทิศทาง (BUY/SELL)</li>
+        <li>ราคาเข้า (Entry), Take Profit 1-3, Stop Loss</li>
+        <li>เหตุผลทางเทคนิค 3 บรรทัด (ภาษาไทย)</li>
+      </ul>
+    </div>
+
+    <div class="box" style="opacity:0.6">
+      <p><strong>⚫ ไม่มี SMC Setup</strong> — ระบบจะบอกว่าคู่นั้นไม่มี Setup ในขณะนี้</p>
+    </div>
+
+    <div class="box" style="border-color:#5a2a2a;background:rgba(255,0,0,0.03)">
+      <p><strong>🔴 Error</strong> — ถ้ามีข้อผิดพลาด (เช่น OpenAI Key ไม่ถูกต้อง) จะแสดง Error พร้อมรายละเอียด</p>
+    </div>
+  </section>
+
+  <!-- ====== MANUAL ====== -->
+  <section id="manual">
+    <h2>ส่งแบบ Manual</h2>
+    <p>ขั้นตอนการส่ง Signal แบบ Manual (ปิด Auto Mode):</p>
+    <ol>
+      <li>เลือกคู่เงินที่ต้องการ → Toggle ON</li>
+      <li>กด <strong>🔍 วิเคราะห์ SMC</strong></li>
+      <li>รอผลการวิเคราะห์ (~5-15 วิ/คู่)</li>
+      <li>ตรวจสอบผลลัพธ์</li>
+      <li>กด <strong>✅ ยืนยันส่ง Signal</strong> เพื่อส่ง หรือ <strong>❌ ยกเลิก</strong> เพื่อยกเลิก</li>
+    </ol>
+
+    <div class="box gold">
+      <strong>💡 Tips:</strong> หลังยืนยันส่ง Signal จะเข้าไปอยู่ในระบบทันที MT5 EA จะดึงไปเปิด Pending Order ภายใน 60 วินาที
+    </div>
+  </section>
+
+  <!-- ====== AUTO SEND ====== -->
+  <section id="auto-send">
+    <h2>ส่งแบบ Auto</h2>
+    <p>การตั้งค่าให้ระบบทำงานอัตโนมัติ:</p>
+    <ol>
+      <li>เลือกคู่เงินที่ต้องการวิเคราะห์</li>
+      <li>เปิด <strong>Switch Auto Mode → ON</strong></li>
+      <li>เลือก <strong>Interval</strong> ที่ต้องการ</li>
+      <li>กด <strong>💾 บันทึกการตั้งค่า</strong></li>
+    </ol>
+
+    <div class="box">
+      <h3>การทำงาน</h3>
+      <ul>
+        <li><strong>GitHub Actions</strong> เรียก <code>POST /api/auto-signals/auto-run</code> ทุก 15 นาที</li>
+        <li>Server ตรวจสอบว่า Auto Mode ON หรือไม่</li>
+        <li>เช็คว่าครบกำหนด Interval หรือยัง (จับเวลาจาก <code>lastRunAt</code>)</li>
+        <li>ถ้าครบ → วิเคราะห์ SMC ทุกคู่ที่เปิด → ส่ง Signal อัตโนมัติ → อัปเดต <code>lastRunAt</code></li>
+        <li>ถ้ายังไม่ครบ → ข้ามไป รอรอบถัดไป</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ====== CONFIRM ====== -->
+  <section id="confirm">
+    <h2>ยืนยัน / ยกเลิก</h2>
+    <p>ใน Manual Mode หลังจากวิเคราะห์เสร็จ จะมีปุ่มให้เลือก:</p>
+
+    <table>
+      <tr><th>ปุ่ม</th><th>การทำงาน</th></tr>
+      <tr><td>✅ ยืนยันส่ง Signal</td><td>ส่ง Signal ทั้งหมดที่มี Setup เข้าสู่ระบบ → EA ดึงไปเปิด Pending Order</td></tr>
+      <tr><td>❌ ยกเลิก</td><td>ยกเลิกผลการวิเคราะห์ครั้งนี้ ไม่ส่ง Signal ใดๆ</td></tr>
+    </table>
+
+    <div class="box green">
+      <strong>⚠️ หมายเหตุ:</strong> Auto Mode จะ <strong>ส่งอัตโนมัติทันที</strong> โดยไม่ต้องยืนยัน — ไม่มีขั้นตอนตรวจสอบก่อนส่ง
+    </div>
+  </section>
+
+  <!-- ====== GITHUB ACTIONS ====== -->
+  <section id="github">
+    <h2>GitHub Actions</h2>
+    <p>ระบบ Auto Signal ใช้ GitHub Actions เพื่อเรียก API เป็นระยะ</p>
+
+    <table>
+      <tr><th>รายการ</th><th>ค่า</th></tr>
+      <tr><td>Workflow</td><td><code>auto-signals-runner.yml</code></td></tr>
+      <tr><td>Cron</td><td><code>*/15 * * * *</code> (ทุก 15 นาที)</td></tr>
+      <tr><td>API Endpoint</td><td><code>POST /api/auto-signals/auto-run</code></td></tr>
+      <tr><td>Auth</td><td><code>X-AI-Key</code> header</td></tr>
+    </table>
+
+    <p>สามารถรันด้วยมือได้ที่ GitHub → Actions → <strong>Auto Signal Runner</strong> → <strong>Run workflow</strong></p>
+
+    <h3>Secrets ที่ต้องตั้งใน GitHub</h3>
+    <pre>
+AI_API_URL = https://forex-rouge-gamma.vercel.app
+AI_SIGNAL_API_KEY = (ค่าจากใน .env)
+    </pre>
+  </section>
+
+  <!-- ====== MONITOR ====== -->
+  <section id="monitor">
+    <h2>ตรวจสอบสถานะ</h2>
+    <p>วิธีตรวจสอบว่าระบบทำงานปกติ:</p>
+    <ul>
+      <li><strong>GitHub Actions:</strong> ไปที่ GitHub → Actions → Auto Signal Runner → ดูว่าล่าสุด Success หรือ Failed</li>
+      <li><strong>Admin Panel → Signals:</strong> ดูว่ามี Signal ใหม่เกิดขึ้นตาม Interval หรือไม่</li>
+      <li><strong>MT5 Expert Log:</strong> ดูว่า EA ดึง Signal มาวาง Pending Order หรือไม่</li>
+      <li><strong>test-signal.html:</strong> ใช้หน้า <code>test-signal.html</code> ดู Signal ที่ Active</li>
+    </ul>
+  </section>
+
+  <!-- ====== TROUBLESHOOT ====== -->
+  <section id="troubleshoot">
+    <h2>แก้ปัญหาเบื้องต้น</h2>
+
+    <div class="box">
+      <p><strong>❌ วิเคราะห์ไม่ได้ "OPENAI_API_KEY not set on server"</strong></p>
+      <p>ไปตั้ง <code>OPENAI_API_KEY</code> ที่ Vercel Dashboard → Settings → Environment Variables</p>
+    </div>
+
+    <div class="box">
+      <p><strong>❌ GitHub Actions Failed</strong></p>
+      <p>เช็คว่า <code>AI_API_URL</code> และ <code>AI_SIGNAL_API_KEY</code> อยู่ใน GitHub Secrets หรือไม่</p>
+    </div>
+
+    <div class="box">
+      <p><strong>❌ Auto Mode ไม่ส่ง Signal</strong></p>
+      <p>เช็ค 3 อย่าง: (1) Auto Mode ON? (2) มีคู่ที่เลือกหรือไม่? (3) Interval ครบกำหนดหรือยัง?</p>
+    </div>
+
+    <div class="box">
+      <p><strong>❌ วิเคราะห์แล้วไม่พบ SMC Setup</strong></p>
+      <p>เป็นเรื่องปกติ — SMC จะสร้างสัญญาณเมื่อเงื่อนไขครบเท่านั้น ถ้าตลาดไม่มีโครงสร้างชัดเจน AI จะไม่สร้างสัญญาณ</p>
+    </div>
+
+    <div class="box">
+      <p><strong>❌ MT5 ไม่เปิด Pending Order</strong></p>
+      <p>เช็ค: (1) EA อยู่บน Chart หรือไม่ (2) WebRequest URL ตั้งไว้หรือยัง (3) สัญญาณ status = active</p>
+    </div>
+  </section>
+
+  <p style="text-align:center;color:#555;font-size:0.75rem;margin-top:3rem">ATH Trader — Auto Signal Guide v1.0</p>
+</div>
+
+<script>
+// Sidebar active state on scroll
+const links = document.querySelectorAll('.sidebar a');
+const sections = document.querySelectorAll('.main section');
+
+function updateActive() {
+  let current = 'intro';
+  sections.forEach(s => {
+    const top = s.getBoundingClientRect().top;
+    if (top <= 150) current = s.id;
+  });
+  links.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+
+window.addEventListener('scroll', updateActive);
+window.addEventListener('load', updateActive);
+
+// Smooth scroll
+links.forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const id = a.getAttribute('href').substring(1);
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+
+</body>
+</html>
