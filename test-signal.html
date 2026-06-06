@@ -73,6 +73,17 @@
   </form>
 
   <div id="result"></div>
+
+  <hr style="border-color:#333;margin:1.5rem 0">
+
+  <h2 style="color:#d4a017;font-size:1.1rem;margin-bottom:0.5rem">ยกเลิก Signal</h2>
+  <p style="color:#888;font-size:0.8rem;margin-bottom:0.8rem">ใส่ ID แล้วกดยกเลิก — Signal จะถูกเปลี่ยนเป็น loss</p>
+  <div style="display:flex;gap:0.5rem">
+    <input type="number" id="cancelId" placeholder="Signal ID" style="flex:1">
+    <button class="btn btn-gold" id="cancelBtn" style="width:auto;padding:0.6rem 1.2rem;margin-top:0">ยกเลิก</button>
+  </div>
+  <div id="cancelResult" style="margin-top:0.5rem;padding:0.5rem;border-radius:6px;display:none;font-size:0.85rem"></div>
+
   <div class="api-url">API: /api/signals/ai</div>
 </div>
 
@@ -122,6 +133,32 @@ document.getElementById('signalForm').addEventListener('submit', async (e) => {
   result.style.display = 'block';
   btn.disabled = false;
   btn.textContent = 'ส่ง Signal';
+});
+
+document.getElementById('cancelBtn').addEventListener('click', async () => {
+  const id = document.getElementById('cancelId').value;
+  const cr = document.getElementById('cancelResult');
+  if (!id) { cr.className='error'; cr.textContent='กรุณาใส่ ID'; cr.style.display='block'; return; }
+
+  try {
+    const res = await fetch(API_BASE + '/api/signals/ai/evaluate', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'X-AI-Key': AI_KEY },
+      body: JSON.stringify({ id: parseInt(id), status: 'loss' }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      cr.className = 'success';
+      cr.textContent = '✔ Signal #' + id + ' ถูกยกเลิกแล้ว (loss)';
+    } else {
+      cr.className = 'error';
+      cr.textContent = '✖ ' + (data.error || 'ไม่พบ Signal นี้');
+    }
+  } catch (err) {
+    cr.className = 'error';
+    cr.textContent = '✖ Connection failed: ' + err.message;
+  }
+  cr.style.display = 'block';
 });
 </script>
 </body>
