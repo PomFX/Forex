@@ -564,8 +564,20 @@ const Admin = {
         }
       };
 
-      // Analyze
-      document.getElementById('autoAnalyzeBtn').onclick = () => this.runAutoAnalyze(settings);
+      // Analyze — saves current toggle state first, then analyzes
+      document.getElementById('autoAnalyzeBtn').onclick = async () => {
+        const newSettings = {};
+        for (const [catKey, cat] of Object.entries(settings)) {
+          newSettings[catKey] = cat.map(p => ({
+            ...p,
+            enabled: !!document.querySelector(`.auto-pair-cb[data-cat="${catKey}"][data-pair="${p.pair}"]`).checked,
+          }));
+        }
+        try {
+          await API.saveAutoSignalSettings(newSettings);
+        } catch (err) { /* ignore */ }
+        this.runAutoAnalyze(newSettings);
+      };
 
     } catch (err) {
       console.error('renderAutoSignal:', err);
