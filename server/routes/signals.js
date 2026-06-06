@@ -51,7 +51,7 @@ router.post('/ai', async (req, res) => {
   }
 });
 
-// MT5 endpoint — returns latest active signal for EA consumption
+// MT5 endpoint — returns all active signals for EA (multi-symbol)
 router.get('/mt5', async (req, res) => {
   try {
     const apiKey = req.headers['x-mt5-key'];
@@ -60,13 +60,9 @@ router.get('/mt5', async (req, res) => {
       return res.status(403).json({ error: 'Invalid MT5 key' });
     }
     const result = await pool.query(
-      "SELECT id, pair, direction, entry, tp1, tp2, tp3, sl, reason, created_at FROM signals WHERE status='active' ORDER BY created_at DESC LIMIT 1"
+      "SELECT id, pair, direction, entry, tp1, tp2, tp3, sl, reason, created_at FROM signals WHERE status='active' ORDER BY created_at DESC"
     );
-    if (result.rows.length === 0) {
-      return res.json(null);
-    }
-    const s = result.rows[0];
-    res.json({
+    res.json(result.rows.map(s => ({
       id: s.id,
       pair: s.pair,
       direction: s.direction,
@@ -77,7 +73,7 @@ router.get('/mt5', async (req, res) => {
       sl: parseFloat(s.sl) || 0,
       reason: s.reason || '',
       created_at: s.created_at
-    });
+    })));
   } catch (err) {
     console.error('MT5 signal error:', err.message);
     res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });

@@ -23,9 +23,9 @@ input bool     FILTER_FOREX       = true;      // รับ Signal Forex (EUR, G
 input bool     FILTER_CRYPTO      = true;      // รับ Signal Crypto (BTC, ETH, XRP)
 
 //--- Global Variables
-int       g_lastSignalId = 0;
+int       g_processedIds[50];
+int       g_processedCount = 0;
 bool      g_isBusy        = false;
-bool      g_pendingPlaced = false;
 
 //--- Symbol Cache
 string    g_cachedSymbol[2][20];
@@ -58,7 +58,7 @@ string FindSymbol(string pair)
     for(int j = 0; j < total; j++)
     {
        string sym = SymbolName(j, false);
-       if(StringFind(sym, base) >= 0 || StringFind(sym, "GOLD") >= 0 || StringFind(sym, "XAU") >= 0)
+        if(StringFind(sym, base) >= 0)
        {
           SymbolSelect(sym, true);
           if(SymbolInfoDouble(sym, SYMBOL_BID) > 0)
@@ -203,7 +203,38 @@ void CancelAllPending()
          }
       }
    }
-   g_pendingPlaced = false;
+}
+
+//+------------------------------------------------------------------+
+//| Cancel pending order for a specific symbol                        |
+//+------------------------------------------------------------------+
+void CancelPendingBySymbol(string symbol)
+{
+   int total = OrdersTotal();
+   for(int i = total - 1; i >= 0; i--)
+   {
+      ulong ticket = OrderGetTicket(i);
+      if(ticket > 0)
+      {
+         if(OrderGetInteger(ORDER_MAGIC) == MAGIC_NUMBER &&
+            OrderGetString(ORDER_SYMBOL) == symbol &&
+            (OrderGetInteger(ORDER_TYPE) == ORDER_TYPE_BUY_LIMIT  ||
+             OrderGetInteger(ORDER_TYPE) == ORDER_TYPE_SELL_LIMIT ||
+             OrderGetInteger(ORDER_TYPE) == ORDER_TYPE_BUY_STOP   ||
+             OrderGetInteger(ORDER_TYPE) == ORDER_TYPE_SELL_STOP))
+         {
+            MqlTradeRequest  request  = {};
+            MqlTradeResult   result   = {};
+            request.action   = TRADE_ACTION_REMOVE;
+            request.order    = ticket;
+
+            if(OrderSend(request, result))
+               Print("[SignalReceiver] Cancelled pending ", symbol, " #", ticket);
+            else
+               Print("[SignalReceiver] Failed to cancel ", symbol, " #", ticket, " retcode=", result.retcode);
+         }
+      }
+   }
 }
 
 //+------------------------------------------------------------------+
@@ -361,50 +392,49 @@ bool PlacePending(string symbol, string direction, double entry, double tp, doub
 }
 
 //+------------------------------------------------------------------+
-//| Process incoming signal                                           |
+//| Track processed signal IDs                                        |
 //+------------------------------------------------------------------+
-void ProcessSignal()
+bool IsProcessed(int signalId)
 {
-   if(g_isBusy) return;
-   g_isBusy = true;
-   Print("[SignalReceiver] Checking for new signal...");
+   for(int i = 0; i < g_processedCount; i++)
+      if(g_processedIds[i] == signalId) return true;
+   return false;
+}
 
-   string json;
-   if(!FetchSignal(json))
+void MarkProcessed(int signalId)
+{
+   if(g_processedCount >= 50)
    {
-      g_isBusy = false;
-      return;
+      for(int i = 0; i < 49; i++) g_processedIds[i] = g_processedIds[i+1];
+      g_processedCount = 49;
    }
+   g_processedIds[g_processedCount++] = signalId;
+}
 
-   // No active signal — cancel all pending orders
-   if(json == "null" || StringFind(json, "\"error\"") >= 0 || StringFind(json, "\"id\"") < 0)
-   {
-      if(g_pendingPlaced)
-      {
-         Print("[SignalReceiver] No active signal — cancelling all pending orders");
-         CancelAllPending();
-      }
-      g_isBusy = false;
-      return;
-   }
-
-   // Parse signal
-   int    signalId  = (int)StringToInteger(JsonExtract(json, "id"));
-   string pair      = JsonExtract(json, "pair");
-   string direction = JsonExtract(json, "direction");
-   double entry     = StringToDouble(JsonExtract(json, "entry"));
-   double tp1       = StringToDouble(JsonExtract(json, "tp1"));
-   double tp2       = StringToDouble(JsonExtract(json, "tp2"));
-   double tp3       = StringToDouble(JsonExtract(json, "tp3"));
-   double sl        = StringToDouble(JsonExtract(json, "sl"));
-   string reason    = JsonExtract(json, "reason");
+//+------------------------------------------------------------------+
+//| Process a single signal object                                    |
+//+------------------------------------------------------------------+
+void ProcessOneSignal(string obj)
+{
+   int    signalId  = (int)StringToInteger(JsonExtract(obj, "id"));
+   string pair      = JsonExtract(obj, "pair");
+   string direction = JsonExtract(obj, "direction");
+   double entry     = StringToDouble(JsonExtract(obj, "entry"));
+   double tp1       = StringToDouble(JsonExtract(obj, "tp1"));
+   double tp2       = StringToDouble(JsonExtract(obj, "tp2"));
+   double tp3       = StringToDouble(JsonExtract(obj, "tp3"));
+   double sl        = StringToDouble(JsonExtract(obj, "sl"));
+   string reason    = JsonExtract(obj, "reason");
 
    if(signalId == 0 || pair == "" || direction == "")
    {
-      Print("[SignalReceiver] Incomplete signal data");
-      g_isBusy = false;
+      Print("[SignalReceiver] Incomplete signal data — skipping");
       return;
    }
+
+   // Already processed this signal
+   if(IsProcessed(signalId))
+      return;
 
    // Check category filter
    string category = GetPairCategory(pair);
@@ -415,32 +445,21 @@ void ProcessSignal()
    if(!allowed)
    {
       Print("[SignalReceiver] Skipped ", pair, " (", category, " filter disabled)");
-      g_isBusy = false;
       return;
    }
 
-   // Already processed this signal
-   if(signalId == g_lastSignalId && g_pendingPlaced)
-   {
-      g_isBusy = false;
-      return;
-   }
-
-   // Match signal pair to chart symbol
+   // Match signal pair to broker symbol
    string symbol = FindSymbol(pair);
    if(symbol == "")
    {
       Print("[SignalReceiver] Symbol not found for: ", pair);
-      g_isBusy = false;
       return;
    }
 
-   // Only process if signal matches this chart's symbol
-   string chartSymbol = Symbol();
-   if(symbol != chartSymbol)
+   // Check that symbol has live prices
+   if(SymbolInfoDouble(symbol, SYMBOL_BID) <= 0 || SymbolInfoDouble(symbol, SYMBOL_ASK) <= 0)
    {
-      Print("[SignalReceiver] Skipped ", pair, " (chart is ", chartSymbol, ", not ", symbol, ")");
-      g_isBusy = false;
+      Print("[SignalReceiver] No market prices for ", symbol, " — skipping");
       return;
    }
 
@@ -462,18 +481,61 @@ void ProcessSignal()
       case 3: tp = tp3; break;
    }
 
-   // Cancel all existing pending orders first
-   if(g_pendingPlaced)
-   {
-      Print("[SignalReceiver] New signal — cancelling previous pending orders");
-      CancelAllPending();
-   }
+   // Cancel existing pending for this symbol only
+   Print("[SignalReceiver] New signal for ", symbol, " — cancelling previous pending for this symbol");
+   CancelPendingBySymbol(symbol);
 
    // Place pending order
    if(PlacePending(symbol, direction, entry, tp, sl, signalId))
+      MarkProcessed(signalId);
+}
+
+//+------------------------------------------------------------------+
+//| Process all signals from API                                      |
+//+------------------------------------------------------------------+
+void ProcessSignal()
+{
+   if(g_isBusy) return;
+   g_isBusy = true;
+   Print("[SignalReceiver] Checking for new signals...");
+
+   string json;
+   if(!FetchSignal(json))
    {
-      g_lastSignalId = signalId;
-      g_pendingPlaced = true;
+      g_isBusy = false;
+      return;
+   }
+
+   // No active signals or error — keep existing pending orders
+   if(json == "[]" || json == "null" || StringFind(json, "\"error\"") >= 0)
+   {
+      g_isBusy = false;
+      return;
+   }
+
+   // Parse JSON array — extract each object
+   int pos = 0;
+   while(pos < StringLen(json))
+   {
+      // Find opening brace
+      int start = StringFind(json, "{", pos);
+      if(start < 0) break;
+
+      // Find matching closing brace
+      int depth = 0;
+      int end = start;
+      for(int i = start; i < StringLen(json); i++)
+      {
+         ushort ch = StringGetCharacter(json, i);
+         if(ch == '{') depth++;
+         if(ch == '}') depth--;
+         if(depth == 0) { end = i; break; }
+      }
+
+      string obj = StringSubstr(json, start, end - start + 1);
+      pos = end + 1;
+
+      ProcessOneSignal(obj);
    }
 
    g_isBusy = false;
