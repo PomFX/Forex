@@ -60,7 +60,7 @@ router.get('/mt5', async (req, res) => {
       return res.status(403).json({ error: 'Invalid MT5 key' });
     }
     const result = await pool.query(
-      "SELECT id, pair, direction, entry, tp1, tp2, tp3, sl, reason, created_at FROM signals WHERE pair='XAU/USD' AND status='active' ORDER BY created_at DESC LIMIT 1"
+      "SELECT id, pair, direction, entry, tp1, tp2, tp3, sl, reason, created_at FROM signals WHERE status='active' ORDER BY created_at DESC LIMIT 1"
     );
     if (result.rows.length === 0) {
       return res.json(null);

@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "ATH Trader"
 #property version   "2.0"
-#property description "Gold-only Pending Order EA — XAU/USD signals from API"
+#property description "Multi-symbol Pending Order EA — any active signal from API"
 #property description "Docs: https://forex-rouge-gamma.vercel.app"
 
 //--- Input Parameters
@@ -445,7 +445,7 @@ void ProcessSignal()
 int OnInit()
 {
    Print("══════════════════════════════════════════════");
-   Print("[SignalReceiver v2.0] GOLD-ONLY PENDING ORDER EA");
+   Print("[SignalReceiver v2.0] MULTI-SYMBOL PENDING ORDER EA");
    Print("  API URL  : ", API_URL);
    Print("  Interval : ", POLL_INTERVAL, " seconds");
    Print("  Lot Size : ", LOT_SIZE);
