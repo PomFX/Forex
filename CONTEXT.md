@@ -39,8 +39,8 @@
 | Detail | Value |
 |--------|-------|
 | **Workflow** | `ai-signals.yml` — 3 jobs (generate → evaluate → article) |
-| **Frequency** | ทุก 1 ชั่วโมง (ตรวจสอบ SMC setup รายชั่วโมง) |
-| **Cron** | `0 * * * *` (UTC) |
+| **Frequency** | ทุก 30 นาที |
+| **Cron** | `*/30 * * * *` (UTC) |
 | **Model** | `gpt-4o-mini` (OpenAI) |
 | **Manual** | `workflow_dispatch` — กดรันเองได้ที่ GitHub Actions |
 
