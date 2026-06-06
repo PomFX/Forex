@@ -1,0 +1,21 @@
+name: Auto Signal Runner
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  auto-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Auto-Run API
+        run: |
+          RESPONSE=$(curl -s -X POST "${{ secrets.AI_API_URL }}/api/auto-signals/auto-run" \
+            -H "X-AI-Key: ${{ secrets.AI_SIGNAL_API_KEY }}" \
+            -H "Content-Type: application/json")
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -q '"error"'; then
+            echo "Error occurred"
+            exit 1
+          fi

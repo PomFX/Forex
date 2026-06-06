@@ -443,12 +443,35 @@
           <!-- Auto Signal Settings -->
           <div class="admin-page-content" id="admin-autosignal">
             <h1>Auto Signal — SMC M15</h1>
-            <p style="color:#888;margin-bottom:1rem;font-size:0.85rem">เลือกคู่เงินที่ต้องการวิเคราะห์ SMC (Smart Money Concepts) กรอบ M15 แล้วกดวิเคราะห์</p>
+            <p style="color:#888;margin-bottom:1rem;font-size:0.85rem">เลือกคู่เงินที่ต้องการวิเคราะห์ SMC (Smart Money Concepts) กรอบ M15</p>
+
+            <!-- Auto Mode Controls -->
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:1.2rem">
+              <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+                <div style="display:flex;align-items:center;gap:0.5rem">
+                  <label class="switch"><input type="checkbox" id="autoModeToggle"><span class="slider"></span></label>
+                  <span style="font-weight:600;font-size:0.9rem">โหมด Auto</span>
+                  <span id="autoModeStatus" style="font-size:0.8rem;color:var(--text-muted)">ปิด</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem">
+                  <label style="font-size:0.85rem;color:var(--text-muted)">ส่งทุก</label>
+                  <select id="autoIntervalSelect" style="width:auto">
+                    <option value="15">15 นาที</option>
+                    <option value="30">30 นาที</option>
+                    <option value="60" selected>1 ชั่วโมง</option>
+                    <option value="120">2 ชั่วโมง</option>
+                    <option value="180">3 ชั่วโมง</option>
+                    <option value="240">4 ชั่วโมง</option>
+                  </select>
+                </div>
+              </div>
+              <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem">โหมด Auto = ระบบวิเคราะห์และส่ง Signal อัตโนมัติตามช่วงเวลาที่กำหนด (ต้องตั้งค่า GitHub Actions)</p>
+            </div>
 
             <div id="autoSignalPairs"></div>
 
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem">
-              <button class="btn btn-gold" id="autoSaveBtn">บันทึกการตั้งค่า</button>
+              <button class="btn btn-gold" id="autoSaveBtn">💾 บันทึกการตั้งค่า</button>
               <button class="btn btn-outline" id="autoAnalyzeBtn">🔍 วิเคราะห์ SMC</button>
             </div>
 

@@ -522,9 +522,19 @@ const Admin = {
   async renderAutoSignal() {
     try {
       const settings = await API.getAutoSignalSettings();
+
+      // Auto mode controls
+      document.getElementById('autoModeToggle').checked = settings.autoMode || false;
+      document.getElementById('autoIntervalSelect').value = String(settings.interval || 60);
+      this.updateAutoModeUI();
+
+      document.getElementById('autoModeToggle').addEventListener('change', () => this.updateAutoModeUI());
+      document.getElementById('autoIntervalSelect').addEventListener('change', () => this.updateAutoModeUI());
+
       const container = document.getElementById('autoSignalPairs');
       let html = '';
       for (const [catKey, cat] of Object.entries(settings)) {
+        if (!Array.isArray(cat)) continue;
         const catLabel = { commodities: '🏆 Commodities', forex: '💱 Forex', crypto: '🪙 Crypto' }[catKey] || catKey;
         html += `<div style="margin-bottom:1.2rem">
           <h3 style="color:#d4a017;font-size:1rem;margin-bottom:0.5rem">${catLabel}</h3>`;
@@ -539,7 +549,6 @@ const Admin = {
       }
       container.innerHTML = html;
 
-      // Toggle visual update
       container.querySelectorAll('.auto-pair-cb').forEach(cb => {
         cb.addEventListener('change', () => {
           cb.closest('.pair-toggle').classList.toggle('on', cb.checked);
@@ -547,32 +556,29 @@ const Admin = {
         });
       });
 
-      // Save
-      document.getElementById('autoSaveBtn').onclick = async () => {
-        const newSettings = {};
+      const collectSettings = () => {
+        const out = { autoMode: document.getElementById('autoModeToggle').checked, interval: parseInt(document.getElementById('autoIntervalSelect').value) };
         for (const [catKey, cat] of Object.entries(settings)) {
-          newSettings[catKey] = cat.map(p => ({
+          if (!Array.isArray(cat)) continue;
+          out[catKey] = cat.map(p => ({
             ...p,
             enabled: !!document.querySelector(`.auto-pair-cb[data-cat="${catKey}"][data-pair="${p.pair}"]`).checked,
           }));
         }
+        return out;
+      };
+
+      document.getElementById('autoSaveBtn').onclick = async () => {
         try {
-          await API.saveAutoSignalSettings(newSettings);
+          await API.saveAutoSignalSettings(collectSettings());
           App.toast('บันทึกการตั้งค่าแล้ว');
         } catch (err) {
           App.toast('บันทึกผิดพลาด', true);
         }
       };
 
-      // Analyze — saves current toggle state first, then analyzes
       document.getElementById('autoAnalyzeBtn').onclick = async () => {
-        const newSettings = {};
-        for (const [catKey, cat] of Object.entries(settings)) {
-          newSettings[catKey] = cat.map(p => ({
-            ...p,
-            enabled: !!document.querySelector(`.auto-pair-cb[data-cat="${catKey}"][data-pair="${p.pair}"]`).checked,
-          }));
-        }
+        const newSettings = collectSettings();
         try {
           await API.saveAutoSignalSettings(newSettings);
         } catch (err) { /* ignore */ }
@@ -583,6 +589,12 @@ const Admin = {
       console.error('renderAutoSignal:', err);
       document.getElementById('autoSignalPairs').innerHTML = '<p style="color:#f88">โหลดข้อมูลล้มเหลว</p>';
     }
+  },
+
+  updateAutoModeUI() {
+    const on = document.getElementById('autoModeToggle').checked;
+    document.getElementById('autoModeStatus').textContent = on ? 'เปิด' : 'ปิด';
+    document.getElementById('autoModeStatus').style.color = on ? 'var(--gold)' : 'var(--text-muted)';
   },
 
   async runAutoAnalyze(settings) {
