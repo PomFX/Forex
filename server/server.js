@@ -31,6 +31,7 @@ app.use('/api/upload', require('./routes/upload'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/market', require('./routes/market'));
 app.use('/api/line', require('./routes/line'));
+app.use('/api/auto-signals', require('./routes/auto-signals'));
 
 // SPA fallback
 app.get('*', (req, res) => {

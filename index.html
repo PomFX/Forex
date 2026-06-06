@@ -257,8 +257,9 @@
             <a href="#/admin/articles" class="admin-link" data-page="articles">บทความ</a>
             <a href="#/admin/brokers" class="admin-link" data-page="brokers">โบรกเกอร์</a>
             <a href="#/admin/contact" class="admin-link" data-page="contact">ติดต่อ</a>
-            <a href="#/admin/banner" class="admin-link" data-page="banner">แบนเนอร์</a>
-            <a href="#/" class="admin-link admin-logout">กลับหน้าบ้าน</a>
+    <a href="#/admin/banner" class="admin-link" data-page="banner">แบนเนอร์</a>
+    <a href="#/admin/autosignal" class="admin-link" data-page="autosignal">Auto Signal</a>
+    <a href="#/" class="admin-link admin-logout">กลับหน้าบ้าน</a>
           </nav>
         </aside>
         <main class="admin-main" id="adminMain">
@@ -437,6 +438,28 @@
               <div class="form-group"><label>โค้ด HTML แบนเนอร์ <span id="bannerHtmlLabel">(ขวา)</span></label><textarea id="bannerHtmlInput" rows="6" placeholder="&lt;a href=&quot;...&quot;&gt;&lt;img src=&quot;...&quot;&gt;&lt;/a&gt;"></textarea></div>
               <button type="submit" class="btn btn-gold">บันทึกแบนเนอร์</button>
             </form>
+          </div>
+
+          <!-- Auto Signal Settings -->
+          <div class="admin-page-content" id="admin-autosignal">
+            <h1>Auto Signal — SMC M15</h1>
+            <p style="color:#888;margin-bottom:1rem;font-size:0.85rem">เลือกคู่เงินที่ต้องการวิเคราะห์ SMC (Smart Money Concepts) กรอบ M15 แล้วกดวิเคราะห์</p>
+
+            <div id="autoSignalPairs"></div>
+
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem">
+              <button class="btn btn-gold" id="autoSaveBtn">บันทึกการตั้งค่า</button>
+              <button class="btn btn-outline" id="autoAnalyzeBtn">🔍 วิเคราะห์ SMC</button>
+            </div>
+
+            <div id="autoAnalyzeResult" style="display:none;margin-top:1.5rem">
+              <h2 style="color:#d4a017;font-size:1.1rem;margin-bottom:0.8rem">ผลการวิเคราะห์</h2>
+              <div id="autoAnalyzeBody"></div>
+              <div style="display:flex;gap:0.5rem;margin-top:1rem" id="autoConfirmRow" style="display:none">
+                <button class="btn btn-gold" id="autoConfirmBtn">✅ ยืนยันส่ง Signal</button>
+                <button class="btn btn-outline" id="autoCancelBtn">❌ ยกเลิก</button>
+              </div>
+            </div>
           </div>
         </main>
       </div>

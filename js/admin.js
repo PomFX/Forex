@@ -515,5 +515,137 @@ const Admin = {
       document.getElementById('bannerEnabled').checked = data.enabled || false;
       document.getElementById('bannerHtmlInput').value = data.html || '';
     } catch (err) { console.error('renderBannerSettings:', err); }
-  }
+  },
+
+  // ====== AUTO SIGNAL ======
+
+  async renderAutoSignal() {
+    try {
+      const settings = await API.getAutoSignalSettings();
+      const container = document.getElementById('autoSignalPairs');
+      let html = '';
+      for (const [catKey, cat] of Object.entries(settings)) {
+        const catLabel = { commodities: '🏆 Commodities', forex: '💱 Forex', crypto: '🪙 Crypto' }[catKey] || catKey;
+        html += `<div style="margin-bottom:1.2rem">
+          <h3 style="color:#d4a017;font-size:1rem;margin-bottom:0.5rem">${catLabel}</h3>`;
+        for (const p of cat) {
+          html += `<label class="pair-toggle ${p.enabled ? 'on' : ''}">
+            <input type="checkbox" class="auto-pair-cb" data-cat="${catKey}" data-pair="${p.pair}" ${p.enabled ? 'checked' : ''}>
+            <span class="pair-name">${p.label}</span>
+            <span class="pair-status">${p.enabled ? '✅ ส่ง' : '⛔ ไม่ส่ง'}</span>
+          </label>`;
+        }
+        html += `</div>`;
+      }
+      container.innerHTML = html;
+
+      // Toggle visual update
+      container.querySelectorAll('.auto-pair-cb').forEach(cb => {
+        cb.addEventListener('change', () => {
+          cb.closest('.pair-toggle').classList.toggle('on', cb.checked);
+          cb.closest('.pair-toggle').querySelector('.pair-status').textContent = cb.checked ? '✅ ส่ง' : '⛔ ไม่ส่ง';
+        });
+      });
+
+      // Save
+      document.getElementById('autoSaveBtn').onclick = async () => {
+        const newSettings = {};
+        for (const [catKey, cat] of Object.entries(settings)) {
+          newSettings[catKey] = cat.map(p => ({
+            ...p,
+            enabled: !!document.querySelector(`.auto-pair-cb[data-cat="${catKey}"][data-pair="${p.pair}"]`).checked,
+          }));
+        }
+        try {
+          await API.saveAutoSignalSettings(newSettings);
+          App.toast('บันทึกการตั้งค่าแล้ว');
+        } catch (err) {
+          App.toast('บันทึกผิดพลาด', true);
+        }
+      };
+
+      // Analyze
+      document.getElementById('autoAnalyzeBtn').onclick = () => this.runAutoAnalyze(settings);
+
+    } catch (err) {
+      console.error('renderAutoSignal:', err);
+      document.getElementById('autoSignalPairs').innerHTML = '<p style="color:#f88">โหลดข้อมูลล้มเหลว</p>';
+    }
+  },
+
+  async runAutoAnalyze(settings) {
+    const enabled = Object.values(settings).flat().filter(p => p.enabled);
+    if (enabled.length === 0) {
+      App.toast('กรุณาเลือกคู่เงินที่ต้องการวิเคราะห์ก่อน', true);
+      return;
+    }
+
+    const resultDiv = document.getElementById('autoAnalyzeResult');
+    const bodyDiv = document.getElementById('autoAnalyzeBody');
+    const confirmRow = document.getElementById('autoConfirmRow');
+    resultDiv.style.display = 'none';
+
+    App.toast('กำลังวิเคราะห์ SMC... โปรดรอ');
+
+    try {
+      const res = await API.analyzeAutoSignals();
+      const { results, analyzedAt } = res;
+      resultDiv.style.display = 'block';
+
+      const hasSetup = results.filter(r => r.hasSetup);
+      let html = `<p style="color:#888;font-size:0.85rem;margin-bottom:0.8rem">วิเคราะห์เมื่อ: ${new Date(analyzedAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })}</p>`;
+
+      for (const r of results) {
+        if (r.hasSetup) {
+          html += `<div class="signal-item" style="border-color:#2a5a2a">
+            <div class="info">
+              <span class="pair" style="color:#d4a017">${r.pair}</span>
+              <span class="dir ${r.direction === 'BUY' ? 'buy' : 'sell'}">${r.direction}</span>
+              <span style="color:#fff">@${r.entry}</span>
+              <div class="detail">
+                TP1: ${r.tp1||'-'} | TP2: ${r.tp2||'-'} | TP3: ${r.tp3||'-'} | SL: ${r.sl||'-'}
+                <br><span style="color:#aaa">${r.reason||''}</span>
+              </div>
+            </div>
+          </div>`;
+        } else {
+          html += `<div class="signal-item" style="border-color:#333;opacity:0.6">
+            <div class="info">
+              <span style="color:#888">${r.pair}</span>
+              <span style="color:#666">— ไม่มี SMC Setup</span>
+              ${r.error ? `<div class="detail" style="color:#f88">Error: ${r.error}</div>` : ''}
+            </div>
+          </div>`;
+        }
+      }
+
+      bodyDiv.innerHTML = html;
+
+      if (hasSetup.length > 0) {
+        confirmRow.style.display = 'flex';
+        const pendingSignals = hasSetup;
+        document.getElementById('autoConfirmBtn').onclick = async () => {
+          try {
+            await API.confirmAutoSignals(pendingSignals);
+            App.toast(`✅ ส่ง Signal แล้ว ${pendingSignals.length} รายการ`);
+            confirmRow.style.display = 'none';
+            bodyDiv.innerHTML = '<p style="color:#8f8">✅ ส่ง Signal เรียบร้อยแล้ว</p>';
+            if (typeof Admin.renderSignals === 'function') Admin.renderSignals();
+          } catch (err) {
+            App.toast('ส่ง Signal ล้มเหลว', true);
+          }
+        };
+        document.getElementById('autoCancelBtn').onclick = () => {
+          confirmRow.style.display = 'none';
+          bodyDiv.innerHTML = '<p style="color:#888">ยกเลิกการส่งแล้ว</p>';
+        };
+      } else {
+        confirmRow.style.display = 'none';
+      }
+    } catch (err) {
+      resultDiv.style.display = 'block';
+      bodyDiv.innerHTML = `<p style="color:#f88">วิเคราะห์ล้มเหลว: ${err.message}</p>`;
+      App.toast('วิเคราะห์ล้มเหลว', true);
+    }
+  },
 };

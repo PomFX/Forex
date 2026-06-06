@@ -699,3 +699,16 @@ img { max-width: 100%; height: auto; }
 .slider::before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; bottom: 3px; background: var(--text-muted); border-radius: 50%; transition: var(--transition); }
 .switch input:checked + .slider { background: var(--gold); }
 .switch input:checked + .slider::before { background: #000; transform: translateX(22px); }
+
+/* ====== AUTO SIGNAL PAIR TOGGLE ====== */
+.pair-toggle {
+  display:flex; align-items:center; gap:0.5rem;
+  padding:0.6rem 0.8rem; margin-bottom:0.3rem;
+  border:1px solid var(--border); border-radius:var(--radius);
+  cursor:pointer; transition:var(--transition);
+  background:var(--bg-input);
+}
+.pair-toggle.on { border-color:var(--gold-dark); background:rgba(212,160,23,0.08); }
+.pair-toggle .pair-name { flex:1; font-size:0.9rem; }
+.pair-toggle .pair-status { font-size:0.75rem; color:var(--text-muted); }
+.pair-toggle.on .pair-status { color:var(--gold); }

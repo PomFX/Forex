@@ -59,6 +59,7 @@ const Router = {
         case 'brokers': await Admin.renderBrokers(); break;
         case 'contact': await Admin.renderContactSettings(); break;
         case 'banner': await Admin.renderBannerSettings(); break;
+        case 'autosignal': await Admin.renderAutoSignal(); break;
         default: await Admin.showDashboard(); break;
       }
       return;

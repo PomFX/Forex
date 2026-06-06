@@ -146,4 +146,21 @@ const API = {
   async updateBanner(data, side) {
     return this._fetch('/settings/banner?side=' + (side || 'right'), { method: 'PUT', body: JSON.stringify(data) });
   },
+
+  // Auto Signal
+  async getAutoSignalSettings() {
+    return this._fetch('/auto-signals/settings');
+  },
+
+  async saveAutoSignalSettings(data) {
+    return this._fetch('/auto-signals/settings', { method: 'PUT', body: JSON.stringify(data) });
+  },
+
+  async analyzeAutoSignals() {
+    return this._fetch('/auto-signals/analyze', { method: 'POST' });
+  },
+
+  async confirmAutoSignals(signals) {
+    return this._fetch('/auto-signals/confirm', { method: 'POST', body: JSON.stringify({ signals }) });
+  },
 };
