@@ -426,9 +426,27 @@ void ProcessSignal()
       return;
    }
 
+   // Match signal pair to chart symbol
+   string symbol = FindSymbol(pair);
+   if(symbol == "")
+   {
+      Print("[SignalReceiver] Symbol not found for: ", pair);
+      g_isBusy = false;
+      return;
+   }
+
+   // Only process if signal matches this chart's symbol
+   string chartSymbol = Symbol();
+   if(symbol != chartSymbol)
+   {
+      Print("[SignalReceiver] Skipped ", pair, " (chart is ", chartSymbol, ", not ", symbol, ")");
+      g_isBusy = false;
+      return;
+   }
+
    Print("══════════════════════════════════════════════");
-   Print("[SignalReceiver] NEW GOLD SIGNAL #", signalId);
-   Print("  Pair     : ", pair);
+   Print("[SignalReceiver] NEW SIGNAL #", signalId);
+   Print("  Pair     : ", pair, " -> ", symbol);
    Print("  Direction: ", direction);
    Print("  Entry    : ", entry);
    Print("  TP1/2/3  : ", tp1, " / ", tp2, " / ", tp3);
@@ -449,15 +467,6 @@ void ProcessSignal()
    {
       Print("[SignalReceiver] New signal — cancelling previous pending orders");
       CancelAllPending();
-   }
-
-   // Find MT5 symbol
-   string symbol = FindSymbol(pair);
-   if(symbol == "")
-   {
-      Print("[SignalReceiver] Symbol not found for: ", pair);
-      g_isBusy = false;
-      return;
    }
 
    // Place pending order
