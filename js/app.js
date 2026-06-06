@@ -215,8 +215,8 @@ const App = {
         }
         <div class="article-card-body">
           <h3>${escHtml(a.title)}</h3>
+          <div class="meta" style="margin-bottom:0.5rem">${date}</div>
           <p>${escHtml(a.content)}</p>
-          <div class="meta">${date}</div>
         </div>
       </div>
     `;
