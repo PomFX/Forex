@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>คู่มือ MT5 EA — ATH Trader</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:-apple-system,'Segoe UI',sans-serif;
+    background:#0d0d0d; color:#e0e0e0;
+    display:flex; min-height:100vh;
+  }
+  .sidebar {
+    width:260px; background:#151515;
+    border-right:1px solid #222;
+    padding:1.5rem 0; position:sticky; top:0; height:100vh; overflow-y:auto;
+    flex-shrink:0;
+  }
+  .sidebar h2 {
+    color:#d4a017; font-size:1rem; text-align:center;
+    padding:0 1rem 1rem; border-bottom:1px solid #222; margin-bottom:0.5rem;
+  }
+  .sidebar a {
+    display:block; padding:0.6rem 1.2rem;
+    color:#999; text-decoration:none; font-size:0.85rem;
+    transition:0.2s; border-left:3px solid transparent;
+  }
+  .sidebar a:hover { color:#d4a017; background:rgba(212,160,23,0.05); }
+  .sidebar a.active { color:#d4a017; border-left-color:#d4a017; background:rgba(212,160,23,0.08); }
+  .sidebar .cat { color:#666; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; padding:1rem 1.2rem 0.3rem; }
+  .main { flex:1; padding:2rem 2.5rem; max-width:900px; }
+  .main h1 { color:#d4a017; font-size:1.6rem; margin-bottom:0.3rem; }
+  .main .sub { color:#888; font-size:0.9rem; margin-bottom:2rem; }
+  .main section { margin-bottom:2.5rem; }
+  .main h2 { color:#d4a017; font-size:1.2rem; margin-bottom:1rem; padding-bottom:0.3rem; border-bottom:1px solid #222; }
+  .main h3 { color:#f0e6c0; font-size:1rem; margin:1.2rem 0 0.5rem; }
+  .main p, .main li { font-size:0.9rem; line-height:1.7; color:#ccc; }
+  .main ul, .main ol { padding-left:1.2rem; }
+  .main li { margin-bottom:0.3rem; }
+  .main code {
+    background:#1a1a1a; border:1px solid #333; border-radius:4px;
+    padding:0.15rem 0.4rem; font-size:0.8rem; color:#d4a017;
+  }
+  .main pre {
+    background:#111; border:1px solid #333; border-radius:6px;
+    padding:1rem; font-size:0.8rem; color:#aaa; overflow-x:auto; margin:0.5rem 0;
+  }
+  .box {
+    background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:1rem; margin:0.8rem 0;
+  }
+  .box.gold { border-color:#d4a017; background:rgba(212,160,23,0.05); }
+  .box.green { border-color:#2a5a2a; background:rgba(34,139,34,0.05); }
+  .box.red { border-color:#5a2a2a; background:rgba(255,0,0,0.03); }
+  .badge { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.7rem; font-weight:600; }
+  .badge.gold { background:#d4a017; color:#111; }
+  .badge.green { background:#2a5a2a; color:#8f8; }
+  .badge.gray { background:#333; color:#aaa; }
+  .badge.red { background:#5a2a2a; color:#f88; }
+  table { width:100%; border-collapse:collapse; font-size:0.85rem; margin:0.5rem 0; }
+  th, td { padding:0.5rem 0.8rem; text-align:left; border-bottom:1px solid #222; }
+  th { color:#d4a017; font-weight:600; }
+  td { color:#ccc; }
+  img { max-width:100%; border-radius:6px; border:1px solid #333; margin:0.5rem 0; }
+  .step { display:flex; gap:1rem; align-items:flex-start; margin:1rem 0; }
+  .step-num { background:#d4a017; color:#111; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0; }
+  .step-content { flex:1; }
+  .step-content h3 { margin-top:0; }
+  @media (max-width:768px) {
+    body { flex-direction:column; }
+    .sidebar { width:100%; height:auto; position:static; border-right:none; border-bottom:1px solid #222; padding:0.8rem; }
+    .sidebar a { padding:0.4rem 0.8rem; font-size:0.8rem; }
+    .main { padding:1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <h2>📘 คู่มือ MT5 EA</h2>
+
+  <div class="cat">เริ่มต้น</div>
+  <a href="#intro" class="active">แนะนำ EA</a>
+  <a href="#requirements">สิ่งที่ต้องเตรียม</a>
+  <a href="#install">ติดตั้ง EA</a>
+
+  <div class="cat">การใช้งาน</div>
+  <a href="#attach">แนบ EA เข้า Chart</a>
+  <a href="#inputs">ตั้งค่า Inputs</a>
+  <a href="#symbol">Symbol ที่รองรับ</a>
+
+  <div class="cat">การทำงาน</div>
+  <a href="#how-it-works">ระบบทำงานอย่างไร</a>
+  <a href="#pending-order">Pending Order</a>
+  <a href="#hotkeys">ปุ่มลัด (Hotkeys)</a>
+  <a href="#logs">อ่าน Log</a>
+
+  <div class="cat">การเชื่อมต่อ</div>
+  <a href="#webrequest">ตั้งค่า WebRequest</a>
+  <a href="#admin">Run as Administrator</a>
+  <a href="#vps">ใช้งานบน VPS</a>
+
+  <div class="cat">แก้ปัญหา</div>
+  <a href="#troubleshoot">ปัญหาที่พบบ่อย</a>
+  <a href="#errors">Error Codes</a>
+  <a href="#support">ติดต่อช่วยเหลือ</a>
+</nav>
+
+<div class="main">
+
+  <h1>📡 คู่มือการใช้งาน EA SignalReceiver</h1>
+  <p class="sub">รับสัญญาณเทรดอัตโนมัติ — ATH Trader MT5 Integration</p>
+
+  <!-- ====== INTRO ====== -->
+  <section id="intro">
+    <h2>แนะนำ EA</h2>
+    <p><strong>SignalReceiver</strong> เป็น Expert Advisor (EA) สำหรับ MetaTrader 5 ที่พัฒนาโดย ATH Trader เพื่อรับสัญญาณเทรด (Trading Signals) จากระบบของเราแล้วเปิด <strong>Pending Order</strong> อัตโนมัติ</p>
+
+    <div class="box gold">
+      <div class="badge gold" style="margin-bottom:0.3rem">คุณสมบัติ</div>
+      <ul>
+        <li>รับสัญญาณจาก API อัตโนมัติทุกๆ 60 วินาที</li>
+        <li>รองรับ Symbol หลากหลาย: XAU/USD, Forex, Crypto</li>
+        <li>เลือกรับเฉพาะหมวดที่ต้องการ (Commodities/Forex/Crypto)</li>
+        <li>เลือก TP Mode (TP1/TP2/TP3)</li>
+        <li>คำนวณ Lot ตามความเสี่ยง (Risk %)</li>
+        <li>ตรวจจับ Symbol อัตโนมัติ ไม่ว่าจะชื่ออะไร (.m, .pro, GOLD ฯลฯ)</li>
+        <li>ยกเลิก Pending Order เก่าเมื่อมีสัญญาณใหม่</li>
+        <li>ปุ่มลัด F5 = ตรวจสัญญาณทันที, F6 = ยกเลิกทั้งหมด</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ====== REQUIREMENTS ====== -->
+  <section id="requirements">
+    <h2>สิ่งที่ต้องเตรียม</h2>
+    <table>
+      <tr><th>รายการ</th><th>รายละเอียด</th></tr>
+      <tr><td>MetaTrader 5</td><td>ติดตั้ง MT5 จาก Broker ที่คุณใช้ (หรือ MT5 ทั่วไป)</td></tr>
+      <tr><td>Expert Advisors</td><td>ต้องเปิดใช้งาน EA: <code>Tools → Options → Expert Advisors → Allow Automated Trading</code></td></tr>
+      <tr><td>WebRequest</td><td>อนุญาตให้ EA เชื่อมต่อ API ได้ (ตั้งค่าด้านล่าง)</td></tr>
+      <tr><td>อินเทอร์เน็ต</td><td>ต้องการการเชื่อมต่อที่เสถียร (แนะนำ VPS)</td></tr>
+      <tr><td>สิทธิ์ Admin</td><td>แนะนำ Run as Administrator เพื่อป้องกัน Error 5203</td></tr>
+    </table>
+  </section>
+
+  <!-- ====== INSTALL ====== -->
+  <section id="install">
+    <h2>ติดตั้ง EA</h2>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>ดาวน์โหลดไฟล์ EA</h3>
+        <p>ดาวน์โหลดไฟล์ <code>SignalReceiver.mq5</code> จากลิงก์ที่ Admin จัดเตรียมไว้</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>เปิด MT5 Data Folder</h3>
+        <p>ใน MT5 → <code>File → Open Data Folder</code> → ไปที่ <code>MQL5 → Experts</code></p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>วางไฟล์ EA</h3>
+        <p>วางไฟล์ <code>SignalReceiver.mq5</code> ในโฟลเดอร์ <code>MQL5/Experts/</code></p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Compile EA</h3>
+        <p>เปิด MetaEditor (F4) หรือใน MT5 → <code>Tools → MetaQuotes Language Editor</code> → เปิดไฟล์ → กด F7 (Compile)</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h3>ตั้งค่า WebRequest</h3>
+        <p><code>Tools → Options → Expert Advisors</code> → ติ๊ก Allow WebRequest + เพิ่ม URL (ดูหัวข้อถัดไป)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== ATTACH ====== -->
+  <section id="attach">
+    <h2>แนบ EA เข้า Chart</h2>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <p>เปิด Chart ที่ต้องการ (เช่น XAU/USD, GOLD, ETHUSDi)</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <p>ลาก EA <strong>SignalReceiver</strong> จาก Navigator (View → Navigator) วางบน Chart</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <p>หน้าต่าง Setting จะเปิดขึ้นมา → ตั้งค่าตามต้องการ → กด OK</p>
+      </div>
+    </div>
+
+    <div class="box green">
+      <strong>⚠️ ข้อสำคัญ:</strong> ถ้าเป็นครั้งแรก ต้องติ๊ก <strong>"Allow Automated Trading"</strong> ในหน้าต่าง Common ก่อน
+    </div>
+
+    <p>EA จะเริ่มทำงานทันที — จะเห็นข้อความขึ้นใน Experts log ว่า <code>[SignalReceiver v2.2] MULTI-SYMBOL PENDING ORDER EA</code></p>
+  </section>
+
+  <!-- ====== INPUTS ====== -->
+  <section id="inputs">
+    <h2>ตั้งค่า Inputs (พารามิเตอร์)</h2>
+    <p>เมื่อแนบ EA เข้า Chart จะมีหน้าต่าง Inputs ให้ตั้งค่า:</p>
+
+    <table>
+      <tr><th>พารามิเตอร์</th><th>ค่าเริ่มต้น</th><th>คำอธิบาย</th></tr>
+      <tr><td><code>API_URL</code></td><td>https://forex-rouge-gamma.vercel.app/api/signals/mt5</td><td>URL สำหรับดึงสัญญาณ <span class="badge gray">ไม่ต้องแก้</span></td></tr>
+      <tr><td><code>API_KEY</code></td><td>d0d52f...</td><td>API Key สำหรับยืนยันตัวตน <span class="badge gray">ไม่ต้องแก้</span></td></tr>
+      <tr><td><code>LOT_SIZE</code></td><td>0.01</td><td>ขนาด Lot คงที่ (ใช้เมื่อ <code>USE_RISK_PCT = false</code>)</td></tr>
+      <tr><td><code>POLL_INTERVAL</code></td><td>60</td><td>ความถี่ในการตรวจสอบสัญญาณ (วินาที)</td></tr>
+      <tr><td><code>MAGIC_NUMBER</code></td><td>20260605</td><td>Magic Number ใช้แยกคำสั่งของ EA นี้</td></tr>
+      <tr><td><code>USE_RISK_PCT</code></td><td>false</td><td>true = คำนวณ Lot ตามความเสี่ยง, false = ใช้ LOT_SIZE คงที่</td></tr>
+      <tr><td><code>RISK_PERCENT</code></td><td>1.0</td><td>ความเสี่ยงต่อการเทรด (%) — ใช้เมื่อ USE_RISK_PCT = true</td></tr>
+      <tr><td><code>TP_MODE</code></td><td>1</td><td>1=TP1, 2=TP2, 3=TP3</td></tr>
+      <tr><td><code>FILTER_COMMODITIES</code></td><td>true</td><td>รับสัญญาณ Commodities (XAU/USD, XAG/USD)</td></tr>
+      <tr><td><code>FILTER_FOREX</code></td><td>true</td><td>รับสัญญาณ Forex (EUR, GBP, JPY, CHF, AUD, NZD, CAD)</td></tr>
+      <tr><td><code>FILTER_CRYPTO</code></td><td>true</td><td>รับสัญญาณ Crypto (BTC, ETH, XRP)</td></tr>
+    </table>
+
+    <div class="box gold">
+      <strong>💡 Tips:</strong> ถ้าวาง EA บน Chart XAU/USD และเปิด FILTER_COMMODITIES = true, FILTER_FOREX = false, FILTER_CRYPTO = false — EA จะรับเฉพาะสัญญาณทองคำเท่านั้น
+    </div>
+  </section>
+
+  <!-- ====== SYMBOL ====== -->
+  <section id="symbol">
+    <h2>Symbol ที่รองรับ</h2>
+    <p>EA สามารถตรวจจับชื่อ Symbol ได้อัตโนมัติ ไม่ว่า Broker จะตั้งชื่ออะไร:</p>
+
+    <table>
+      <tr><th>ประเภท</th><th>ชื่อในระบบ</th><th>ชื่อใน Broker (ตัวอย่าง)</th></tr>
+      <tr><td>ทองคำ</td><td>XAU/USD</td><td>XAUUSD, GOLD, XAUUSD.m, XAUUSD.pro, XAUUSD.r, XAUUSD.ecn, XAUUSDu</td></tr>
+      <tr><td>เงิน</td><td>XAG/USD</td><td>XAGUSD, SILVER, XAGUSD.m</td></tr>
+      <tr><td>Forex</td><td>EUR/USD, GBP/USD, ฯลฯ</td><td>EURUSD, EURUSD.m, EURUSD.pro, EURUSDu</td></tr>
+      <tr><td>Crypto</td><td>BTC/USD, ETH/USD, XRP/USD</td><td>BTCUSD, BTCUSD.m, ETHUSDi, XRPUSDi</td></tr>
+      <tr><td>อื่นๆ</td><td>กรอกเอง</td><td>ค้นหาอัตโนมัติจากทุกรายการ Symbol ใน Broker</td></tr>
+    </table>
+
+    <p>EA จะค้นหา Symbol โดยอัตโนมัติ: เปลี่ยน / เป็นว่าง → ลองชื่อตรง → ลอง GOLD → ลอง suffix ต่างๆ → ค้นหาจากทุกรายการที่ Broker มี</p>
+  </section>
+
+  <!-- ====== HOW IT WORKS ====== -->
+  <section id="how-it-works">
+    <h2>ระบบทำงานอย่างไร</h2>
+
+    <div class="box">
+      <ol>
+        <li><strong>API</strong> — ระบบ ATH Trader สร้างสัญญาณเทรด (Auto Signal หรือ Manual)</li>
+        <li><strong>EA</strong> — เรียก API ทุกๆ <code>POLL_INTERVAL</code> วินาที (ค่าเริ่มต้น 60 วิ)</li>
+        <li><strong>รับข้อมูล</strong> — EA ได้รับ JSON: <code>{"id":...,"pair":"XAU/USD","direction":"BUY","entry":4318.50,...}</code></li>
+        <li><strong>กรอง</strong> — เช็ค Category Filter + เปรียบเทียบ Symbol กับ Chart ปัจจุบัน</li>
+        <li><strong>ค้นหา Symbol</strong> — <code>FindSymbol()</code> เปลี่ยนชื่อ API pair → MT5 symbol</li>
+        <li><strong>ยกเลิกคำสั่งเก่า</strong> — ลบ Pending Order ก่อนหน้าทั้งหมด (Magic Number เดียวกัน)</li>
+        <li><strong>เปิดคำสั่งใหม่</strong> — เลือกประเภท LIMIT/STOP อัตโนมัติตาม Entry vs ราคาตลาด</li>
+      </ol>
+    </div>
+
+    <div class="box green">
+      <strong>🔄 วนรอบ:</strong> ทุกๆ 60 วิ EA จะตรวจสอบสัญญาณใหม่ ถ้าเจอสัญญาณใหม่ → แทนที่อันเก่า ถ้าเจอ <code>null</code> → ยกเลิกทั้งหมด
+    </div>
+  </section>
+
+  <!-- ====== PENDING ORDER ====== -->
+  <section id="pending-order">
+    <h2>Pending Order (คำสั่งตั้งรอ)</h2>
+
+    <p>EA จะเลือกประเภท Pending Order อัตโนมัติ:</p>
+
+    <table>
+      <tr><th>ทิศทาง</th><th>Entry vs ราคา</th><th>ประเภท</th><th>คำอธิบาย</th></tr>
+      <tr><td>BUY</td><td>Entry &lt; ราคาปัจจุบัน</td><td>BUY LIMIT</td><td>รอราคาลงมาที่ Entry</td></tr>
+      <tr><td>BUY</td><td>Entry &gt; ราคาปัจจุบัน</td><td>BUY STOP</td><td>รอราคาขึ้นไปที่ Entry</td></tr>
+      <tr><td>SELL</td><td>Entry &gt; ราคาปัจจุบัน</td><td>SELL LIMIT</td><td>รอราคาขึ้นไปที่ Entry</td></tr>
+      <tr><td>SELL</td><td>Entry &lt; ราคาปัจจุบัน</td><td>SELL STOP</td><td>รอราคาลงมาที่ Entry</td></tr>
+    </table>
+
+    <p>Pending Order จะถูกยกเลิกเมื่อ:</p>
+    <ul>
+      <li>มีสัญญาณใหม่มาแทนที่ (Signal ID ใหม่กว่า)</li>
+      <li>สัญญาณปัจจุบันถูกเปลี่ยนสถานะเป็น win/loss</li>
+      <li>กด F6 หรือกด Cancel ใน test-signal.html</li>
+    </ul>
+  </section>
+
+  <!-- ====== HOTKEYS ====== -->
+  <section id="hotkeys">
+    <h2>ปุ่มลัด (Hotkeys)</h2>
+    <p>เมื่อ EA ทำงานอยู่บน Chart สามารถใช้ปุ่มลัดได้:</p>
+
+    <table>
+      <tr><th>ปุ่ม</th><th>การทำงาน</th></tr>
+      <tr><td><kbd>F5</kbd></td><td>ตรวจสอบสัญญาณทันที (ไม่ต้องรอรอบถัดไป)</td></tr>
+      <tr><td><kbd>F6</kbd></td><td>ยกเลิก Pending Order ทั้งหมดของ EA นี้</td></tr>
+    </table>
+  </section>
+
+  <!-- ====== LOGS ====== -->
+  <section id="logs">
+    <h2>อ่าน Log (Expert Log)</h2>
+    <p>ดู Log ได้ที่ <code>View → Toolbox → Experts</code> หรือกด F8</p>
+
+    <table>
+      <tr><th>ข้อความ</th><th>ความหมาย</th></tr>
+      <tr><td><code>[SignalReceiver v2.2] MULTI-SYMBOL PENDING ORDER EA</code></td><td>EA เริ่มทำงานสำเร็จ</td></tr>
+      <tr><td><code>[SignalReceiver] Checking for new signal...</code></td><td>กำลังตรวจสอบ API</td></tr>
+      <tr><td><code>[SignalReceiver] PENDING ORDER PLACED | Ticket=...</code></td><td>✅ วาง Pending Order สำเร็จ</td></tr>
+      <tr><td><code>[SignalReceiver] New signal — cancelling previous pending orders</code></td><td>สัญญาณใหม่ → ยกเลิกคำสั่งเก่า</td></tr>
+      <tr><td><code>[SignalReceiver] No active signal — cancelling all pending orders</code></td><td>ไม่มีสัญญาณ → ยกเลิกทั้งหมด</td></tr>
+      <tr><td><code>[SignalReceiver] Skipped ETHUSDi (chart is XAUUSD, not ETHUSDi)</code></td><td>สัญญาณไม่ตรงกับ Chart นี้</td></tr>
+      <tr><td><code>[SignalReceiver] WebRequest FAILED...</code></td><td>เชื่อมต่อ API ไม่ได้ (ดูหัวข้อแก้ปัญหา)</td></tr>
+    </table>
+  </section>
+
+  <!-- ====== WEBREQUEST ====== -->
+  <section id="webrequest">
+    <h2>ตั้งค่า WebRequest</h2>
+    <p>EA ใช้ <code>WebRequest</code> เพื่อเชื่อมต่อ API ต้องตั้งค่าก่อนใช้งาน:</p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <p>เปิด MT5 → <code>Tools → Options → Expert Advisors</code></p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <p>ติ๊ก ✅ <strong>Allow WebRequest for listed URL</strong></p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <p>เพิ่ม URL นี้ในลิสต์:</p>
+        <pre>https://forex-rouge-gamma.vercel.app</pre>
+        <p>หรือถ้ายัง Error 5203 ให้ใส่ path เต็ม:</p>
+        <pre>https://forex-rouge-gamma.vercel.app/api/signals/mt5</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <p>กด OK → ปิด MT5 แล้วเปิดใหม่ (Restart)</p>
+      </div>
+    </div>
+
+    <div class="box red">
+      <strong>⚠️ ถ้ายัง Error 5203:</strong> ให้คลิกขวา MT5 → <strong>Run as Administrator</strong> → เปิด Chart → Attach EA ใหม่
+    </div>
+  </section>
+
+  <!-- ====== ADMIN ====== -->
+  <section id="admin">
+    <h2>Run as Administrator</h2>
+    <p>Windows Server / VPS มักปิดกั้น WinHTTP สำหรับโปรแกรมที่ไม่ได้รันด้วยสิทธิ์ Admin → MT5 ใช้ WinHTTP ในการทำ WebRequest → ถ้า Error 5203 ต้องรัน MT5 แบบ Administrator</p>
+
+    <p><strong>วิธีทำ:</strong></p>
+    <ol>
+      <li>ปิด MT5</li>
+      <li>คลิกขวาที่ไอคอน MT5 → <strong>Run as Administrator</strong></li>
+      <li>กด Yes เพื่อยืนยัน</li>
+      <li>เปิด Chart → Attach EA</li>
+    </ol>
+  </section>
+
+  <!-- ====== VPS ====== -->
+  <section id="vps">
+    <h2>ใช้งานบน VPS</h2>
+    <p>แนะนำให้ใช้ VPS (Virtual Private Server) เพื่อให้ EA ทำงาน 24/7 โดยไม่ต้องเปิดเครื่องทิ้งไว้</p>
+
+    <div class="box gold">
+      <strong>💡 Tips สำหรับ VPS:</strong>
+      <ul>
+        <li>เข้า VPS ผ่าน <strong>Remote Desktop (RDP)</strong></li>
+        <li>เปิด MT5 → ตั้งค่า WebRequest → Run as Administrator → Attach EA</li>
+        <li>ตั้ง Windows ให้ล็อกอินอัตโนมัติ และ MT5 เปิดอัตโนมัติเมื่อรีสตาร์ท</li>
+        <li>ใช้ไฟล์ <code>WebRequestTest.mq5</code> ทดสอบการเชื่อมต่อ API ก่อนใช้ EA จริง</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ====== TROUBLESHOOT ====== -->
+  <section id="troubleshoot">
+    <h2>ปัญหาที่พบบ่อย</h2>
+
+    <div class="box">
+      <p><strong>❌ WebRequest FAILED | res=1001 LastError=5203</strong></p>
+      <p><strong>สาเหตุ:</strong> URL ไม่อยู่ใน Allowed List หรือ MT5 ไม่มีสิทธิ์เข้าถึงเครือข่าย</p>
+      <p><strong>แก้ไข:</strong></p>
+      <ul>
+        <li>เช็ค Tools → Options → Expert Advisors → Allow WebRequest → มี URL หรือยัง</li>
+        <li>ใส่ path เต็ม: <code>https://forex-rouge-gamma.vercel.app/api/signals/mt5</code></li>
+        <li>Run as Administrator → เปิด MT5 ใหม่</li>
+        <li>ปิด Windows Firewall ชั่วคราวเพื่อทดสอบ</li>
+      </ul>
+    </div>
+
+    <div class="box">
+      <p><strong>❌ Pending order FAILED | RetCode=10018</strong></p>
+      <p><strong>สาเหตุ:</strong> ตลาดปิด (Market closed) — เสาร์-อาทิตย์ หรือ Symbol นั้นไม่เปิดให้เทรด</p>
+      <p><strong>แก้ไข:</strong> รอตลาดเปิด หรือตรวจสอบ Trading Hours ของ Symbol นั้นใน Market Watch → Specification</p>
+    </div>
+
+    <div class="box">
+      <p><strong>❌ Pending order FAILED | RetCode=10014</strong></p>
+      <p><strong>สาเหตุ:</strong> ราคาที่ขอไม่ถูกต้อง (Invalid price) — Entry/SL/TP ไม่ตรงกับ Stop Level</p>
+      <p><strong>แก้ไข:</strong> ระบบปรับ SL/TP อัตโนมัติให้ถูกต้อง ลองใหม่อีกครั้งเมื่อราคาเปลี่ยน</p>
+    </div>
+
+    <div class="box">
+      <p><strong>❌ Symbol not found for: XXX</strong></p>
+      <p><strong>สาเหตุ:</strong> Broker ของคุณไม่มี Symbol นี้ หรือใช้ชื่ออื่น</p>
+      <p><strong>แก้ไข:</strong> เพิ่มชื่อ Symbol ใน Market Watch (คลิกขวา → Symbols → แสดง Symbol นั้น)</p>
+    </div>
+
+    <div class="box">
+      <p><strong>❌ EA ไม่ทำงาน — Expert หยุด</strong></p>
+      <p><strong>สาเหตุ:</strong> เปิด MT5 ครั้งแรก โดยไม่ได้ตั้งค่า Allow Automated Trading</p>
+      <p><strong>แก้ไข:</strong> ใน Chart → คลิก笑脸 → เปลี่ยน Enable เป็น On หรือกดปุ่ม AutoTrading</p>
+    </div>
+
+    <div class="box">
+      <p><strong>❌ Trade context busy</strong></p>
+      <p><strong>สาเหตุ:</strong> MT5 กำลังทำงานอื่นอยู่ (เช่น สั่งซื้อพร้อมกันหลายอัน)</p>
+      <p><strong>แก้ไข:</strong> EA จะลองอีกครั้งในรอบถัดไป (60 วิ) — ปกติไม่ต้องทำอะไร</p>
+    </div>
+  </section>
+
+  <!-- ====== ERRORS ====== -->
+  <section id="errors">
+    <h2>Error Codes (RetCode)</h2>
+    <table>
+      <tr><th>Code</th><th>ความหมาย</th></tr>
+      <tr><td>10004</td><td>Trade disabled (ปิด AutoTrading)</td></tr>
+      <tr><td>10006</td><td>No connection (MT5 ไม่ต่อ Server)</td></tr>
+      <tr><td>10014</td><td>Invalid price (ราคาไม่ถูกต้อง)</td></tr>
+      <tr><td>10018</td><td>Market closed (ตลาดปิด)</td></tr>
+      <tr><td>10019</td><td>Too many requests (คำสั่งมากเกินไป)</td></tr>
+      <tr><td>130</td><td>Invalid stops (SL/TP ห่างจากราคาน้อยเกินไป)</td></tr>
+      <tr><td>138</td><td>Requote (ราคาเปลี่ยนระหว่างส่งคำสั่ง)</td></tr>
+      <tr><td>145</td><td>Modification denied (แก้ไขไม่ได้รับอนุญาต)</td></tr>
+    </table>
+  </section>
+
+  <!-- ====== SUPPORT ====== -->
+  <section id="support">
+    <h2>ติดต่อช่วยเหลือ</h2>
+    <p>หากมีปัญหาหรือข้อสงสัยเกี่ยวกับการใช้งาน EA:</p>
+    <ul>
+      <li>ตรวจสอบคู่มือนี้ในหน้า <a href="https://forex-rouge-gamma.vercel.app/mt5-guide.html" target="_blank" style="color:#d4a017">MT5 Guide</a></li>
+      <li>ติดต่อ Admin ผ่านช่องทางที่กำหนด</li>
+      <li>แจ้ง Error Code และ Log เพื่อให้วิเคราะห์ปัญหาได้เร็วขึ้น</li>
+    </ul>
+
+    <div class="box" style="text-align:center;padding:1.5rem">
+      <p style="color:#d4a017;font-weight:600">ATH Trader</p>
+      <p style="font-size:0.8rem">https://forex-rouge-gamma.vercel.app</p>
+    </div>
+  </section>
+
+  <p style="text-align:center;color:#555;font-size:0.75rem;margin-top:3rem">ATH Trader — MT5 EA Guide v2.2</p>
+</div>
+
+<script>
+const links = document.querySelectorAll('.sidebar a');
+const sections = document.querySelectorAll('.main section');
+
+function updateActive() {
+  let current = 'intro';
+  sections.forEach(s => {
+    if (s.getBoundingClientRect().top <= 150) current = s.id;
+  });
+  links.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+
+window.addEventListener('scroll', updateActive);
+window.addEventListener('load', updateActive);
+
+links.forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const id = a.getAttribute('href').substring(1);
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>
