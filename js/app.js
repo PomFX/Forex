@@ -205,7 +205,7 @@ const App = {
   },
 
   articleCardHTML(a) {
-    const date = new Date(a.created_at || a.createdAt).toLocaleDateString('th-TH');
+    const date = new Date(a.created_at || a.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
     const hasImg = !!a.image;
     return `
       <div class="article-card">
