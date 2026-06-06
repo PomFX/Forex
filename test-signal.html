@@ -7,7 +7,7 @@
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:-apple-system,'Segoe UI',sans-serif; background:#0d0d0d; color:#e0e0e0; display:flex; justify-content:center; padding:2rem 1rem; }
-  .card { background:#1a1a1a; border:1px solid #333; border-radius:12px; padding:2rem; max-width:600px; width:100%; }
+  .card { background:#1a1a1a; border:1px solid #333; border-radius:12px; padding:2rem; max-width:650px; width:100%; }
   h1 { color:#d4a017; font-size:1.5rem; margin-bottom:0.5rem; }
   p.sub { color:#888; font-size:0.85rem; margin-bottom:1.5rem; }
   .form-row { display:flex; gap:1rem; margin-bottom:1rem; }
@@ -16,20 +16,31 @@
   input,select,textarea { width:100%; padding:0.6rem; border:1px solid #333; border-radius:6px; background:#111; color:#e0e0e0; font-size:0.9rem; }
   input:focus,select:focus,textarea:focus { outline:none; border-color:#d4a017; }
   textarea { resize:vertical; font-family:inherit; }
-  .btn { width:100%; padding:0.75rem; border:none; border-radius:6px; font-size:1rem; font-weight:600; cursor:pointer; margin-top:0.5rem; }
+  .btn { padding:0.75rem; border:none; border-radius:6px; font-size:1rem; font-weight:600; cursor:pointer; }
   .btn-gold { background:#d4a017; color:#111; }
   .btn-gold:hover { background:#e6b422; }
   .btn-gold:disabled { opacity:0.5; cursor:not-allowed; }
+  .btn-sm { padding:0.4rem 0.8rem; font-size:0.8rem; white-space:nowrap; }
+  .btn-red { background:#a00; color:#fff; }
+  .btn-red:hover { background:#c00; }
   #result { margin-top:1rem; padding:0.75rem; border-radius:6px; display:none; font-size:0.85rem; white-space:pre-wrap; word-break:break-all; }
   #result.success { display:block; background:#0a2a0a; border:1px solid #2a5a2a; color:#8f8; }
   #result.error { display:block; background:#2a0a0a; border:1px solid #5a2a2a; color:#f88; }
   .api-url { color:#666; font-size:0.75rem; text-align:center; margin-top:1rem; }
+  hr { border:none; border-top:1px solid #333; margin:1.5rem 0; }
+  .signal-item { display:flex; align-items:center; gap:0.5rem; padding:0.6rem; border:1px solid #333; border-radius:6px; margin-bottom:0.5rem; background:#151515; }
+  .signal-item .info { flex:1; font-size:0.85rem; }
+  .signal-item .pair { color:#d4a017; font-weight:600; }
+  .signal-item .dir { font-weight:600; }
+  .signal-item .dir.buy { color:#4c4; }
+  .signal-item .dir.sell { color:#f44; }
+  .signal-item .detail { color:#999; font-size:0.75rem; }
 </style>
 </head>
 <body>
 <div class="card">
-  <h1>📡 ทดสอบส่ง Signal</h1>
-  <p class="sub">กรอกข้อมูลแล้วกดส่ง — API จะบันทึกและ EA จะดึงไปเปิด Pending Order</p>
+  <h1>📡 ทดสอบ Signal</h1>
+  <p class="sub">ส่ง Signal ทดสอบไปยังระบบ — EA จะดึงไปเปิด Pending Order</p>
 
   <form id="signalForm">
     <div class="form-row">
@@ -48,8 +59,8 @@
     </div>
 
     <div class="form-row">
-      <div class="form-group"><label>Entry Price</label><input type="text" id="entry" placeholder="4318.50"></div>
-      <div class="form-group"><label>Stop Loss</label><input type="text" id="sl" placeholder="4313.50"></div>
+      <div class="form-group"><label>Entry</label><input type="text" id="entry" placeholder="4318.50"></div>
+      <div class="form-group"><label>SL</label><input type="text" id="sl" placeholder="4313.50"></div>
     </div>
 
     <div class="form-row">
@@ -65,31 +76,78 @@
     </div>
 
     <div class="form-group">
-      <label>เหตุผลทางเทคนิค</label>
-      <textarea id="reason" rows="3" placeholder="Market Structure: ...&#10;Order Block / FVG: ...&#10;Liquidity: ...">Test signal from test-signal.html</textarea>
+      <label>เหตุผล</label>
+      <textarea id="reason" rows="3" placeholder="เหตุผลทางเทคนิค">Test signal</textarea>
     </div>
 
-    <button type="submit" class="btn btn-gold" id="submitBtn">ส่ง Signal</button>
+    <button type="submit" class="btn btn-gold" id="submitBtn" style="width:100%;margin-top:0.5rem">ส่ง Signal</button>
   </form>
 
   <div id="result"></div>
 
-  <hr style="border-color:#333;margin:1.5rem 0">
+  <hr>
 
-  <h2 style="color:#d4a017;font-size:1.1rem;margin-bottom:0.5rem">ยกเลิก Signal</h2>
-  <p style="color:#888;font-size:0.8rem;margin-bottom:0.8rem">ใส่ ID แล้วกดยกเลิก — Signal จะถูกเปลี่ยนเป็น loss</p>
-  <div style="display:flex;gap:0.5rem">
-    <input type="number" id="cancelId" placeholder="Signal ID" style="flex:1">
-    <button class="btn btn-gold" id="cancelBtn" style="width:auto;padding:0.6rem 1.2rem;margin-top:0">ยกเลิก</button>
-  </div>
-  <div id="cancelResult" style="margin-top:0.5rem;padding:0.5rem;border-radius:6px;display:none;font-size:0.85rem"></div>
+  <h2 style="color:#d4a017;font-size:1.1rem;margin-bottom:0.8rem">Signal ที่กำลัง Active</h2>
+  <div id="signalList"></div>
 
-  <div class="api-url">API: /api/signals/ai</div>
+  <div class="api-url">API: /api/signals</div>
 </div>
 
 <script>
 const API_BASE = 'https://forex-rouge-gamma.vercel.app';
 const AI_KEY = 'b544afcadfba96c8b08b8afac68d6838f5722ee885cfae53';
+
+async function loadActiveSignals() {
+  const el = document.getElementById('signalList');
+  try {
+    const res = await fetch(API_BASE + '/api/signals');
+    const all = await res.json();
+    const active = all.filter(s => s.status === 'active');
+    if (active.length === 0) {
+      el.innerHTML = '<p style="color:#666;font-size:0.85rem">ไม่มี Signal ที่ active</p>';
+      return;
+    }
+    el.innerHTML = active.map(s => {
+      const dirClass = s.direction === 'BUY' ? 'buy' : 'sell';
+      const time = new Date(s.created_at).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+      return `<div class="signal-item">
+        <div class="info">
+          <span class="pair">${escHtml(s.pair)}</span>
+          <span class="dir ${dirClass}">${s.direction}</span>
+          <span style="color:#fff">@${escHtml(s.entry)}</span>
+          <div class="detail">
+            TP1: ${escHtml(s.tp1||'-')} | TP2: ${escHtml(s.tp2||'-')} | TP3: ${escHtml(s.tp3||'-')}
+            SL: ${escHtml(s.sl||'-')}
+            <br>#${s.id} · ${time}
+          </div>
+        </div>
+        <button class="btn btn-sm btn-red" onclick="cancelSignal(${s.id})">ลบ</button>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    el.innerHTML = '<p style="color:#f88;font-size:0.85rem">โหลดข้อมูลล้มเหลว</p>';
+  }
+}
+
+async function cancelSignal(id) {
+  if (!confirm('ยกเลิก Signal #' + id + '?')) return;
+  try {
+    const res = await fetch(API_BASE + '/api/signals/ai/evaluate', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'X-AI-Key': AI_KEY },
+      body: JSON.stringify({ id, status: 'loss' }),
+    });
+    if (res.ok) loadActiveSignals();
+    else alert('ล้มเหลว: ' + ((await res.json()).error || ''));
+  } catch (err) {
+    alert('Connection failed: ' + err.message);
+  }
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 document.getElementById('signalForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -120,7 +178,8 @@ document.getElementById('signalForm').addEventListener('submit', async (e) => {
     const data = await res.json();
     if (res.ok) {
       result.className = 'success';
-      result.textContent = '✔ Signal ส่งสำเร็จ!\n\nID: ' + data.id + '\n' + data.pair + ' ' + data.direction + ' @' + data.entry + '\nTP1: ' + data.tp1 + ' | SL: ' + data.sl + '\nสถานะ: ' + data.status;
+      result.textContent = '✔ Signal ส่งสำเร็จ!  #' + data.id + ' ' + data.pair + ' ' + data.direction + ' @' + data.entry;
+      loadActiveSignals();
     } else {
       result.className = 'error';
       result.textContent = '✖ Error: ' + (data.error || 'Unknown');
@@ -135,31 +194,7 @@ document.getElementById('signalForm').addEventListener('submit', async (e) => {
   btn.textContent = 'ส่ง Signal';
 });
 
-document.getElementById('cancelBtn').addEventListener('click', async () => {
-  const id = document.getElementById('cancelId').value;
-  const cr = document.getElementById('cancelResult');
-  if (!id) { cr.className='error'; cr.textContent='กรุณาใส่ ID'; cr.style.display='block'; return; }
-
-  try {
-    const res = await fetch(API_BASE + '/api/signals/ai/evaluate', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'X-AI-Key': AI_KEY },
-      body: JSON.stringify({ id: parseInt(id), status: 'loss' }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      cr.className = 'success';
-      cr.textContent = '✔ Signal #' + id + ' ถูกยกเลิกแล้ว (loss)';
-    } else {
-      cr.className = 'error';
-      cr.textContent = '✖ ' + (data.error || 'ไม่พบ Signal นี้');
-    }
-  } catch (err) {
-    cr.className = 'error';
-    cr.textContent = '✖ Connection failed: ' + err.message;
-  }
-  cr.style.display = 'block';
-});
+loadActiveSignals();
 </script>
 </body>
 </html>
