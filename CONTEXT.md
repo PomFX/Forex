@@ -68,12 +68,15 @@
 
 | Term | Definition |
 |------|------------|
-| **MT5 EA** | Expert Advisor (`SignalReceiver.mq5`) ที่ติดตั้งใน MetaTrader 5 — ดึง Signal ทองคำจาก API แล้วเปิด Pending Order อัตโนมัติ |
-| **MT5 Signal Filter** | EA รับ Signal ที่ `status = active` เท่านั้น — API endpoint `/api/signals/mt5` คืน Signal active ล่าสุด ทุกคู่ |
+| **MT5 EA** | Expert Advisor (`SignalReceiver.mq5`) ที่ติดตั้งใน MetaTrader 5 — ดึง Signal ทั้งหมดจาก API แล้วเปิด Pending Order อัตโนมัติ ทุกคู่ |
+| **MT5 Signal API** | API endpoint `/api/signals/mt5` คืน **ทุก Signal active** เป็น JSON array `[{...}, {...}]` |
 | **Pending Order** | คำสั่งตั้งรอราคาใน MT5 — EA เลือก BUY LIMIT / BUY STOP / SELL LIMIT / SELL STOP อัตโนมัติ โดยเทียบ `entry` กับราคาตลาดปัจจุบัน |
-| **Order Replacement** | เมื่อมี Signal ใหม่ EA จะยกเลิก Pending Order เก่าทั้งหมด (Magic Number เดียวกัน) แล้วเปิด Pending Order ใหม่ตาม Signal ล่าสุด |
-| **Signal Expiry** | Pending Order ไม่มีวันหมดอายุ — จะถูกยกเลิกเมื่อมี Signal ใหม่เข้ามา หรือเมื่อ Signal ต้นทางถูก evaluate เป็น win/loss (API คืน null) |
-| **Symbol Resolution** | EA รองรับชื่อ Symbol หลายรูปแบบ: `XAUUSD`, `GOLD`, `XAUUSD.m`, `XAUUSD.pro`, `XAUUSD.r`, `XAUUSD.ecn` ฯลฯ — ค้นหาอัตโนมัติจากรายชื่อ Symbol ของ Broker |
+| **Multi-Symbol** | EA 1 ตัวรันกราฟไหนก็ได้ — เปิด Pending ทุกคู่พร้อมกันโดยไม่เช็ค chart symbol |
+| **Order Replacement** | เมื่อมี Signal ใหม่สำหรับคู่ใด EA จะยกเลิก Pending ของคู่นั้นเท่านั้น (ไม่แตะคู่อื่น) แล้วเปิด Pending ใหม่ |
+| **Signal Persistence** | Signal หายจาก API → Pending Order ค้างไว้ จนกว่า Signal ใหม่ของคู่นั้นมาแทนที่ |
+| **Symbol Resolution** | EA รองรับชื่อ Symbol หลายรูปแบบ: `XAUUSD`, `GOLD`, `XAUUSD.m`, `XAUUSD.pro`, `XAUUSD.r`, `XAUUSD.ecn`, `ETHUSDi`, `XRPUSDi` ฯลฯ — ค้นหาอัตโนมัติจากรายชื่อ Symbol ของ Broker |
+| **Price Check** | ก่อนวาง Pending ตรวจสอบราคา Bid/Ask ก่อน — ถ้าไม่มี quotes จะข้ามไปรอบถัดไป |
+| **Processed Signal Tracking** | เก็บ Signal ID ที่ประมวลผลแล้วสูงสุด 50 รายการ — ป้องกันการซ้ำในรอบถัดไป |
 | **Auth** | API endpoint ใช้ `X-MT5-Key` header — key ถูกเก็บใน `MT5_API_KEY` env var |
 
 ## Architecture
@@ -83,7 +86,7 @@
 | **Image Storage** | รูปภาพทั้งหมดถูกเก็บเป็น Base64 Data URL (ข้อความยาวใน Database) เพื่อรองรับการ Deploy บน Vercel serverless |
 | **Auth Model** | Super Admin ยืนยันตัวตนผ่าน env vars; Admin ปกติยืนยันผ่าน Database (`users` table) โดยตรวจสอบคอลัมน์ `is_admin`; ผู้ใช้ทั่วไปยืนยันผ่าน Database เช่นกัน |
 
-## Status (2026-06-05)
+## Status (2026-06-06)
 
 | Item | Status |
 |------|--------|
@@ -98,3 +101,6 @@
 | **VIP Auto-Count** | ✅ เริ่ม 109 + เพิ่มวันละ 5-10 คน (deterministic cycle) |
 | **Middle Banner** | ✅ 300×250px Medium Rectangle, Admin แท็บ "กลาง" |
 | **AI Signals (SMC)** | ✅ M15 SMC: Market Structure, OB, FVG, Liquidity |
+| **MT5 Multi-Symbol** | ✅ API คืนทุก signal active (array), EA เปิด Pending ทุกคู่พร้อมกัน |
+| **MT5 Per-Symbol Replacement** | ✅ ยกเลิก Pending เฉพาะคู่ที่มี signal ใหม่, ไม่แตะคู่อื่น |
+| **MT5 Price Guard** | ✅ ตรวจสอบ Bid/Ask ก่อนวาง Pending — ถ้าไม่มีราคาข้ามรอบ |
