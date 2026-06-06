@@ -4,8 +4,8 @@
 //|          รับ Signal เฉพาะ XAU/USD เปิด Pending Order อัตโนมัติ        |
 //+------------------------------------------------------------------+
 #property copyright "ATH Trader"
-#property version   "2.0"
-#property description "Multi-symbol Pending Order EA — any active signal from API"
+#property version   "2.2"
+#property description "Multi-symbol Pending Order EA — category filter: Commodities/Forex/Crypto"
 #property description "Docs: https://forex-rouge-gamma.vercel.app"
 
 //--- Input Parameters
@@ -18,6 +18,9 @@ input int      SLIPPAGE         = 30;          // Max slippage when order fills 
 input bool     USE_RISK_PCT     = false;       // Use risk-based lot sizing
 input double   RISK_PERCENT     = 1.0;         // Risk % per trade
 input int      TP_MODE          = 1;           // 1=TP1, 2=TP2, 3=TP3
+input bool     FILTER_COMMODITIES = true;      // รับ Signal Commodities (XAU/USD, XAG/USD)
+input bool     FILTER_FOREX       = true;      // รับ Signal Forex (EUR, GBP, JPY, CHF, AUD, NZD, CAD)
+input bool     FILTER_CRYPTO      = true;      // รับ Signal Crypto (BTC, ETH, XRP)
 
 //--- Global Variables
 int       g_lastSignalId = 0;
@@ -83,6 +86,21 @@ void CacheAdd(string pair, string symbol)
    g_cachedSymbol[1][g_cacheCount] = symbol;
    g_cacheCount++;
    Print("[FindSymbol] ", pair, " -> ", symbol);
+}
+
+//+------------------------------------------------------------------+
+//| Get pair category                                                 |
+//+------------------------------------------------------------------+
+string GetPairCategory(string pair)
+{
+   if(pair == "XAU/USD" || pair == "XAG/USD") return "commodities";
+   string forexPairs[] = {"EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "NZD/USD", "USD/CAD"};
+   for(int i = 0; i < ArraySize(forexPairs); i++)
+      if(pair == forexPairs[i]) return "forex";
+   string cryptoPairs[] = {"BTC/USD", "ETH/USD", "XRP/USD"};
+   for(int i = 0; i < ArraySize(cryptoPairs); i++)
+      if(pair == cryptoPairs[i]) return "crypto";
+   return "unknown";
 }
 
 //+------------------------------------------------------------------+
@@ -358,12 +376,12 @@ void ProcessSignal()
       return;
    }
 
-   // No active gold signal — cancel all pending orders
+   // No active signal — cancel all pending orders
    if(json == "null" || StringFind(json, "\"error\"") >= 0 || StringFind(json, "\"id\"") < 0)
    {
       if(g_pendingPlaced)
       {
-         Print("[SignalReceiver] No active gold signal — cancelling all pending orders");
+         Print("[SignalReceiver] No active signal — cancelling all pending orders");
          CancelAllPending();
       }
       g_isBusy = false;
@@ -384,6 +402,19 @@ void ProcessSignal()
    if(signalId == 0 || pair == "" || direction == "")
    {
       Print("[SignalReceiver] Incomplete signal data");
+      g_isBusy = false;
+      return;
+   }
+
+   // Check category filter
+   string category = GetPairCategory(pair);
+   bool allowed = (FILTER_COMMODITIES && category == "commodities") ||
+                  (FILTER_FOREX && category == "forex") ||
+                  (FILTER_CRYPTO && category == "crypto") ||
+                  category == "unknown";
+   if(!allowed)
+   {
+      Print("[SignalReceiver] Skipped ", pair, " (", category, " filter disabled)");
       g_isBusy = false;
       return;
    }
@@ -445,12 +476,13 @@ void ProcessSignal()
 int OnInit()
 {
    Print("══════════════════════════════════════════════");
-   Print("[SignalReceiver v2.0] MULTI-SYMBOL PENDING ORDER EA");
-   Print("  API URL  : ", API_URL);
+   Print("[SignalReceiver v2.2] MULTI-SYMBOL PENDING ORDER EA");
+   Print("  Source   : signal.json (Common Files)");
    Print("  Interval : ", POLL_INTERVAL, " seconds");
    Print("  Lot Size : ", LOT_SIZE);
    Print("  Magic    : ", MAGIC_NUMBER);
    Print("  TP Mode  : ", TP_MODE);
+   Print("  Filters  : Commo=", FILTER_COMMODITIES, " Forex=", FILTER_FOREX, " Crypto=", FILTER_CRYPTO);
    Print("══════════════════════════════════════════════");
    EventSetTimer(POLL_INTERVAL);
    ProcessSignal();
