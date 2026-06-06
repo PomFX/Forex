@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Test Signal — ATH Trader</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,'Segoe UI',sans-serif; background:#0d0d0d; color:#e0e0e0; display:flex; justify-content:center; padding:2rem 1rem; }
+  .card { background:#1a1a1a; border:1px solid #333; border-radius:12px; padding:2rem; max-width:600px; width:100%; }
+  h1 { color:#d4a017; font-size:1.5rem; margin-bottom:0.5rem; }
+  p.sub { color:#888; font-size:0.85rem; margin-bottom:1.5rem; }
+  .form-row { display:flex; gap:1rem; margin-bottom:1rem; }
+  .form-group { flex:1; }
+  label { display:block; font-size:0.8rem; color:#aaa; margin-bottom:0.3rem; }
+  input,select,textarea { width:100%; padding:0.6rem; border:1px solid #333; border-radius:6px; background:#111; color:#e0e0e0; font-size:0.9rem; }
+  input:focus,select:focus,textarea:focus { outline:none; border-color:#d4a017; }
+  textarea { resize:vertical; font-family:inherit; }
+  .btn { width:100%; padding:0.75rem; border:none; border-radius:6px; font-size:1rem; font-weight:600; cursor:pointer; margin-top:0.5rem; }
+  .btn-gold { background:#d4a017; color:#111; }
+  .btn-gold:hover { background:#e6b422; }
+  .btn-gold:disabled { opacity:0.5; cursor:not-allowed; }
+  #result { margin-top:1rem; padding:0.75rem; border-radius:6px; display:none; font-size:0.85rem; white-space:pre-wrap; word-break:break-all; }
+  #result.success { display:block; background:#0a2a0a; border:1px solid #2a5a2a; color:#8f8; }
+  #result.error { display:block; background:#2a0a0a; border:1px solid #5a2a2a; color:#f88; }
+  .api-url { color:#666; font-size:0.75rem; text-align:center; margin-top:1rem; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>📡 ทดสอบส่ง Signal</h1>
+  <p class="sub">กรอกข้อมูลแล้วกดส่ง — API จะบันทึกและ EA จะดึงไปเปิด Pending Order</p>
+
+  <form id="signalForm">
+    <div class="form-row">
+      <div class="form-group">
+        <label>คู่เงิน</label>
+        <select id="pair"><option value="XAU/USD" selected>XAU/USD</option></select>
+      </div>
+      <div class="form-group">
+        <label>ทิศทาง</label>
+        <select id="direction"><option value="BUY">BUY</option><option value="SELL">SELL</option></select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group"><label>Entry Price</label><input type="text" id="entry" placeholder="4318.50"></div>
+      <div class="form-group"><label>Stop Loss</label><input type="text" id="sl" placeholder="4313.50"></div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group"><label>TP1</label><input type="text" id="tp1" placeholder="4323.00"></div>
+      <div class="form-group"><label>TP2</label><input type="text" id="tp2" placeholder="4328.00"></div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group"><label>TP3</label><input type="text" id="tp3" placeholder="4335.00"></div>
+      <div class="form-group"><label>สถานะ</label>
+        <select id="status"><option value="active">Active</option><option value="win">Win</option><option value="loss">Loss</option></select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>เหตุผลทางเทคนิค</label>
+      <textarea id="reason" rows="3" placeholder="Market Structure: ...&#10;Order Block / FVG: ...&#10;Liquidity: ...">Test signal from test-signal.html</textarea>
+    </div>
+
+    <button type="submit" class="btn btn-gold" id="submitBtn">ส่ง Signal</button>
+  </form>
+
+  <div id="result"></div>
+  <div class="api-url">API: /api/signals/ai</div>
+</div>
+
+<script>
+const API_BASE = 'https://forex-rouge-gamma.vercel.app';
+const AI_KEY = 'b544afcadfba96c8b08b8afac68d6838f5722ee885cfae53';
+
+document.getElementById('signalForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  const result = document.getElementById('result');
+  btn.disabled = true;
+  btn.textContent = 'กำลังส่ง...';
+  result.className = '';
+  result.style.display = 'none';
+
+  const body = {
+    pair: document.getElementById('pair').value,
+    direction: document.getElementById('direction').value,
+    entry: document.getElementById('entry').value,
+    sl: document.getElementById('sl').value,
+    tp1: document.getElementById('tp1').value,
+    tp2: document.getElementById('tp2').value,
+    tp3: document.getElementById('tp3').value,
+    reason: document.getElementById('reason').value,
+  };
+
+  try {
+    const res = await fetch(API_BASE + '/api/signals/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-AI-Key': AI_KEY },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      result.className = 'success';
+      result.textContent = '✔ Signal ส่งสำเร็จ!\n\nID: ' + data.id + '\n' + data.pair + ' ' + data.direction + ' @' + data.entry + '\nTP1: ' + data.tp1 + ' | SL: ' + data.sl + '\nสถานะ: ' + data.status;
+    } else {
+      result.className = 'error';
+      result.textContent = '✖ Error: ' + (data.error || 'Unknown');
+    }
+  } catch (err) {
+    result.className = 'error';
+    result.textContent = '✖ Connection failed: ' + err.message;
+  }
+
+  result.style.display = 'block';
+  btn.disabled = false;
+  btn.textContent = 'ส่ง Signal';
+});
+</script>
+</body>
+</html>
