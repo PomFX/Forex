@@ -163,4 +163,56 @@ const API = {
   async confirmAutoSignals(signals) {
     return this._fetch('/auto-signals/confirm', { method: 'POST', body: JSON.stringify({ signals }) });
   },
+
+  // AI Settings
+  async getAiSettings() {
+    return this._fetch('/ai-settings');
+  },
+
+  async saveAiSettings(data) {
+    return this._fetch('/ai-settings', { method: 'PUT', body: JSON.stringify(data) });
+  },
+
+  async testAiSettings(data) {
+    return this._fetch('/ai-settings/test', { method: 'POST', body: JSON.stringify(data) });
+  },
+
+  // AI Article Settings
+  async getAiArticleSettings() {
+    return this._fetch('/ai-article-settings');
+  },
+
+  async saveAiArticleSettings(data) {
+    return this._fetch('/ai-article-settings', { method: 'PUT', body: JSON.stringify(data) });
+  },
+
+  async testAiArticleSettings(data) {
+    return this._fetch('/ai-article-settings/test', { method: 'POST', body: JSON.stringify(data) });
+  },
+
+  async generateAiArticle() {
+    return this._fetch('/ai-article-settings/generate', { method: 'POST' });
+  },
+
+  // EA Dashboard
+  async getEaConfig() {
+    return this._fetch('/ea/config');
+  },
+
+  async saveEaConfig(data) {
+    return this._fetch('/ea/config', { method: 'PUT', body: JSON.stringify(data) });
+  },
+
+  async getEaLogs() {
+    return this._fetch('/ea/logs');
+  },
+
+  async clearEaLogs() {
+    return this._fetch('/ea/logs', { method: 'DELETE' });
+  },
+
+  // Performance
+  async getPerformanceStats() {
+    return this._fetch('/stats/performance');
+  },
 };

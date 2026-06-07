@@ -259,6 +259,10 @@
             <a href="#/admin/contact" class="admin-link" data-page="contact">ติดต่อ</a>
     <a href="#/admin/banner" class="admin-link" data-page="banner">แบนเนอร์</a>
     <a href="#/admin/autosignal" class="admin-link" data-page="autosignal">Auto Signal</a>
+    <a href="#/admin/aisettings" class="admin-link" data-page="aisettings">AI Settings</a>
+    <a href="#/admin/aiarticlesettings" class="admin-link" data-page="aiarticlesettings">AI Article</a>
+    <a href="#/admin/performance" class="admin-link" data-page="performance">ผลงาน</a>
+    <a href="#/admin/eadashboard" class="admin-link" data-page="eadashboard">EA Dashboard</a>
     <a href="#/" class="admin-link admin-logout">กลับหน้าบ้าน</a>
           </nav>
         </aside>
@@ -482,6 +486,134 @@
                 <button class="btn btn-gold" id="autoConfirmBtn">✅ ยืนยันส่ง Signal</button>
                 <button class="btn btn-outline" id="autoCancelBtn">❌ ยกเลิก</button>
               </div>
+            </div>
+          </div>
+
+          <!-- AI Settings -->
+          <div class="admin-page-content" id="admin-aisettings">
+            <h1>AI Settings — Signal Generation</h1>
+
+            <div id="aiSettingsStatus" style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem"></div>
+
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:1.2rem">
+              <h3 style="color:#d4a017;font-size:0.95rem;margin-bottom:0.5rem">📋 ตัวอย่าง Prompt จริง (XAU/USD)</h3>
+              <pre id="aiSettingsPreview" style="background:#111;padding:0.8rem;border-radius:6px;font-size:0.75rem;line-height:1.5;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;color:#aaa"></pre>
+            </div>
+
+            <form class="admin-form" id="aiSettingsForm">
+              <div class="form-group"><label>OpenAI Model</label>
+                <select id="aiSettingsModel" style="width:100%">
+                  <option value="gpt-4o-mini">GPT-4o Mini</option>
+                  <option value="gpt-4o">GPT-4o</option>
+                  <option value="gpt-4">GPT-4</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Temperature</label>
+                <input type="number" id="aiSettingsTemp" step="0.1" min="0" max="2" value="0.7" style="width:100px">
+              </div>
+              <div class="form-group"><label>Max Signals Per Day</label>
+                <input type="number" id="aiSettingsMax" min="1" max="20" value="4" style="width:100px">
+              </div>
+              <div class="form-group"><label>Prompt (ใช้ <code>{pair}</code> แทนชื่อคู่เงิน)</label>
+                <textarea id="aiSettingsPrompt" rows="10" style="width:100%;font-family:monospace;font-size:0.85rem" placeholder="กำลังโหลด Prompt จากระบบ..."></textarea>
+              </div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+                <button type="submit" class="btn btn-gold">💾 บันทึก</button>
+                <button type="button" class="btn btn-outline" id="aiSettingsTestBtn">🧪 ทดสอบ AI</button>
+              </div>
+            </form>
+
+            <div style="margin-top:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem">
+              <h3 style="color:#d4a017;font-size:0.95rem;margin-bottom:0.5rem">🔄 สัญญาณที่สร้างวันนี้</h3>
+              <div id="aiSettingsTodaySignals" style="font-size:0.85rem;color:var(--text-muted)"><p>กำลังโหลด...</p></div>
+            </div>
+
+            <div id="aiSettingsTestResult" style="display:none;margin-top:1rem;padding:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius)"></div>
+          </div>
+
+          <!-- AI Article Settings -->
+          <div class="admin-page-content" id="admin-aiarticlesettings">
+            <h1>AI Settings — Article Generation</h1>
+
+            <div id="aiArticleSettingsStatus" style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem"></div>
+
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:1.2rem">
+              <h3 style="color:#d4a017;font-size:0.95rem;margin-bottom:0.5rem">📋 ตัวอย่าง Prompt จริง</h3>
+              <pre id="aiArticleSettingsPreview" style="background:#111;padding:0.8rem;border-radius:6px;font-size:0.75rem;line-height:1.5;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;color:#aaa"></pre>
+            </div>
+
+            <form class="admin-form" id="aiArticleSettingsForm">
+              <div class="form-group"><label>OpenAI Model</label>
+                <select id="aiArticleSettingsModel" style="width:100%">
+                  <option value="gpt-4o-mini">GPT-4o Mini</option>
+                  <option value="gpt-4o">GPT-4o</option>
+                  <option value="gpt-4">GPT-4</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Temperature</label>
+                <input type="number" id="aiArticleSettingsTemp" step="0.1" min="0" max="2" value="0.7" style="width:100px">
+              </div>
+              <div class="form-group"><label>Prompt (ใช้ <code>{price}</code> และ <code>{date}</code>)</label>
+                <textarea id="aiArticleSettingsPrompt" rows="10" style="width:100%;font-family:monospace;font-size:0.85rem" placeholder="กำลังโหลด Prompt จากระบบ..."></textarea>
+              </div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+                <button type="submit" class="btn btn-gold">💾 บันทึก</button>
+                <button type="button" class="btn btn-outline" id="aiArticleSettingsTestBtn">🧪 ทดสอบ AI</button>
+                <button type="button" class="btn btn-outline" id="aiArticleSettingsGenerateBtn">📝 สร้างบทความตอนนี้</button>
+              </div>
+            </form>
+
+            <div style="margin-top:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem">
+              <h3 style="color:#d4a017;font-size:0.95rem;margin-bottom:0.5rem">📰 บทความล่าสุดที่สร้างโดย AI</h3>
+              <div id="aiArticleSettingsRecent" style="font-size:0.85rem;color:var(--text-muted)"><p>กำลังโหลด...</p></div>
+            </div>
+
+            <div id="aiArticleSettingsTestResult" style="display:none;margin-top:1rem;padding:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius)"></div>
+          </div>
+
+          <!-- Performance -->
+          <div class="admin-page-content" id="admin-performance">
+            <h1>ผลงานสัญญาณเทรด</h1>
+            <div id="performanceSummary" style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem"></div>
+            <div id="performanceByPair" style="margin-bottom:1.5rem">
+              <h3 style="color:#d4a017;font-size:1rem;margin-bottom:0.5rem">แยกตามคู่เงิน</h3>
+              <div class="table-wrapper"><table class="admin-table"><thead><tr><th>คู่เงิน</th><th>ทั้งหมด</th><th>ชนะ</th><th>แพ้</th><th>Win Rate</th></tr></thead><tbody id="performancePairBody"></tbody></table></div>
+            </div>
+            <div id="performanceMonthly" style="margin-bottom:1.5rem">
+              <h3 style="color:#d4a017;font-size:1rem;margin-bottom:0.5rem">แยกตามเดือน</h3>
+              <div class="table-wrapper"><table class="admin-table"><thead><tr><th>เดือน</th><th>ทั้งหมด</th><th>ชนะ</th><th>Win Rate</th></tr></thead><tbody id="performanceMonthlyBody"></tbody></table></div>
+            </div>
+          </div>
+
+          <!-- EA Dashboard -->
+          <div class="admin-page-content" id="admin-eadashboard">
+            <h1>EA Dashboard</h1>
+            <p style="color:#888;margin-bottom:1rem;font-size:0.85rem">จัดการการทำงานของ MT5 Expert Advisor</p>
+            <form class="admin-form" id="eaConfigForm">
+              <div class="form-group">
+                <label>เปิดใช้งาน EA</label>
+                <label class="switch"><input type="checkbox" id="eaEnabled"><span class="slider"></span></label>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Lot Size</label><input type="number" id="eaLotSize" step="0.01" min="0.01" value="0.01" style="width:120px"></div>
+                <div class="form-group"><label>TP Mode</label>
+                  <select id="eaTpMode" style="width:120px">
+                    <option value="1">TP1</option>
+                    <option value="2">TP2</option>
+                    <option value="3">TP3</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group"><label>คู่เงินที่อนุญาตให้ EA เข้า Order</label>
+                <div id="eaAllowedPairs" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.3rem"></div>
+              </div>
+              <button type="submit" class="btn btn-gold">💾 บันทึก</button>
+            </form>
+
+            <div style="margin-top:2rem">
+              <h3 style="color:#d4a017;font-size:1rem;margin-bottom:0.5rem">Activity Log</h3>
+              <div id="eaLogContent" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;font-family:monospace;font-size:0.8rem;min-height:60px"></div>
+              <button class="btn btn-danger btn-sm" id="eaClearLogsBtn" style="margin-top:0.5rem">🗑 ลบ Log</button>
             </div>
           </div>
         </main>

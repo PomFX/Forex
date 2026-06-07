@@ -79,4 +79,25 @@ router.get('/gold', async (req, res) => {
   }
 });
 
+// Performance stats (admin)
+router.get('/performance', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const [total, byPair, byDirection, monthly] = await Promise.all([
+      pool.query("SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE status='win') as wins, COUNT(*) FILTER (WHERE status='loss') as losses, COUNT(*) FILTER (WHERE status='active') as active FROM signals"),
+      pool.query("SELECT pair, COUNT(*) as total, COUNT(*) FILTER (WHERE status='win') as wins, COUNT(*) FILTER (WHERE status='loss') as losses FROM signals GROUP BY pair ORDER BY total DESC"),
+      pool.query("SELECT direction, COUNT(*) as total, COUNT(*) FILTER (WHERE status='win') as wins FROM signals GROUP BY direction"),
+      pool.query("SELECT to_char(created_at, 'YYYY-MM') as month, COUNT(*) as total, COUNT(*) FILTER (WHERE status='win') as wins FROM signals GROUP BY month ORDER BY month DESC LIMIT 12"),
+    ]);
+    res.json({
+      summary: total.rows[0],
+      byPair: byPair.rows,
+      byDirection: byDirection.rows,
+      monthly: monthly.rows,
+    });
+  } catch (err) {
+    console.error('Get performance stats error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด' });
+  }
+});
+
 module.exports = router;

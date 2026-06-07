@@ -68,7 +68,7 @@
 
 | Term | Definition |
 |------|------------|
-| **MT5 EA** | Expert Advisor (`SignalReceiver.mq5`) ที่ติดตั้งใน MetaTrader 5 — ดึง Signal ทั้งหมดจาก API แล้วเปิด Pending Order อัตโนมัติ ทุกคู่ |
+| **MT5 EA** | Expert Advisor (`SignalReceiverATH.mq5`) ที่ติดตั้งใน MetaTrader 5 — ดึง Signal ทั้งหมดจาก API แล้วเปิด Pending Order อัตโนมัติ ทุกคู่ |
 | **MT5 Signal API** | API endpoint `/api/signals/mt5` คืน **ทุก Signal active** เป็น JSON array `[{...}, {...}]` |
 | **Pending Order** | คำสั่งตั้งรอราคาใน MT5 — EA เลือก BUY LIMIT / BUY STOP / SELL LIMIT / SELL STOP อัตโนมัติ โดยเทียบ `entry` กับราคาตลาดปัจจุบัน |
 | **Multi-Symbol** | EA 1 ตัวรันกราฟไหนก็ได้ — เปิด Pending ทุกคู่พร้อมกันโดยไม่เช็ค chart symbol |
@@ -86,7 +86,60 @@
 | **Image Storage** | รูปภาพทั้งหมดถูกเก็บเป็น Base64 Data URL (ข้อความยาวใน Database) เพื่อรองรับการ Deploy บน Vercel serverless |
 | **Auth Model** | Super Admin ยืนยันตัวตนผ่าน env vars; Admin ปกติยืนยันผ่าน Database (`users` table) โดยตรวจสอบคอลัมน์ `is_admin`; ผู้ใช้ทั่วไปยืนยันผ่าน Database เช่นกัน |
 
-## Status (2026-06-06)
+## AI Settings
+
+| Detail | Value |
+|--------|-------|
+| **Model** | ตั้งค่าได้ (default: `gpt-4o-mini`) |
+| **Prompt** | ใช้ `{pair}` placeholder, ปรับแต่งได้, ทดสอบผ่าน Admin UI |
+| **Temperature** | 0-2, default 0.7 |
+| **Max/Day** | จำกัดจำนวนสัญญาณต่อวัน (default: 4) |
+| **Admin Page** | `/#/admin/aisettings` |
+| **API** | `GET/PUT /api/ai-settings`, `POST /api/ai-settings/test` |
+
+## AI Article Settings
+
+| Detail | Value |
+|--------|-------|
+| **Model** | ตั้งค่าได้ (default: `gpt-4o-mini`) |
+| **Prompt** | ใช้ `{price}` และ `{date}` placeholder |
+| **Generate** | กดปุ่ม "สร้างบทความตอนนี้" ใน Admin UI หรือเรียก `POST /api/ai-article-settings/generate` |
+| **Admin Page** | `/#/admin/aiarticlesettings` |
+| **API** | `GET/PUT /api/ai-article-settings`, `POST /api/ai-article-settings/test`, `POST /api/ai-article-settings/generate` |
+
+## EA Dashboard
+
+| Detail | Value |
+|--------|-------|
+| **Master Toggle** | เปิด/ปิด EA จาก Server |
+| **Lot Size** | ตั้งค่าขนาด Lot จาก Server |
+| **TP Mode** | เลือก TP1/TP2/TP3 |
+| **Allowed Pairs** | เลือกคู่เงินที่ให้ EA เข้า Order ได้ |
+| **Heartbeat** | EA ส่งสถานะมาที่ `GET /api/ea/heartbeat` ทุก Poll |
+| **Activity Log** | ดู Log การทำงานของ EA + ลบได้ |
+| **Admin Page** | `/#/admin/eadashboard` |
+| **API** | `GET/PUT /api/ea/config`, `GET /api/ea/allowed-pairs`, `GET /api/ea/heartbeat`, `GET/DELETE /api/ea/logs` |
+
+## Performance Dashboard
+
+| Detail | Value |
+|--------|-------|
+| **Summary** | สัญญาณทั้งหมด / ชนะ / แพ้ / Win Rate / Active |
+| **By Pair** |  Win Rate แยกตามคู่เงิน |
+| **By Month** |  Win Rate แยกตามเดือน |
+| **Admin Page** | `/#/admin/performance` |
+| **API** | `GET /api/stats/performance` |
+
+## Shared Express App
+
+| Detail | Value |
+|--------|-------|
+| **File** | `server/app.js` — สร้าง Express app + middleware + routes ทั้งหมด |
+| **server.js** | import app.js → เพิ่ม static + SPA fallback → initDB → listen |
+| **api/index.js** | import app.js → initDB → export serverless handler |
+| **ข้อดี** | เพิ่ม route ครั้งเดียว ไม่ต้องลงทะเบียนซ้ำ 2 ที่ |
+
+## Status (2026-06-07)
 
 | Item | Status |
 |------|--------|
@@ -104,3 +157,8 @@
 | **MT5 Multi-Symbol** | ✅ API คืนทุก signal active (array), EA เปิด Pending ทุกคู่พร้อมกัน |
 | **MT5 Per-Symbol Replacement** | ✅ ยกเลิก Pending เฉพาะคู่ที่มี signal ใหม่, ไม่แตะคู่อื่น |
 | **MT5 Price Guard** | ✅ ตรวจสอบ Bid/Ask ก่อนวาง Pending — ถ้าไม่มีราคาข้ามรอบ |
+| **AI Settings** | ✅ Admin UI + API (GET/PUT/test) |
+| **AI Article Settings** | ✅ Admin UI + API (GET/PUT/test/generate) |
+| **EA Dashboard** | ✅ Admin UI + API (config, allowed-pairs, heartbeat, logs) |
+| **Performance** | ✅ Admin UI + API (`GET /api/stats/performance`) |
+| **Shared Express App** | ✅ `server/app.js` — routes registered once |

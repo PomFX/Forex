@@ -60,6 +60,10 @@ const Router = {
         case 'contact': await Admin.renderContactSettings(); break;
         case 'banner': await Admin.renderBannerSettings(); break;
         case 'autosignal': await Admin.renderAutoSignal(); break;
+        case 'aisettings': await Admin.renderAiSettings(); break;
+        case 'aiarticlesettings': await Admin.renderAiArticleSettings(); break;
+        case 'performance': await Admin.renderPerformance(); break;
+        case 'eadashboard': await Admin.renderEaDashboard(); break;
         default: await Admin.showDashboard(); break;
       }
       return;

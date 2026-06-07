@@ -672,4 +672,279 @@ const Admin = {
       App.toast('วิเคราะห์ล้มเหลว', true);
     }
   },
+
+  // ====== AI SETTINGS ======
+  async renderAiSettings() {
+    try {
+      const settings = await API.getAiSettings();
+      document.getElementById('aiSettingsModel').value = settings.model || 'gpt-4o-mini';
+      document.getElementById('aiSettingsTemp').value = settings.temperature || 0.7;
+      document.getElementById('aiSettingsMax').value = settings.maxSignalsPerDay || 4;
+      const prompt = settings.prompt || '';
+      document.getElementById('aiSettingsPrompt').value = prompt;
+
+      const rendered = prompt.replace(/\{pair\}/g, 'XAU/USD');
+      document.getElementById('aiSettingsPreview').textContent = rendered;
+
+      document.getElementById('aiSettingsPrompt').addEventListener('input', () => {
+        const p = document.getElementById('aiSettingsPrompt').value;
+        document.getElementById('aiSettingsPreview').textContent = p.replace(/\{pair\}/g, 'XAU/USD');
+      });
+
+      try {
+        const perf = await API.getPerformanceStats();
+        const s = perf.summary;
+        const total = parseInt(s.total);
+        const wins = parseInt(s.wins);
+        const losses = parseInt(s.losses);
+        const winRate = total > 0 ? ((wins / (wins + losses)) * 100).toFixed(1) : '0';
+        document.getElementById('aiSettingsStatus').innerHTML = `
+          <div class="admin-stat-card" style="flex:1;min-width:120px"><h3>🤖 โมเดล</h3><p style="font-size:0.85rem">${settings.model || 'gpt-4o-mini'}</p></div>
+          <div class="admin-stat-card" style="flex:1;min-width:120px"><h3>🌡️ Temperature</h3><p style="font-size:0.85rem">${settings.temperature || 0.7}</p></div>
+          <div class="admin-stat-card" style="flex:1;min-width:120px"><h3>📊 Win Rate</h3><p style="font-size:0.85rem">${winRate}%</p></div>
+          <div class="admin-stat-card" style="flex:1;min-width:120px"><h3>⏰ กำหนดการ</h3><p style="font-size:0.85rem">ทุก 30 นาที</p></div>
+        `;
+      } catch { /* ignore */ }
+
+      try {
+        const signals = await API.getSignals();
+        const today = new Date().toISOString().slice(0, 10);
+        const todaySignals = signals.filter(s => s.created_at && s.created_at.slice(0, 10) === today);
+        document.getElementById('aiSettingsTodaySignals').innerHTML = todaySignals.length
+          ? todaySignals.map(s => {
+              const st = s.direction === 'BUY' ? '🟢' : '🔴';
+              return `<div style="padding:0.3rem 0;border-bottom:1px solid #222;display:flex;gap:0.5rem">
+                <span>${st}</span>
+                <span style="color:#d4a017">${s.pair}</span>
+                <span style="color:${s.direction === 'BUY' ? 'var(--green)' : 'var(--red)'}">${s.direction}</span>
+                <span style="color:#888">@${s.entry || '-'}</span>
+                <span style="color:var(--text-muted);font-size:0.75rem">${s.status}</span>
+              </div>`;
+            }).join('')
+          : '<p style="color:#888">— ยังไม่มีสัญญาณวันนี้ —</p>';
+      } catch { /* ignore */ }
+
+      document.getElementById('aiSettingsForm').onsubmit = async (e) => {
+        e.preventDefault();
+        try {
+          await API.saveAiSettings({
+            model: document.getElementById('aiSettingsModel').value,
+            temperature: parseFloat(document.getElementById('aiSettingsTemp').value),
+            maxSignalsPerDay: parseInt(document.getElementById('aiSettingsMax').value),
+            prompt: document.getElementById('aiSettingsPrompt').value,
+          });
+          App.toast('บันทึก AI Settings แล้ว');
+        } catch (err) { App.toast('บันทึกผิดพลาด', true); }
+      };
+
+      document.getElementById('aiSettingsTestBtn').onclick = async () => {
+        const resultDiv = document.getElementById('aiSettingsTestResult');
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<p style="color:#888">🤖 กำลังทดสอบ AI...</p>';
+        try {
+          const res = await API.testAiSettings({
+            prompt: document.getElementById('aiSettingsPrompt').value,
+            pair: 'XAU/USD',
+          });
+          const hasSetup = res.result && res.result.hasSetup;
+          const icon = hasSetup ? '🟢' : '⚪';
+          resultDiv.innerHTML = `<div style="margin-bottom:0.5rem;font-size:0.9rem">${icon} ผลการทดสอบ AI</div>
+            <pre style="font-size:0.8rem;white-space:pre-wrap;word-break:break-word;background:#111;padding:0.8rem;border-radius:6px">${escHtml(JSON.stringify(res.result, null, 2))}</pre>`;
+        } catch (err) {
+          resultDiv.innerHTML = `<p style="color:#f88">❌ ทดสอบล้มเหลว: ${escHtml(err.message)}</p>`;
+        }
+      };
+    } catch (err) { console.error('renderAiSettings:', err); }
+  },
+
+  // ====== AI ARTICLE SETTINGS ======
+  async renderAiArticleSettings() {
+    try {
+      const settings = await API.getAiArticleSettings();
+      document.getElementById('aiArticleSettingsModel').value = settings.model || 'gpt-4o-mini';
+      document.getElementById('aiArticleSettingsTemp').value = settings.temperature || 0.7;
+      const prompt = settings.prompt || '';
+      document.getElementById('aiArticleSettingsPrompt').value = prompt;
+
+      const today = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Bangkok' });
+      const rendered = prompt.replace(/\{price\}/g, '3,150.00').replace(/\{date\}/g, today);
+      document.getElementById('aiArticleSettingsPreview').textContent = rendered;
+
+      document.getElementById('aiArticleSettingsPrompt').addEventListener('input', () => {
+        const p = document.getElementById('aiArticleSettingsPrompt').value;
+        document.getElementById('aiArticleSettingsPreview').textContent = p.replace(/\{price\}/g, '3,150.00').replace(/\{date\}/g, today);
+      });
+
+      try {
+        document.getElementById('aiArticleSettingsStatus').innerHTML = `
+          <div class="admin-stat-card" style="flex:1;min-width:120px"><h3>🤖 โมเดล</h3><p style="font-size:0.85rem">${settings.model || 'gpt-4o-mini'}</p></div>
+          <div class="admin-stat-card" style="flex:1;min-width:120px"><h3>🌡️ Temperature</h3><p style="font-size:0.85rem">${settings.temperature || 0.7}</p></div>
+          <div class="admin-stat-card" style="flex:1;min-width:120px"><h3>⏰ สร้างทุก</h3><p style="font-size:0.85rem">30 นาที (หลัง Signal)</p></div>
+        `;
+      } catch { /* ignore */ }
+
+      try {
+        const articles = await API.getArticles();
+        const aiArticles = articles.filter(a => a.title.includes('ทอง') || a.title.includes('XAU') || a.title.includes('Gold')).slice(0, 5);
+        document.getElementById('aiArticleSettingsRecent').innerHTML = aiArticles.length
+          ? aiArticles.map(a => {
+              const date = new Date(a.created_at).toLocaleDateString('th-TH');
+              return `<div style="padding:0.4rem 0;border-bottom:1px solid #222">
+                <a href="#/articles" style="color:#d4a017;text-decoration:none">📰 ${escHtml(a.title)}</a>
+                <span style="color:#888;font-size:0.75rem;margin-left:0.5rem">${date}</span>
+              </div>`;
+            }).join('')
+          : '<p style="color:#888">— ยังไม่มีบทความที่สร้างโดย AI —</p>';
+      } catch { /* ignore */ }
+
+      document.getElementById('aiArticleSettingsForm').onsubmit = async (e) => {
+        e.preventDefault();
+        try {
+          await API.saveAiArticleSettings({
+            model: document.getElementById('aiArticleSettingsModel').value,
+            temperature: parseFloat(document.getElementById('aiArticleSettingsTemp').value),
+            prompt: document.getElementById('aiArticleSettingsPrompt').value,
+          });
+          App.toast('บันทึก AI Article Settings แล้ว');
+        } catch (err) { App.toast('บันทึกผิดพลาด', true); }
+      };
+
+      document.getElementById('aiArticleSettingsTestBtn').onclick = async () => {
+        const resultDiv = document.getElementById('aiArticleSettingsTestResult');
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<p style="color:#888">🤖 กำลังทดสอบ AI...</p>';
+        try {
+          const res = await API.testAiArticleSettings({
+            prompt: document.getElementById('aiArticleSettingsPrompt').value,
+          });
+          const hasTitle = res.result && res.result.title;
+          const icon = hasTitle ? '✅' : '⚠️';
+          resultDiv.innerHTML = `<div style="margin-bottom:0.5rem;font-size:0.9rem">${icon} ผลการทดสอบ AI</div>
+            <pre style="font-size:0.8rem;white-space:pre-wrap;word-break:break-word;background:#111;padding:0.8rem;border-radius:6px">${escHtml(JSON.stringify(res.result, null, 2))}</pre>`;
+        } catch (err) {
+          resultDiv.innerHTML = `<p style="color:#f88">❌ ทดสอบล้มเหลว: ${escHtml(err.message)}</p>`;
+        }
+      };
+
+      document.getElementById('aiArticleSettingsGenerateBtn').onclick = async () => {
+        const resultDiv = document.getElementById('aiArticleSettingsTestResult');
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<p style="color:#888">📝 กำลังสร้างบทความ...</p>';
+        try {
+          const article = await API.generateAiArticle();
+          resultDiv.innerHTML = `<p style="color:#8f8">✅ สร้างบทความสำเร็จ: <strong>${escHtml(article.title)}</strong></p>`;
+          if (typeof Admin.renderArticles === 'function') Admin.renderArticles();
+        } catch (err) {
+          resultDiv.innerHTML = `<p style="color:#f88">❌ สร้างบทความล้มเหลว: ${escHtml(err.message)}</p>`;
+        }
+      };
+    } catch (err) { console.error('renderAiArticleSettings:', err); }
+  },
+
+  // ====== PERFORMANCE ======
+  async renderPerformance() {
+    try {
+      const perf = await API.getPerformanceStats();
+      const s = perf.summary;
+      const total = parseInt(s.total);
+      const wins = parseInt(s.wins);
+      const losses = parseInt(s.losses);
+      const winRate = total > 0 ? ((wins / (wins + losses)) * 100).toFixed(1) : '0';
+
+      document.getElementById('performanceSummary').innerHTML = `
+        <div class="admin-stat-card"><h3>สัญญาณทั้งหมด</h3><p>${total}</p></div>
+        <div class="admin-stat-card"><h3>ชนะ</h3><p style="color:var(--green)">${wins}</p></div>
+        <div class="admin-stat-card"><h3>แพ้</h3><p style="color:var(--red)">${losses}</p></div>
+        <div class="admin-stat-card"><h3>Win Rate</h3><p style="color:var(--gold)">${winRate}%</p></div>
+        <div class="admin-stat-card"><h3>กำลังดำเนินการ</h3><p style="color:var(--text-muted)">${s.active}</p></div>
+      `;
+
+      document.getElementById('performancePairBody').innerHTML = perf.byPair.length
+        ? perf.byPair.map(p => {
+            const pwins = parseInt(p.wins);
+            const plosses = parseInt(p.losses);
+            const prate = (pwins + plosses) > 0 ? ((pwins / (pwins + plosses)) * 100).toFixed(1) : '0';
+            return `<tr><td>${p.pair}</td><td>${p.total}</td><td style="color:var(--green)">${pwins}</td><td style="color:var(--red)">${plosses}</td><td style="color:var(--gold)">${prate}%</td></tr>`;
+          }).join('')
+        : '<tr><td colspan="5" style="text-align:center">ไม่มีข้อมูล</td></tr>';
+
+      document.getElementById('performanceMonthlyBody').innerHTML = perf.monthly.length
+        ? perf.monthly.map(m => {
+            const mwins = parseInt(m.wins);
+            const mtotal = parseInt(m.total);
+            const mrate = mtotal > 0 ? ((mwins / mtotal) * 100).toFixed(1) : '0';
+            return `<tr><td>${m.month}</td><td>${mtotal}</td><td style="color:var(--green)">${mwins}</td><td style="color:var(--gold)">${mrate}%</td></tr>`;
+          }).join('')
+        : '<tr><td colspan="4" style="text-align:center">ไม่มีข้อมูล</td></tr>';
+    } catch (err) { console.error('renderPerformance:', err); }
+  },
+
+  // ====== EA DASHBOARD ======
+  async renderEaDashboard() {
+    try {
+      const config = await API.getEaConfig();
+      document.getElementById('eaEnabled').checked = config.enabled || false;
+      document.getElementById('eaLotSize').value = config.lotSize || 0.01;
+      document.getElementById('eaTpMode').value = String(config.tpMode || 1);
+
+      const pairsContainer = document.getElementById('eaAllowedPairs');
+      const allPairs = config.allPairs || ['XAU/USD','XAG/USD','EUR/USD','GBP/USD','USD/JPY','USD/CHF','AUD/USD','NZD/USD','USD/CAD','BTC/USD','ETH/USD','XRP/USD'];
+      const allowed = config.allowedPairs || [];
+      pairsContainer.innerHTML = allPairs.map(p => {
+        const checked = allowed.includes(p);
+        return `<label class="pair-toggle ${checked ? 'on' : ''}" style="margin:0">
+          <input type="checkbox" class="ea-pair-cb" data-pair="${p}" ${checked ? 'checked' : ''}>
+          <span class="pair-name">${p}</span>
+        </label>`;
+      }).join('');
+
+      pairsContainer.querySelectorAll('.ea-pair-cb').forEach(cb => {
+        cb.addEventListener('change', () => {
+          cb.closest('.pair-toggle').classList.toggle('on', cb.checked);
+        });
+      });
+
+      document.getElementById('eaConfigForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const selected = [];
+        document.querySelectorAll('.ea-pair-cb:checked').forEach(cb => selected.push(cb.dataset.pair));
+        try {
+          await API.saveEaConfig({
+            enabled: document.getElementById('eaEnabled').checked,
+            lotSize: parseFloat(document.getElementById('eaLotSize').value),
+            tpMode: parseInt(document.getElementById('eaTpMode').value),
+            allowedPairs: selected,
+          });
+          App.toast('บันทึก EA Config แล้ว');
+        } catch (err) { App.toast('บันทึกผิดพลาด', true); }
+      };
+
+      // Load logs
+      await this._loadEaLogs();
+      document.getElementById('eaClearLogsBtn').onclick = async () => {
+        try {
+          await API.clearEaLogs();
+          document.getElementById('eaLogContent').innerHTML = '<p style="color:#888">— ลบ Log แล้ว —</p>';
+          App.toast('ลบ Log แล้ว');
+        } catch (err) { App.toast('ลบ Log ล้มเหลว', true); }
+      };
+    } catch (err) { console.error('renderEaDashboard:', err); }
+  },
+
+  async _loadEaLogs() {
+    try {
+      const data = await API.getEaLogs();
+      const logDiv = document.getElementById('eaLogContent');
+      if (!data.logs) {
+        logDiv.innerHTML = '<p style="color:#888">— ยังไม่มี Log —</p>';
+        return;
+      }
+      logDiv.innerHTML = Object.entries(data.logs).map(([k, v]) => {
+        const val = typeof v === 'object' ? JSON.stringify(v) : v;
+        return `<div><span style="color:var(--gold)">${k}:</span> ${escHtml(String(val))}</div>`;
+      }).join('');
+    } catch (err) {
+      document.getElementById('eaLogContent').innerHTML = '<p style="color:#888">— ยังไม่มี Log —</p>';
+    }
+  },
 };

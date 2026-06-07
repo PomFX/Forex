@@ -108,13 +108,13 @@
 
 <div class="main">
 
-  <h1>📡 คู่มือการใช้งาน EA SignalReceiver</h1>
+  <h1>📡 คู่มือการใช้งาน EA SignalReceiverATH</h1>
   <p class="sub">รับสัญญาณเทรดอัตโนมัติ — ATH Trader MT5 Integration</p>
 
   <!-- ====== INTRO ====== -->
   <section id="intro">
     <h2>แนะนำ EA</h2>
-    <p><strong>SignalReceiver</strong> เป็น Expert Advisor (EA) สำหรับ MetaTrader 5 ที่พัฒนาโดย ATH Trader เพื่อรับสัญญาณเทรด (Trading Signals) จากระบบของเราแล้วเปิด <strong>Pending Order</strong> อัตโนมัติ</p>
+    <p><strong>SignalReceiverATH</strong> เป็น Expert Advisor (EA) สำหรับ MetaTrader 5 ที่พัฒนาโดย ATH Trader เพื่อรับสัญญาณเทรด (Trading Signals) จากระบบของเราแล้วเปิด <strong>Pending Order</strong> อัตโนมัติ</p>
 
     <div class="box gold">
       <div class="badge gold" style="margin-bottom:0.3rem">คุณสมบัติ</div>
@@ -152,7 +152,7 @@
       <div class="step-num">1</div>
       <div class="step-content">
         <h3>ดาวน์โหลดไฟล์ EA</h3>
-        <p>ดาวน์โหลดไฟล์ <code>SignalReceiver.mq5</code> จากลิงก์ที่ Admin จัดเตรียมไว้</p>
+        <p>ดาวน์โหลดไฟล์ <code>SignalReceiverATH.mq5</code> จากลิงก์ที่ Admin จัดเตรียมไว้</p>
       </div>
     </div>
 
@@ -168,7 +168,7 @@
       <div class="step-num">3</div>
       <div class="step-content">
         <h3>วางไฟล์ EA</h3>
-        <p>วางไฟล์ <code>SignalReceiver.mq5</code> ในโฟลเดอร์ <code>MQL5/Experts/</code></p>
+        <p>วางไฟล์ <code>SignalReceiverATH.mq5</code> ในโฟลเดอร์ <code>MQL5/Experts/</code></p>
       </div>
     </div>
 
@@ -203,7 +203,7 @@
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-content">
-        <p>ลาก EA <strong>SignalReceiver</strong> จาก Navigator (View → Navigator) วางบน Chart</p>
+        <p>ลาก EA <strong>SignalReceiverATH</strong> จาก Navigator (View → Navigator) วางบน Chart</p>
       </div>
     </div>
 
@@ -218,7 +218,7 @@
       <strong>⚠️ ข้อสำคัญ:</strong> ถ้าเป็นครั้งแรก ต้องติ๊ก <strong>"Allow Automated Trading"</strong> ในหน้าต่าง Common ก่อน
     </div>
 
-    <p>EA จะเริ่มทำงานทันที — จะเห็นข้อความขึ้นใน Experts log ว่า <code>[SignalReceiver v2.2] MULTI-SYMBOL PENDING ORDER EA</code></p>
+    <p>EA จะเริ่มทำงานทันที — จะเห็นข้อความขึ้นใน Experts log ว่า <code>[SignalReceiverATH v2.2] MULTI-SYMBOL PENDING ORDER EA</code></p>
   </section>
 
   <!-- ====== INPUTS ====== -->
@@ -325,13 +325,13 @@
 
     <table>
       <tr><th>ข้อความ</th><th>ความหมาย</th></tr>
-      <tr><td><code>[SignalReceiver v2.2] MULTI-SYMBOL PENDING ORDER EA</code></td><td>EA เริ่มทำงานสำเร็จ</td></tr>
-      <tr><td><code>[SignalReceiver] Checking for new signal...</code></td><td>กำลังตรวจสอบ API</td></tr>
-      <tr><td><code>[SignalReceiver] PENDING ORDER PLACED | Ticket=...</code></td><td>✅ วาง Pending Order สำเร็จ</td></tr>
-      <tr><td><code>[SignalReceiver] New signal — cancelling previous pending orders</code></td><td>สัญญาณใหม่ → ยกเลิกคำสั่งเก่า</td></tr>
-      <tr><td><code>[SignalReceiver] No active signal — cancelling all pending orders</code></td><td>ไม่มีสัญญาณ → ยกเลิกทั้งหมด</td></tr>
-      <tr><td><code>[SignalReceiver] Skipped ETHUSDi (chart is XAUUSD, not ETHUSDi)</code></td><td>สัญญาณไม่ตรงกับ Chart นี้</td></tr>
-      <tr><td><code>[SignalReceiver] WebRequest FAILED...</code></td><td>เชื่อมต่อ API ไม่ได้ (ดูหัวข้อแก้ปัญหา)</td></tr>
+      <tr><td><code>[SignalReceiverATH v2.2] MULTI-SYMBOL PENDING ORDER EA</code></td><td>EA เริ่มทำงานสำเร็จ</td></tr>
+      <tr><td><code>[SignalReceiverATH] Checking for new signal...</code></td><td>กำลังตรวจสอบ API</td></tr>
+      <tr><td><code>[SignalReceiverATH] PENDING ORDER PLACED | Ticket=...</code></td><td>✅ วาง Pending Order สำเร็จ</td></tr>
+      <tr><td><code>[SignalReceiverATH] New signal — cancelling previous pending orders</code></td><td>สัญญาณใหม่ → ยกเลิกคำสั่งเก่า</td></tr>
+      <tr><td><code>[SignalReceiverATH] No active signal — cancelling all pending orders</code></td><td>ไม่มีสัญญาณ → ยกเลิกทั้งหมด</td></tr>
+      <tr><td><code>[SignalReceiverATH] Skipped ETHUSDi (chart is XAUUSD, not ETHUSDi)</code></td><td>สัญญาณไม่ตรงกับ Chart นี้</td></tr>
+      <tr><td><code>[SignalReceiverATH] WebRequest FAILED...</code></td><td>เชื่อมต่อ API ไม่ได้ (ดูหัวข้อแก้ปัญหา)</td></tr>
     </table>
   </section>
 
