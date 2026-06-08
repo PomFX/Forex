@@ -64,6 +64,8 @@ const Router = {
         case 'aiarticlesettings': await Admin.renderAiArticleSettings(); break;
         case 'performance': await Admin.renderPerformance(); break;
         case 'eadashboard': await Admin.renderEaDashboard(); break;
+        case 'testsignal': window.location.href = 'test-signal.html'; return;
+        case 'autosignalguide': window.location.href = 'auto-signal-guide.html'; return;
         default: await Admin.showDashboard(); break;
       }
       return;
