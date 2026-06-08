@@ -84,6 +84,10 @@ int OnInit()
    if(IsExpired())
    {
       Print("[SignalReceiver] EA EXPIRED — licence valid until ", EXPIRY_DATE);
+      MessageBox("EA หมดอายุแล้ว กรุณาติดต่อทีมงาน ATH Trader เพื่อขอต่ออายุ\n\n"
+                +"Expiry: " + EXPIRY_DATE,
+                "ATH Trader — Licence Expired",
+                MB_ICONERROR | MB_OK);
       return INIT_FAILED;
    }
 
@@ -116,7 +120,7 @@ void OnTimer()
 {
    if(IsExpired())
    {
-      Print("[SignalReceiver] EA expired — skipping all operations");
+      Print("[SignalReceiver] EA expired — ติดต่อทีมงาน ATH Trader เพื่อต่ออายุ (Expiry: ", EXPIRY_DATE, ")");
       return;
    }
 
