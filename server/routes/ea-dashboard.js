@@ -107,9 +107,12 @@ router.post('/heartbeat', async (req, res) => {
       return res.status(403).json({ error: 'Invalid MT5 key' });
     }
 
+    console.log('[EA heartbeat POST] body:', JSON.stringify(req.body));
+    console.log('[EA heartbeat POST] headers:', JSON.stringify(req.headers));
+
     const { broker, login, name, balance, profit, mode } = req.body || {};
     if (!login) {
-      return res.status(400).json({ error: 'Missing login' });
+      return res.status(400).json({ error: 'Missing login', body: req.body });
     }
 
     // Update heartbeat timestamp (same as GET)
