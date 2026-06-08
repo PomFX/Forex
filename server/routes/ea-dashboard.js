@@ -109,10 +109,17 @@ router.post('/heartbeat', async (req, res) => {
 
     console.log('[EA heartbeat POST] body:', JSON.stringify(req.body));
     console.log('[EA heartbeat POST] headers:', JSON.stringify(req.headers));
+    console.log('[EA heartbeat POST] rawType:', typeof req.body, 'isArray:', Array.isArray(req.body));
 
     const { broker, login, name, balance, profit, mode } = req.body || {};
     if (!login) {
-      return res.status(400).json({ error: 'Missing login', body: req.body });
+      return res.status(400).json({
+        error: 'Missing login',
+        bodyType: typeof req.body,
+        bodyIsArray: Array.isArray(req.body),
+        bodyKeys: req.body ? Object.keys(req.body) : null,
+        bodyPreview: req.body ? JSON.stringify(req.body).slice(0, 500) : null
+      });
     }
 
     // Update heartbeat timestamp (same as GET)
