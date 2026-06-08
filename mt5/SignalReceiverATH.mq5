@@ -1383,7 +1383,7 @@ bool SendAccountInfo()
       + "\"mode\":\""     + modeStr + "\""
       + "}";
 
-   char data[];
+   uchar data[];
    char result[];
    string resultHeaders;
    StringToCharArray(json, data, 0, StringLen(json));
@@ -1404,5 +1404,6 @@ bool SendAccountInfo()
 
    Print("[SignalReceiver] AccountInfo WebRequest HTTP ", res);
    if(res == 200) Print("[SignalReceiver] AccountInfo sent OK (", broker, " #", login, " $", DoubleToString(balance, 2), ")");
+   else Print("[SignalReceiver] AccountInfo response: ", CharArrayToString(result));
    return (res == 200);
 }
