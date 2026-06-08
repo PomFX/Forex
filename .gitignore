@@ -8,6 +8,8 @@ node_modules/
 uploads/*.jpg
 uploads/*.jpeg
 uploads/*.png
+*.ex5
+*.ex4
 uploads/*.webp
 !uploads/.gitkeep
 .env*
