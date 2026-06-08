@@ -407,6 +407,10 @@ void UpdateDashboard()
          txt = sym + "  Bid:" + DoubleToString(bid, dg) + "  Ask:" + DoubleToString(ask, dg) + "  Spr:" + DoubleToString(spread, 1);
          c = C'100,200,255';
       }
+      else
+      {
+         txt = "⏳ Wait";
+      }
 
       ObjectSetString(0, UI_PREFIX+"Sig"+IntegerToString(r), OBJPROP_TEXT, txt);
       ObjectSetInteger(0, UI_PREFIX+"Sig"+IntegerToString(r), OBJPROP_COLOR, c);
