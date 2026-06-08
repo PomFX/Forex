@@ -4,6 +4,13 @@ const { authMiddleware, adminMiddleware } = require('./auth');
 const { getMarketContext } = require('../services/market-data');
 const router = express.Router();
 
+function parsePrice(v) {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'number') return String(v);
+  const cleaned = String(v).replace(/[^0-9.]/g, '');
+  return cleaned || '';
+}
+
 const SETTINGS_KEY = 'auto_signals';
 
 const DEFAULT_SETTINGS = {
@@ -157,17 +164,20 @@ Order Type: Always BUY LIMIT (entry below current price) / SELL LIMIT (entry abo
 
 If there is a clear BOS setup, return signal details. Otherwise return "NO_SETUP".
 
+IMPORTANT: Return ALL price values as numeric strings WITHOUT $ or commas.
+Example: "4317.01", not "$4317.01", not "price at OB".
+
 Return ONLY valid JSON (no markdown, no code blocks):
 {
   "pair": "${pair}",
   "hasSetup": true/false,
   "direction": "BUY" or "SELL",
-  "entry": "price at Order Block",
-  "tp1": "price (R:R 1:2)",
-  "tp2": "price (R:R 1:3)",
-  "tp3": "price (R:R 1:5)",
-  "sl": "price (below OB low for BUY / above OB high for SELL)",
-  "reason": "3-line Thai: 1) BOS direction + structure 2) Order Block zone 3) Entry rationale + R:R"
+  "entry": "4317.01",
+  "tp1": "4325.61",
+  "tp2": "4332.61",
+  "tp3": "4344.62",
+  "sl": "4268.19",
+  "reason": "บรรทัด1\\nบรรทัด2\\nบรรทัด3"
 }`;
 
         const completion = await openai.chat.completions.create({
@@ -181,10 +191,10 @@ Return ONLY valid JSON (no markdown, no code blocks):
         const data = JSON.parse(cleaned);
 
         if (data.hasSetup) {
-          const result = await pool.query(
-            "INSERT INTO signals (pair, direction, entry, tp1, tp2, tp3, sl, status, reason) VALUES ($1,$2,$3,$4,$5,$6,$7,'active',$8) RETURNING *",
-            [data.pair, data.direction, data.entry || '', data.tp1 || '', data.tp2 || '', data.tp3 || '', data.sl || '', data.reason || '']
-          );
+        const result = await pool.query(
+          "INSERT INTO signals (pair, direction, entry, tp1, tp2, tp3, sl, status, reason) VALUES ($1,$2,$3,$4,$5,$6,$7,'active',$8) RETURNING *",
+          [data.pair, data.direction, parsePrice(data.entry), parsePrice(data.tp1), parsePrice(data.tp2), parsePrice(data.tp3), parsePrice(data.sl), data.reason || '']
+        );
           posted.push(result.rows[0]);
           console.log(`Auto-run signal: ${data.pair} ${data.direction} (id: ${result.rows[0].id})`);
         }
@@ -262,17 +272,20 @@ Order Type: Always BUY LIMIT (entry below current price) / SELL LIMIT (entry abo
 
 If there is a clear BOS setup, return signal details. Otherwise return "NO_SETUP".
 
+IMPORTANT: Return ALL price values as numeric strings WITHOUT $ or commas.
+Example: "4317.01", not "$4317.01", not "price at OB".
+
 Return ONLY valid JSON (no markdown, no code blocks):
 {
   "pair": "${pair}",
   "hasSetup": true/false,
   "direction": "BUY" or "SELL",
-  "entry": "price at Order Block",
-  "tp1": "price (R:R 1:2)",
-  "tp2": "price (R:R 1:3)",
-  "tp3": "price (R:R 1:5)",
-  "sl": "price (below OB low for BUY / above OB high for SELL)",
-  "reason": "3-line Thai: 1) BOS direction + structure 2) Order Block zone 3) Entry rationale + R:R"
+  "entry": "4317.01",
+  "tp1": "4325.61",
+  "tp2": "4332.61",
+  "tp3": "4344.62",
+  "sl": "4268.19",
+  "reason": "บรรทัด1\\nบรรทัด2\\nบรรทัด3"
 }`;
 
         const completion = await openai.chat.completions.create({
@@ -311,7 +324,7 @@ router.post('/confirm', authMiddleware, adminMiddleware, async (req, res) => {
     for (const s of signals) {
       const result = await pool.query(
         "INSERT INTO signals (pair, direction, entry, tp1, tp2, tp3, sl, status, reason) VALUES ($1,$2,$3,$4,$5,$6,$7,'active',$8) RETURNING *",
-        [s.pair, s.direction, s.entry || '', s.tp1 || '', s.tp2 || '', s.tp3 || '', s.sl || '', s.reason || '']
+        [s.pair, s.direction, parsePrice(s.entry), parsePrice(s.tp1), parsePrice(s.tp2), parsePrice(s.tp3), parsePrice(s.sl), s.reason || '']
       );
       posted.push(result.rows[0]);
       console.log(`Manual confirm: ${s.pair} ${s.direction} (id: ${result.rows[0].id})`);

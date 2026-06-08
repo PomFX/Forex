@@ -3,6 +3,13 @@ const { pool } = require('../db');
 const { authMiddleware, adminMiddleware } = require('./auth');
 const router = express.Router();
 
+function parsePrice(v) {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'number') return String(v);
+  const cleaned = String(v).replace(/[^0-9.]/g, '');
+  return cleaned || '';
+}
+
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM signals ORDER BY CASE WHEN pair='XAU/USD' THEN 0 ELSE 1 END, created_at DESC");
@@ -41,7 +48,7 @@ router.post('/ai', async (req, res) => {
     }
     const result = await pool.query(
       "INSERT INTO signals (pair, direction, entry, tp1, tp2, tp3, sl, status, reason) VALUES ($1,$2,$3,$4,$5,$6,$7,'active',$8) RETURNING *",
-      [pair, direction, entry || '', tp1 || '', tp2 || '', tp3 || '', sl || '', reason || '']
+      [pair, direction, parsePrice(entry), parsePrice(tp1), parsePrice(tp2), parsePrice(tp3), parsePrice(sl), reason || '']
     );
     console.log(`AI signal saved: ${pair} ${direction}`);
     res.json(result.rows[0]);

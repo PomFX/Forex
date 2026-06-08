@@ -56,14 +56,17 @@ BOS Analysis Framework (M15 Timeframe):
 CRITICAL: If there is NO clear BOS setup — return an empty array [].
 Only generate 1 signal (XAU/USD only) when ALL conditions align.
 
+IMPORTANT: Return ALL price values as numeric strings WITHOUT $ or commas.
+Example: "4317.01", not "$4317.01", not "price at OB".
+
 For each signal provide:
 - pair: always "XAU/USD"
 - direction: BUY or SELL
-- entry: price at Order Block (below current for BUY LIMIT, above current for SELL LIMIT)
-- tp1: next Swing High/Low (R:R ~1:2)
-- tp2: next target (R:R ~1:3)
-- tp3: next target (R:R ~1:5)
-- sl: beyond the Order Block (below OB low for buy, above OB high for sell)
+- entry: numeric string (below current for BUY LIMIT, above current for SELL LIMIT)
+- tp1: numeric string (R:R ~1:2)
+- tp2: numeric string (R:R ~1:3)
+- tp3: numeric string (R:R ~1:5)
+- sl: numeric string (below OB low for buy, above OB high for sell)
 - reason: in Thai (3 lines max) explaining:
   1. BOS ที่เกิดขึ้น + โครงสร้างตลาด
   2. Order Block zone ที่รอ Retest

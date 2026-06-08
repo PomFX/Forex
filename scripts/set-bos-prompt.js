@@ -27,17 +27,20 @@ Order Type: Always BUY LIMIT (entry below current price) / SELL LIMIT (entry abo
 
 If there is a clear BOS setup, return signal details. Otherwise return "NO_SETUP".
 
+IMPORTANT: Return ALL price values as numeric strings WITHOUT $ or commas.
+Example: "4317.01", not "$4317.01", not "price at OB".
+
 Return ONLY valid JSON (no markdown, no code blocks):
 {
   "pair": "{pair}",
   "hasSetup": true/false,
   "direction": "BUY" or "SELL",
-  "entry": "price at Order Block",
-  "tp1": "price (R:R 1:2)",
-  "tp2": "price (R:R 1:3)",
-  "tp3": "price (R:R 1:5)",
-  "sl": "price (below OB low for BUY / above OB high for SELL)",
-  "reason": "3-line Thai: 1) BOS direction + structure 2) Order Block zone 3) Entry rationale + R:R"
+  "entry": "4317.01",
+  "tp1": "4325.61",
+  "tp2": "4332.61",
+  "tp3": "4344.62",
+  "sl": "4268.19",
+  "reason": "บรรทัด1บรรทัด2บรรทัด3"
 }`;
 
 const value = JSON.stringify({
