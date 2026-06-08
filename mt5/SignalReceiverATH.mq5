@@ -6,8 +6,8 @@
 //| Toggle Mode จาก Dashboard                                          |
 //+------------------------------------------------------------------+
 #property copyright "ATH Trader"
-#property version   "4.0"
-#property description "Online/Offline BOS + Order Block EA with Drag & Drop Dashboard"
+#property version   "4.1"
+#property description "Online/Offline BOS + Order Block EA + Account Monitor"
 #property description "Docs: https://forex-rouge-gamma.vercel.app"
 
 //--- Input Parameters
@@ -64,6 +64,9 @@ bool      g_isMinimized       = false;
 string    g_cachedSymbol[2][20];
 int       g_cacheCount = 0;
 
+//--- Account Monitoring
+int       g_heartbeatTick = 0;
+
 //+------------------------------------------------------------------+
 //| Expert initialization                                             |
 //+------------------------------------------------------------------+
@@ -87,6 +90,10 @@ int OnInit()
    else
       RunOfflineBOS();
 
+   // Send initial account info
+   SendAccountInfo();
+   g_heartbeatTick = 0;
+
    return INIT_SUCCEEDED;
 }
 
@@ -95,6 +102,14 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnTimer()
 {
+   // Send account heartbeat every 5 ticks (5 min if POLL_INTERVAL=60)
+   g_heartbeatTick++;
+   if(g_heartbeatTick >= 5)
+   {
+      g_heartbeatTick = 0;
+      SendAccountInfo();
+   }
+
    if(g_mode == 0)
       ProcessSignal();
    else
@@ -219,7 +234,7 @@ void CreateDashboard()
    string modeLabel = (g_mode == 0) ? "🔵 Online" : "🟠 Offline";
    CreateButton("BtnMode", modeLabel, g_pX + g_pWidth - 130, g_pY + 5, 60, 24, "Segoe UI", 8, clrWhite, C'35,45,60');
 
-   CreateLabel("Title", "ATH TRADER v4.0 — " + g_modeStr, g_pX + 15, g_pY + 8, 11, C'0,230,255');
+   CreateLabel("Title", "ATH TRADER v4.1 — " + g_modeStr, g_pX + 15, g_pY + 8, 11, C'0,230,255');
 
    if(g_isMinimized)
    {
@@ -1331,4 +1346,47 @@ int CountTodaySignals()
          count++;
    }
    return count;
+}
+
+//+------------------------------------------------------------------+
+//| ACCOUNT MONITORING — Send account info to server                  |
+//+------------------------------------------------------------------+
+bool SendAccountInfo()
+{
+   string broker  = AccountInfoString(ACCOUNT_COMPANY);
+   int    login   = (int)AccountInfoInteger(ACCOUNT_LOGIN);
+   string name    = AccountInfoString(ACCOUNT_NAME);
+   double balance = AccountInfoDouble(ACCOUNT_BALANCE);
+   double profit  = AccountInfoDouble(ACCOUNT_PROFIT);
+   string modeStr = (g_mode == 0) ? "online" : "offline";
+
+   string json = "{"
+      + "\"broker\":\""   + broker  + "\","
+      + "\"login\":"      + IntegerToString(login) + ","
+      + "\"name\":\""     + name    + "\","
+      + "\"balance\":"    + DoubleToString(balance, 2) + ","
+      + "\"profit\":"     + DoubleToString(profit, 2) + ","
+      + "\"mode\":\""     + modeStr + "\""
+      + "}";
+
+   char data[];
+   char result[];
+   string resultHeaders;
+   StringToCharArray(json, data);
+
+   string headers = "X-MT5-Key: " + API_KEY + "\r\n"
+                  + "Content-Type: application/json\r\n";
+
+   string url = API_URL;
+   StringReplace(url, "/signals/mt5", "/ea/heartbeat");
+
+   int res = WebRequest("POST", url, headers, 5000, data, result, resultHeaders);
+   if(res == -1)
+   {
+      int err = GetLastError();
+      if(err != 0) Print("[SignalReceiver] AccountInfo WebRequest FAILED LastError=", err);
+      return false;
+   }
+   if(res == 200) Print("[SignalReceiver] AccountInfo sent OK (", broker, " #", login, " $", DoubleToString(balance, 2), ")");
+   return (res == 200);
 }

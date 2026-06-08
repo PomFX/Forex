@@ -928,6 +928,16 @@ const Admin = {
           App.toast('ลบ Log แล้ว');
         } catch (err) { App.toast('ลบ Log ล้มเหลว', true); }
       };
+
+      // Load connected accounts
+      await this._loadEaAccounts();
+      document.getElementById('eaClearAccountsBtn').onclick = async () => {
+        try {
+          await API.clearEaAccounts();
+          document.getElementById('eaAccountsContent').innerHTML = '<p style="color:#888">— ลบบัญชีทั้งหมดแล้ว —</p>';
+          App.toast('ลบบัญชีแล้ว');
+        } catch (err) { App.toast('ลบบัญชีล้มเหลว', true); }
+      };
     } catch (err) { console.error('renderEaDashboard:', err); }
   },
 
@@ -945,6 +955,44 @@ const Admin = {
       }).join('');
     } catch (err) {
       document.getElementById('eaLogContent').innerHTML = '<p style="color:#888">— ยังไม่มี Log —</p>';
+    }
+  },
+
+  async _loadEaAccounts() {
+    try {
+      const data = await API.getEaAccounts();
+      const container = document.getElementById('eaAccountsContent');
+      const accounts = data.accounts || [];
+      if (accounts.length === 0) {
+        container.innerHTML = '<p style="color:#888">— ยังไม่มีบัญชีที่เชื่อมต่อ —</p>';
+        return;
+      }
+      container.innerHTML = `<table class="admin-table">
+        <thead><tr>
+          <th>โบรกเกอร์</th>
+          <th>หมายเลขบัญชี</th>
+          <th>ชื่อเจ้าของ</th>
+          <th>ยอดคงเหลือ</th>
+          <th>กำไร/ขาดทุน</th>
+          <th>โหมด</th>
+          <th>อัปเดตล่าสุด</th>
+        </tr></thead>
+        <tbody>${accounts.map(a => {
+          const profitColor = a.profit >= 0 ? 'var(--green)' : 'var(--red)';
+          const profitSign = a.profit >= 0 ? '+' : '';
+          return `<tr>
+            <td>${escHtml(a.broker)}</td>
+            <td>${escHtml(String(a.login))}</td>
+            <td>${escHtml(a.name)}</td>
+            <td>$${Number(a.balance).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+            <td style="color:${profitColor};font-weight:600">${profitSign}$${Number(a.profit).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+            <td><span class="badge ${a.mode === 'online' ? 'badge-blue' : 'badge-orange'}">${escHtml(a.mode)}</span></td>
+            <td style="font-size:0.75rem">${new Date(a.lastSeen).toLocaleString('th-TH')}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`;
+    } catch (err) {
+      document.getElementById('eaAccountsContent').innerHTML = '<p style="color:#888">— ยังไม่มีบัญชีที่เชื่อมต่อ —</p>';
     }
   },
 };

@@ -78,7 +78,7 @@ router.get('/allowed-pairs', async (req, res) => {
   }
 });
 
-// MT5: heartbeat — EA sends status log
+// MT5: heartbeat — EA sends status log (GET, legacy)
 router.get('/heartbeat', async (req, res) => {
   try {
     const apiKey = req.headers['x-mt5-key'];
@@ -94,6 +94,79 @@ router.get('/heartbeat', async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error('EA heartbeat error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด' });
+  }
+});
+
+// MT5: account info — EA sends broker, login, name, balance, profit (POST)
+router.post('/heartbeat', async (req, res) => {
+  try {
+    const apiKey = req.headers['x-mt5-key'];
+    const expectedKey = process.env.MT5_API_KEY;
+    if (!expectedKey || apiKey !== expectedKey) {
+      return res.status(403).json({ error: 'Invalid MT5 key' });
+    }
+
+    const { broker, login, name, balance, profit, mode } = req.body || {};
+    if (!login) {
+      return res.status(400).json({ error: 'Missing login' });
+    }
+
+    // Update heartbeat timestamp (same as GET)
+    await pool.query(
+      "INSERT INTO site_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2",
+      ['ea_heartbeat', JSON.stringify({ status: 'alive', lastSeen: new Date().toISOString() })]
+    );
+
+    // Store account info
+    const existing = await pool.query("SELECT value FROM site_settings WHERE key='ea_accounts'");
+    const accounts = existing.rows.length > 0 ? JSON.parse(existing.rows[0].value) : [];
+
+    // Upsert: keep latest per login
+    const idx = accounts.findIndex(a => a.login === login);
+    const entry = {
+      broker: broker || '',
+      login,
+      name: name || '',
+      balance: balance || 0,
+      profit: profit || 0,
+      mode: mode || 'unknown',
+      lastSeen: new Date().toISOString()
+    };
+    if (idx >= 0) accounts[idx] = entry;
+    else accounts.push(entry);
+
+    await pool.query(
+      "INSERT INTO site_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2",
+      ['ea_accounts', JSON.stringify(accounts)]
+    );
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('EA account info error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด' });
+  }
+});
+
+// Admin: get EA accounts
+router.get('/accounts', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT value FROM site_settings WHERE key='ea_accounts'");
+    const accounts = result.rows.length > 0 ? JSON.parse(result.rows[0].value) : [];
+    res.json({ accounts });
+  } catch (err) {
+    console.error('Get EA accounts error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด' });
+  }
+});
+
+// Admin: clear all EA accounts
+router.delete('/accounts', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM site_settings WHERE key='ea_accounts'");
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Clear EA accounts error:', err.message);
     res.status(500).json({ error: 'เกิดข้อผิดพลาด' });
   }
 });

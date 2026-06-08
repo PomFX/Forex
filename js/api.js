@@ -211,6 +211,14 @@ const API = {
     return this._fetch('/ea/logs', { method: 'DELETE' });
   },
 
+  async getEaAccounts() {
+    return this._fetch('/ea/accounts');
+  },
+
+  async clearEaAccounts() {
+    return this._fetch('/ea/accounts', { method: 'DELETE' });
+  },
+
   // Performance
   async getPerformanceStats() {
     return this._fetch('/stats/performance');

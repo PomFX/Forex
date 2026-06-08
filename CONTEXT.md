@@ -119,9 +119,10 @@
 | **TP Mode** | เลือก TP1/TP2/TP3 |
 | **Allowed Pairs** | เลือกคู่เงินที่ให้ EA เข้า Order ได้ |
 | **Heartbeat** | EA ส่งสถานะมาที่ `GET /api/ea/heartbeat` ทุก Poll |
+| **Account Monitor** | EA ส่ง Broker/Login/Name/Balance/Profit มาให้ `POST /api/ea/heartbeat` ทุก 5 นาที → แสดงใน Dashboard |
 | **Activity Log** | ดู Log การทำงานของ EA + ลบได้ |
 | **Admin Page** | `/#/admin/eadashboard` |
-| **API** | `GET/PUT /api/ea/config`, `GET /api/ea/allowed-pairs`, `GET /api/ea/heartbeat`, `GET/DELETE /api/ea/logs` |
+| **API** | `GET/PUT /api/ea/config`, `GET /api/ea/allowed-pairs`, `GET /api/ea/heartbeat`, `GET/DELETE /api/ea/accounts`, `GET/DELETE /api/ea/logs` |
 
 ## Performance Dashboard
 
@@ -142,7 +143,7 @@
 | **api/index.js** | import app.js → initDB → export serverless handler |
 | **ข้อดี** | เพิ่ม route ครั้งเดียว ไม่ต้องลงทะเบียนซ้ำ 2 ที่ |
 
-## Status (2026-06-10)
+## Status (2026-06-08)
 
 | Item | Status |
 |------|--------|
@@ -163,6 +164,7 @@
 | **MT5 Price Guard** | ✅ ตรวจสอบ Bid/Ask ก่อนวาง Pending — ถ้าไม่มีราคาข้ามรอบ |
 | **AI Settings** | ✅ Admin UI + API (GET/PUT/test) |
 | **AI Article Settings** | ✅ Admin UI + API (GET/PUT/test/generate) |
-| **EA Dashboard** | ✅ Admin UI + API (config, allowed-pairs, heartbeat, logs) |
+| **EA Dashboard** | ✅ Admin UI + API (config, allowed-pairs, heartbeat, logs, accounts) |
+| **EA Account Monitor** | ✅ EA ส่ง Broker/Login/Name/Balance/Profit → Server → แสดงใน Dashboard |
 | **Performance** | ✅ Admin UI + API (`GET /api/stats/performance`) |
 | **Shared Express App** | ✅ `server/app.js` — routes registered once |
