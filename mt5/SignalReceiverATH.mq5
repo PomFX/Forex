@@ -37,7 +37,10 @@ input int      BOS_MAX_PER_DAY    = 4;           // Max signals/day (offline)
 input string   UI_PREFIX          = "ATH_";
 input color    PANEL_BG_COLOR     = C'20,24,35';
 input color    PANEL_BORDER       = C'45,55,72';
-input int      INPUT_PANEL_Y      = 50;
+input int      INPUT_PANEL_X      = 30;          // Dashboard X Position
+input int      INPUT_PANEL_Y      = 50;          // Dashboard Y Position
+input int      INPUT_PANEL_W      = 520;         // Dashboard Width
+input int      INPUT_PANEL_H      = 240;         // Dashboard Height
 
 //--- Global Variables
 int       g_processedIds[50];
@@ -69,7 +72,10 @@ int OnInit()
    ChartSetInteger(0, CHART_SHOW_GRID, false);
    ChartSetInteger(0, CHART_EVENT_MOUSE_MOVE, true);
 
+   g_pX = INPUT_PANEL_X;
    g_pY = INPUT_PANEL_Y;
+   g_pWidth = INPUT_PANEL_W;
+   g_pHeight = INPUT_PANEL_H;
    g_mode = MODE_SELECT;
 
    EventSetTimer(POLL_INTERVAL);
