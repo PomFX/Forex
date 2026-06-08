@@ -104,7 +104,7 @@ const App = {
   async renderHomeBrokers() {
     try {
       const brokers = await API.getBrokers();
-      const topBrokers = brokers.filter(b => b.rating >= 4);
+      const topBrokers = brokers.filter(b => b.rating >= 5);
       const el = document.getElementById('homeBrokers');
       const list = document.getElementById('homeBrokerList');
       if (topBrokers.length === 0) {
