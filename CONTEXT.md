@@ -38,9 +38,9 @@
 
 | Detail | Value |
 |--------|-------|
-| **Workflow** | `ai-signals.yml` — 3 jobs (generate → evaluate → article) |
-| **Frequency** | ทุก 30 นาที |
-| **Cron** | `*/30 * * * *` (UTC) |
+| **Workflow** | `ai-signals.yml` — 2 jobs (generate → evaluate) ทุก 30 นาที |
+| **Article Workflow** | `ai-article.yml` — 1 job (article) ทุก 6 ชั่วโมง |
+| **Cron** | `*/30 * * * *` (signals) + `0 */6 * * *` (article) |
 | **Model** | `gpt-4o-mini` (OpenAI) |
 | **Manual** | `workflow_dispatch` — กดรันเองได้ที่ GitHub Actions |
 
@@ -139,12 +139,13 @@
 | **api/index.js** | import app.js → initDB → export serverless handler |
 | **ข้อดี** | เพิ่ม route ครั้งเดียว ไม่ต้องลงทะเบียนซ้ำ 2 ที่ |
 
-## Status (2026-06-07)
+## Status (2026-06-08)
 
 | Item | Status |
 |------|--------|
 | **Vercel Deploy** | ✅ Live at `https://forex-rouge-gamma.vercel.app` |
-| **AI Signals** | ✅ ทำงานได้จริง (generate → evaluate → article) |
+| **AI Signals** | ✅ ทำงานได้จริง (generate → evaluate) ทุก 30 นาที |
+| **AI Article** | ✅ แยก workflow (`ai-article.yml`) ทุก 6 ชั่วโมง |
 | **Reason Field** | ✅ ครบทั้งระบบ (DB, API, Admin, Frontend) |
 | **Side Banners** | ✅ HTML + Admin ซ้าย/ขวา |
 | **LINE Messaging API** | ✅ Token + UserID + GroupID ใส่ใน Vercel env แล้ว |
