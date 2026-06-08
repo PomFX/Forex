@@ -37,6 +37,9 @@ input int      BOS_MAX_PER_DAY    = 4;           // Max signals/day (offline)
 input string   EXPIRY_DATE        = "2026-12-31"; // หมดอายุ (YYYY-MM-DD)
 datetime       g_expiryDt         = 0;
 
+//--- Foreground
+input bool     ONLY_FOREGROUND    = true;         // ทำงานเมื่อ Chart  active เท่านั้น
+
 //--- UI Customization Inputs
 input string   UI_PREFIX          = "ATH_";
 input color    PANEL_BG_COLOR     = C'20,24,35';
@@ -45,6 +48,12 @@ input int      INPUT_PANEL_X      = 30;          // Dashboard X Position
 input int      INPUT_PANEL_Y      = 50;          // Dashboard Y Position
 input int      INPUT_PANEL_W      = 620;         // Dashboard Width
 input int      INPUT_PANEL_H      = 240;         // Dashboard Height
+
+//--- DLL imports for foreground check
+#import "user32.dll"
+   int  GetForegroundWindow();
+   int  GetParent(int hWnd);
+#import
 
 //--- Global Variables
 int       g_processedIds[50];
@@ -124,6 +133,13 @@ void OnTimer()
       return;
    }
 
+   if(!IsChartForeground())
+   {
+      if(g_isBusy) g_isBusy = false;
+      UpdateDashboard();
+      return;
+   }
+
    // Send account heartbeat every 5 ticks (5 min if POLL_INTERVAL=60)
    g_heartbeatTick++;
    if(g_heartbeatTick >= 5)
@@ -155,6 +171,12 @@ void OnChartEvent(const int id,
                   const double &dparam,
                   const string &sparam)
 {
+   if(id == CHARTEVENT_CHART_CHANGE)
+   {
+      CreateDashboard();
+      return;
+   }
+
    if(id == CHARTEVENT_KEYDOWN)
    {
       if((int)lparam == 116) { Print("[SignalReceiver] Manual refresh (F5)"); if(g_mode==0) ProcessSignal(); else RunOfflineBOS(); }
@@ -421,7 +443,14 @@ void UpdateDashboard()
       ObjectSetString(0, UI_PREFIX+"V_Tp", OBJPROP_TEXT, "Spr: " + DoubleToString((ask - bid) / SymbolInfoDouble(sym, SYMBOL_POINT), 1));
       ObjectSetInteger(0, UI_PREFIX+"V_Tp", OBJPROP_COLOR, C'115,128,142');
    }
-   ObjectSetString(0, UI_PREFIX+"V_Status", OBJPROP_TEXT, g_isBusy ? "PROCESSING..." : "STANDBY");
+   bool fg = IsChartForeground();
+   string statusTxt = "STANDBY";
+   color  statusClr = clrWhite;
+   if(g_isBusy)                { statusTxt = "PROCESSING..."; statusClr = C'255,200,50'; }
+   else if(!fg)                { statusTxt = "PAUSED";        statusClr = C'255,80,80';  }
+   else if(tradeAllowed && algoAllowed) { statusTxt = "ACTIVE"; statusClr = C'50,220,100'; }
+   ObjectSetString(0, UI_PREFIX+"V_Status", OBJPROP_TEXT, statusTxt);
+   ObjectSetInteger(0, UI_PREFIX+"V_Status", OBJPROP_COLOR, statusClr);
 
    ChartRedraw(0);
 }
@@ -583,6 +612,18 @@ void CacheAdd(string pair, string symbol)
 //+------------------------------------------------------------------+
 //| Helpers                                                           |
 //+------------------------------------------------------------------+
+bool IsChartForeground()
+{
+   if(!ONLY_FOREGROUND) return true;
+   int fg = GetForegroundWindow();
+   int hwnd = (int)ChartGetInteger(0, CHART_WINDOW_HANDLE);
+   while(fg > 0)
+   {
+      if(fg == hwnd) return true;
+      fg = GetParent(fg);
+   }
+   return false;
+}
 string GetPairCategory(string pair)
 {
    if(pair == "XAU/USD" || pair == "XAG/USD") return "commodities";
