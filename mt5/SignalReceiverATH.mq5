@@ -37,9 +37,6 @@ input int      BOS_MAX_PER_DAY    = 4;           // Max signals/day (offline)
 input string   EXPIRY_DATE        = "2026-12-31"; // หมดอายุ (YYYY-MM-DD)
 datetime       g_expiryDt         = 0;
 
-//--- Foreground
-input bool     ONLY_FOREGROUND    = true;         // ทำงานเมื่อ Chart  active เท่านั้น
-
 //--- UI Customization Inputs
 input string   UI_PREFIX          = "ATH_";
 input color    PANEL_BG_COLOR     = C'20,24,35';
@@ -48,12 +45,6 @@ input int      INPUT_PANEL_X      = 30;          // Dashboard X Position
 input int      INPUT_PANEL_Y      = 50;          // Dashboard Y Position
 input int      INPUT_PANEL_W      = 620;         // Dashboard Width
 input int      INPUT_PANEL_H      = 240;         // Dashboard Height
-
-//--- DLL imports for foreground check
-#import "user32.dll"
-   int  GetForegroundWindow();
-   int  GetParent(int hWnd);
-#import
 
 //--- Global Variables
 int       g_processedIds[50];
@@ -130,13 +121,6 @@ void OnTimer()
    if(IsExpired())
    {
       Print("[SignalReceiver] EA expired — ติดต่อทีมงาน ATH Trader เพื่อต่ออายุ (Expiry: ", EXPIRY_DATE, ")");
-      return;
-   }
-
-   if(!IsChartForeground())
-   {
-      if(g_isBusy) g_isBusy = false;
-      UpdateDashboard();
       return;
    }
 
@@ -345,7 +329,6 @@ void UpdateDashboard()
    }
 
    bool tradeOk = TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) && MQLInfoInteger(MQL_TRADE_ALLOWED);
-   bool fg = IsChartForeground();
 
    //--- Collect stored signals from GlobalVariables (up to MAX_SIG_ROWS)
    int    sId[MAX_SIG_ROWS];
@@ -437,7 +420,6 @@ void UpdateDashboard()
    string statusTxt = "STANDBY";
    color  statusClr = clrWhite;
    if(g_isBusy)              { statusTxt = "PROCESSING..."; statusClr = C'255,200,50'; }
-   else if(!fg)              { statusTxt = "PAUSED";        statusClr = C'255,80,80';  }
    else if(tradeOk)          { statusTxt = "ACTIVE";        statusClr = C'50,220,100'; }
 
    ObjectSetString(0, UI_PREFIX+"FV_Status", OBJPROP_TEXT, statusTxt);
@@ -466,7 +448,7 @@ void CreatePanel(string name, int x, int y, int width, int height, color bgColor
    ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
    ObjectSetInteger(0, objName, OBJPROP_SELECTABLE, false);
    ObjectSetInteger(0, objName, OBJPROP_BACK, false);
-   ObjectSetInteger(0, objName, OBJPROP_ZORDER, 10);
+   ObjectSetInteger(0, objName, OBJPROP_ZORDER, 1000);
 }
 
 void CreateLabel(string name, string text, int x, int y, int fontSize, color textColor, int anchor=ANCHOR_LEFT_UPPER)
@@ -603,35 +585,6 @@ void CacheAdd(string pair, string symbol)
 //+------------------------------------------------------------------+
 //| Helpers                                                           |
 //+------------------------------------------------------------------+
-bool IsChartForeground()
-{
-   if(!ONLY_FOREGROUND) return true;
-   int fg = GetForegroundWindow();
-   int hwnd = (int)ChartGetInteger(0, CHART_WINDOW_HANDLE);
-   while(fg > 0)
-   {
-      if(fg == hwnd) return true;
-      fg = GetParent(fg);
-   }
-   return false;
-}
-string GetPairCategory(string pair)
-{
-   if(pair == "XAU/USD" || pair == "XAG/USD") return "commodities";
-   string forexPairs[] = {"EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "NZD/USD", "USD/CAD"};
-   for(int i = 0; i < ArraySize(forexPairs); i++)
-      if(pair == forexPairs[i]) return "forex";
-   string cryptoPairs[] = {"BTC/USD", "ETH/USD", "XRP/USD"};
-   for(int i = 0; i < ArraySize(cryptoPairs); i++)
-      if(pair == cryptoPairs[i]) return "crypto";
-   return "unknown";
-}
-
-bool IsExpired()
-{
-   return (TimeCurrent() > g_expiryDt);
-}
-
 bool IsWeekend()
 {
    MqlDateTime dt;
