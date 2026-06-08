@@ -383,26 +383,34 @@ void UpdateDashboard()
    int rowH = 16, sigY = g_pY + 37;
    for(int r = 0; r < MAX_SIG_ROWS; r++)
    {
-      int dc = (StringFind(sPair[r], "/") > 0 && StringFind(sPair[r], "XAU") < 0 && StringFind(sPair[r], "XAG") < 0 && StringFind(sPair[r], "BTC") < 0 && StringFind(sPair[r], "ETH") < 0 && StringFind(sPair[r], "XRP") < 0) ? 5 : 2;
-      string txt = (r < sCount)
-         ? "#" + IntegerToString(sId[r]) + "  " + sPair[r] + "  " + sDir[r]
-           + "  @" + DoubleToString(sEntry[r], dc)
-           + "  SL:" + DoubleToString(sSL[r], dc)
-           + "  TP:" + DoubleToString(sTP[r], dc)
-           + "  " + sStat[r]
-         : (r == 0 ? "⏳ Waiting for signal..." : "");
+      string txt = "";
+      color  c   = C'90,100,115';
 
-      color c = clrWhite;
       if(r < sCount)
       {
+         int dc = (StringFind(sPair[r], "XAU") >= 0 || StringFind(sPair[r], "XAG") >= 0 ||
+                   StringFind(sPair[r], "BTC") >= 0 || StringFind(sPair[r], "ETH") >= 0 ||
+                   StringFind(sPair[r], "XRP") >= 0) ? 2 : 5;
+         txt = "#" + IntegerToString(sId[r]) + "  " + sPair[r] + "  " + sDir[r]
+             + "  @" + DoubleToString(sEntry[r], dc)
+             + "  SL:" + DoubleToString(sSL[r], dc)
+             + "  TP:" + DoubleToString(sTP[r], dc)
+             + "  " + sStat[r];
          if(sStat[r] == "PENDING")      c = C'0,230,255';
          else if(sDir[r] == "BUY")      c = C'0,255,200';
          else if(sDir[r] == "SELL")     c = C'255,60,140';
       }
-      else
+      else if(r == 0)
       {
-         c = C'90,100,115';
+         string sym = Symbol();
+         double bid = SymbolInfoDouble(sym, SYMBOL_BID);
+         double ask = SymbolInfoDouble(sym, SYMBOL_ASK);
+         int dg = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
+         double spread = (ask - bid) / SymbolInfoDouble(sym, SYMBOL_POINT);
+         txt = sym + "  Bid:" + DoubleToString(bid, dg) + "  Ask:" + DoubleToString(ask, dg) + "  Spr:" + DoubleToString(spread, 1);
+         c = C'100,200,255';
       }
+
       ObjectSetString(0, UI_PREFIX+"Sig"+IntegerToString(r), OBJPROP_TEXT, txt);
       ObjectSetInteger(0, UI_PREFIX+"Sig"+IntegerToString(r), OBJPROP_COLOR, c);
    }
