@@ -609,7 +609,7 @@ const Admin = {
     const confirmRow = document.getElementById('autoConfirmRow');
     resultDiv.style.display = 'none';
 
-    App.toast('กำลังวิเคราะห์ SMC... โปรดรอ');
+    App.toast('กำลังวิเคราะห์ BOS... โปรดรอ');
 
     try {
       const res = await API.analyzeAutoSignals();
@@ -636,7 +636,7 @@ const Admin = {
           html += `<div class="signal-item" style="border-color:#333;opacity:0.6">
             <div class="info">
               <span style="color:#888">${r.pair}</span>
-              <span style="color:#666">— ไม่มี SMC Setup</span>
+              <span style="color:#666">— ไม่มี BOS Setup</span>
               ${r.error ? `<div class="detail" style="color:#f88">Error: ${r.error}</div>` : ''}
             </div>
           </div>`;
