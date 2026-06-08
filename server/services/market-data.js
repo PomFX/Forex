@@ -114,24 +114,27 @@ function detectStructure(candles, pivotHighs, pivotLows) {
   };
 }
 
-function buildContext(structure) {
+function buildContext(structure, pair = '') {
   if (!structure) return 'ไม่มีข้อมูลราคาย้อนหลัง (OHLC)';
 
+  const decimals = pair.startsWith('XAU') || pair.startsWith('XAG') || pair.startsWith('BTC') || pair.startsWith('ETH') || pair.startsWith('XRP') ? 2 : 5;
+  const fmt = (v) => v.toFixed(decimals);
+
   const lines = [
-    `ราคาปัจจุบัน: $${structure.currentPrice.toFixed(2)}`,
-    `แนวโน้ม: ${structure.trend === 'bullish' ? 'ขาขึ้น' : structure.trend === 'bearish' ? 'ขาลง' : ' sideways'}`,
-    `BOS ที่ตรวจพบ: ${structure.bosDetected === 'bullish' ? 'Bullish BOS (ทะลุ HH)': structure.bosDetected === 'bearish' ? 'Bearish BOS (ทะลุ LL)' : 'ไม่พบ BOS ล่าสุด'}`,
+    `ราคาปัจจุบัน: ${fmt(structure.currentPrice)}`,
+    `แนวโน้ม: ${structure.trend === 'bullish' ? 'ขาขึ้น' : structure.trend === 'bearish' ? 'ขาลง' : 'sideways'}`,
+    `BOS ที่ตรวจพบ: ${structure.bosDetected === 'bullish' ? 'Bullish BOS (ทะลุ HH)' : structure.bosDetected === 'bearish' ? 'Bearish BOS (ทะลุ LL)' : 'ไม่พบ BOS ล่าสุด'}`,
     ``,
-    `Swing High ล่าสุด: ${structure.latestSwingHigh !== null ? '$' + structure.latestSwingHigh.toFixed(2) : 'ไม่มีข้อมูล'}`,
-    `Swing Low ล่าสุด: ${structure.latestSwingLow !== null ? '$' + structure.latestSwingLow.toFixed(2) : 'ไม่มีข้อมูล'}`,
-    `Swing Highs ย้อนหลัง: [${structure.swingHighs.slice(-3).map(s => '$' + s.price.toFixed(2)).join(', ')}]`,
-    `Swing Lows ย้อนหลัง: [${structure.swingLows.slice(-3).map(s => '$' + s.price.toFixed(2)).join(', ')}]`,
+    `Swing High ล่าสุด: ${structure.latestSwingHigh !== null ? fmt(structure.latestSwingHigh) : 'ไม่มีข้อมูล'}`,
+    `Swing Low ล่าสุด: ${structure.latestSwingLow !== null ? fmt(structure.latestSwingLow) : 'ไม่มีข้อมูล'}`,
+    `Swing Highs ย้อนหลัง: [${structure.swingHighs.slice(-3).map(s => fmt(s.price)).join(', ')}]`,
+    `Swing Lows ย้อนหลัง: [${structure.swingLows.slice(-3).map(s => fmt(s.price)).join(', ')}]`,
     ``,
-    `แท่งล่าสุด: Open=$${structure.lastCandle.open.toFixed(2)} High=$${structure.lastCandle.high.toFixed(2)} Low=$${structure.lastCandle.low.toFixed(2)} Close=$${structure.lastCandle.close.toFixed(2)}`,
+    `แท่งล่าสุด: Open=${fmt(structure.lastCandle.open)} High=${fmt(structure.lastCandle.high)} Low=${fmt(structure.lastCandle.low)} Close=${fmt(structure.lastCandle.close)}`,
   ];
 
   if (structure.prevCandle) {
-    lines.push(`แท่งก่อนหน้า: Open=$${structure.prevCandle.open.toFixed(2)} High=$${structure.prevCandle.high.toFixed(2)} Low=$${structure.prevCandle.low.toFixed(2)} Close=$${structure.prevCandle.close.toFixed(2)}`);
+    lines.push(`แท่งก่อนหน้า: Open=${fmt(structure.prevCandle.open)} High=${fmt(structure.prevCandle.high)} Low=${fmt(structure.prevCandle.low)} Close=${fmt(structure.prevCandle.close)}`);
   }
 
   return lines.join('\n');
@@ -144,7 +147,7 @@ async function getMarketContext(pair) {
   const pivotHighs = findPivotHighs(candles, 2, 2);
   const pivotLows = findPivotLows(candles, 2, 2);
   const structure = detectStructure(candles, pivotHighs, pivotLows);
-  const context = buildContext(structure);
+  const context = buildContext(structure, pair);
 
   return { candles, structure, context, pair };
 }
