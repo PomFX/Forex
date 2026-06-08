@@ -6,7 +6,7 @@
 //| Toggle Mode จาก Dashboard                                          |
 //+------------------------------------------------------------------+
 #property copyright "ATH Trader"
-#property version   "4.1"
+#property version   "4.2"
 #property description "Online/Offline BOS + Order Block EA + Account Monitor"
 #property description "Docs: https://forex-rouge-gamma.vercel.app"
 
@@ -32,6 +32,10 @@ input double   BOS_RISK_RR1       = 2.0;         // R:R สำหรับ TP1
 input double   BOS_RISK_RR2       = 3.0;         // R:R สำหรับ TP2
 input double   BOS_RISK_RR3       = 5.0;         // R:R สำหรับ TP3
 input int      BOS_MAX_PER_DAY    = 4;           // Max signals/day (offline)
+
+//--- Expiry
+input string   EXPIRY_DATE        = "2026-12-31"; // หมดอายุ (YYYY-MM-DD)
+datetime       g_expiryDt         = 0;
 
 //--- UI Customization Inputs
 input string   UI_PREFIX          = "ATH_";
@@ -75,6 +79,14 @@ int OnInit()
    ChartSetInteger(0, CHART_SHOW_GRID, false);
    ChartSetInteger(0, CHART_EVENT_MOUSE_MOVE, true);
 
+   // Parse expiry date
+   g_expiryDt = StringToTime(EXPIRY_DATE + " 23:59:59");
+   if(IsExpired())
+   {
+      Print("[SignalReceiver] EA EXPIRED — licence valid until ", EXPIRY_DATE);
+      return INIT_FAILED;
+   }
+
    g_pX = INPUT_PANEL_X;
    g_pY = INPUT_PANEL_Y;
    g_pWidth = INPUT_PANEL_W;
@@ -102,6 +114,12 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnTimer()
 {
+   if(IsExpired())
+   {
+      Print("[SignalReceiver] EA expired — skipping all operations");
+      return;
+   }
+
    // Send account heartbeat every 5 ticks (5 min if POLL_INTERVAL=60)
    g_heartbeatTick++;
    if(g_heartbeatTick >= 5)
@@ -234,7 +252,7 @@ void CreateDashboard()
    string modeLabel = (g_mode == 0) ? "🔵 Online" : "🟠 Offline";
    CreateButton("BtnMode", modeLabel, g_pX + g_pWidth - 130, g_pY + 5, 60, 24, "Segoe UI", 8, clrWhite, C'35,45,60');
 
-   CreateLabel("Title", "ATH TRADER v4.1 — " + g_modeStr, g_pX + 15, g_pY + 8, 11, C'0,230,255');
+   CreateLabel("Title", "ATH TRADER v4.2 — " + g_modeStr, g_pX + 15, g_pY + 8, 11, C'0,230,255');
 
    if(g_isMinimized)
    {
@@ -252,6 +270,12 @@ void CreateDashboard()
    CreateLabel("L_PairsTitle",    "Active Pairs:",     xLeft, g_pY + 145, 9, C'150,160,175');
    CreateLabel("L_TimeTitle",     "Last Update:",      xLeft, g_pY + 175, 9, C'150,160,175');
    CreateLabel("L_ShortcutHint",  "[F5] Refresh | [F6] Cancel All | [F7] Toggle", xLeft, g_pY + 215, 8, C'90,100,115');
+
+   if(g_expiryDt > 0)
+   {
+      string expiryLabel = "Expires: " + EXPIRY_DATE;
+      CreateLabel("R_Expiry", expiryLabel, g_pX + 15, g_pY + 200, 8, C'255,180,50');
+   }
 
    int xRight = g_pX + 270;
    CreateLabel("R_LatestTitle",   "Latest Signal:",    xRight, g_pY + 55,  9, C'150,160,175');
@@ -540,6 +564,11 @@ string GetPairCategory(string pair)
    for(int i = 0; i < ArraySize(cryptoPairs); i++)
       if(pair == cryptoPairs[i]) return "crypto";
    return "unknown";
+}
+
+bool IsExpired()
+{
+   return (TimeCurrent() > g_expiryDt);
 }
 
 bool IsWeekend()
