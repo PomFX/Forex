@@ -376,7 +376,9 @@ img { max-width: 100%; height: auto; }
   margin-top: 0.8rem;
   padding-top: 0.8rem;
   border-top: 1px solid var(--border);
+  cursor: pointer;
 }
+.broker-promo:hover .broker-promo-title { text-decoration: underline; }
 .broker-promo-title {
   font-size: 0.9rem;
   font-weight: 600;
@@ -726,7 +728,34 @@ img { max-width: 100%; height: auto; }
   cursor: pointer;
 }
 .modal-box .modal-close:hover { color: #fff; }
+.modal-box-lg { max-width: 700px; }
 .modal-body { font-size: 0.9rem; line-height: 1.6; color: var(--text); white-space: pre-line; }
+
+/* ====== PROMOTION MODAL ====== */
+.promo-modal-broker {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.3rem;
+}
+.promo-modal-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+.promo-modal-images {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+.promo-modal-images img {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
 
 /* ====== TOGGLE SWITCH ====== */
 .switch { position: relative; display: inline-block; width: 48px; height: 26px; }

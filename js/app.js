@@ -71,18 +71,34 @@ const App = {
   },
 
   // ====== HOME BROKERS ======
-  _promotionsHTML(raw) {
+  _promotionsHTML(raw, brokerName) {
     let promo = { name: '', enabled: false, images: [] };
     if (raw) {
       try { promo = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch {}
     }
     if (!promo.enabled || !promo.name) return '';
-    return `<div class="broker-promo">
+    const data = encodeURIComponent(JSON.stringify({ broker: brokerName, name: promo.name, images: promo.images }));
+    return `<div class="broker-promo" onclick="App.showPromotionModal('${data}')">
       <div class="broker-promo-title">${escHtml(promo.name)}</div>
-      <div class="broker-promo-images">${(promo.images || []).map(url =>
+      <div class="broker-promo-images">${(promo.images || []).slice(0, 1).map(url =>
         url ? `<img src="${escHtml(url)}" alt="โปรโมชั่น" onerror="this.style.display='none'">` : ''
       ).join('')}</div>
     </div>`;
+  },
+
+  showPromotionModal(data) {
+    try {
+      const promo = JSON.parse(decodeURIComponent(data));
+      const images = (promo.images || []).filter(Boolean);
+      document.getElementById('promoModalContent').innerHTML = `
+        ${promo.broker ? `<div class="promo-modal-broker">${escHtml(promo.broker)}</div>` : ''}
+        <div class="promo-modal-title">${escHtml(promo.name)}</div>
+        <div class="promo-modal-images">${images.map(url =>
+          `<img src="${escHtml(url)}" alt="โปรโมชั่น" onerror="this.style.display='none'">`
+        ).join('')}</div>
+      `;
+      document.getElementById('promoModal').classList.add('open');
+    } catch (err) { console.error('showPromotionModal:', err); }
   },
 
   async renderHomeBrokers() {
@@ -104,7 +120,7 @@ const App = {
           <div class="rating">${'★'.repeat(Math.floor(b.rating))}${b.rating % 1 >= 0.5 ? '½' : ''} ${b.rating}</div>
           <p>${escHtml(b.description)}</p>
           <a href="${escHtml(b.ib_link)}" target="_blank" class="btn btn-gold btn-sm">สมัครผ่าน IB</a>
-          ${this._promotionsHTML(b.promotions)}
+          ${this._promotionsHTML(b.promotions, b.name)}
         </div>`;
       }).join('');
     } catch (err) { console.error('renderHomeBrokers:', err); }
@@ -164,7 +180,7 @@ const App = {
           <div class="rating">${'★'.repeat(Math.floor(b.rating))}${b.rating % 1 >= 0.5 ? '½' : ''} ${b.rating}</div>
           <p>${escHtml(b.description)}</p>
           <a href="${escHtml(b.ib_link)}" target="_blank" class="btn btn-gold btn-sm">สมัครผ่าน IB</a>
-          ${this._promotionsHTML(b.promotions)}
+          ${this._promotionsHTML(b.promotions, b.name)}
         </div>`;
       }).join('');
     } catch (err) { console.error('renderBrokers:', err); }
