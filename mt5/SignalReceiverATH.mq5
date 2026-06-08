@@ -1349,6 +1349,18 @@ int CountTodaySignals()
 }
 
 //+------------------------------------------------------------------+
+//| JSON helper                                                       |
+//+------------------------------------------------------------------+
+string JsonEscape(string s)
+{
+   StringReplace(s, "\\", "\\\\");
+   StringReplace(s, "\"", "\\\"");
+   StringReplace(s, "\n", "\\n");
+   StringReplace(s, "\r", "\\r");
+   return s;
+}
+
+//+------------------------------------------------------------------+
 //| ACCOUNT MONITORING — Send account info to server                  |
 //+------------------------------------------------------------------+
 bool SendAccountInfo()
@@ -1363,9 +1375,9 @@ bool SendAccountInfo()
    Print("[SignalReceiver] SendAccountInfo() called — broker=", broker, " login=", login);
 
    string json = "{"
-      + "\"broker\":\""   + broker  + "\","
+      + "\"broker\":\""   + JsonEscape(broker) + "\","
       + "\"login\":"      + IntegerToString(login) + ","
-      + "\"name\":\""     + name    + "\","
+      + "\"name\":\""     + JsonEscape(name)   + "\","
       + "\"balance\":"    + DoubleToString(balance, 2) + ","
       + "\"profit\":"     + DoubleToString(profit, 2) + ","
       + "\"mode\":\""     + modeStr + "\""
@@ -1374,7 +1386,7 @@ bool SendAccountInfo()
    char data[];
    char result[];
    string resultHeaders;
-   StringToCharArray(json, data);
+   StringToCharArray(json, data, 0, StringLen(json));
 
    string headers = "X-MT5-Key: " + API_KEY + "\r\n"
                   + "Content-Type: application/json\r\n";
