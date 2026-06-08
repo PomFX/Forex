@@ -330,85 +330,72 @@ void UpdateDashboard()
 
    bool tradeOk = TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) && MQLInfoInteger(MQL_TRADE_ALLOWED);
 
-   //--- Collect stored signals from GlobalVariables (up to MAX_SIG_ROWS)
-   int    sId[MAX_SIG_ROWS];
-   string sPair[MAX_SIG_ROWS], sDir[MAX_SIG_ROWS], sStat[MAX_SIG_ROWS];
-   double sEntry[MAX_SIG_ROWS], sSL[MAX_SIG_ROWS], sTP[MAX_SIG_ROWS];
-   int    sCount = 0;
+   //--- Collect pending orders from broker (up to MAX_SIG_ROWS)
+   int    pId[MAX_SIG_ROWS];
+   string pSym[MAX_SIG_ROWS], pDir[MAX_SIG_ROWS];
+   double pEntry[MAX_SIG_ROWS], pSL[MAX_SIG_ROWS], pTP[MAX_SIG_ROWS];
+   int    pCount = 0;
 
-   int gvTotal = GlobalVariablesTotal();
-   for(int i = 0; i < gvTotal && sCount < MAX_SIG_ROWS; i++)
+   int ordTotal = OrdersTotal();
+   for(int i = 0; i < ordTotal && pCount < MAX_SIG_ROWS; i++)
    {
-      string name = GlobalVariableName(i);
-      if(StringFind(name, "ATH_SignalId_") != 0) continue;
-      int sid = (int)GlobalVariableGet(name);
-      if(sid <= 0) continue;
+      ulong ticket = OrderGetTicket(i);
+      if(ticket <= 0) continue;
+      if(OrderGetInteger(ORDER_MAGIC) != MAGIC_NUMBER) continue;
 
-      string pair = StringSubstr(name, 14);
-      StringReplace(pair, "_", "/");
-      double entry = GlobalVariableGet(GvKey(pair, "Entry"));
-      double sl    = GlobalVariableGet(GvKey(pair, "SL"));
-      double tp    = GlobalVariableGet(GvKey(pair, "TP"));
-      double dir   = GlobalVariableGet(GvKey(pair, "Dir"));
+      ENUM_ORDER_TYPE ot = (ENUM_ORDER_TYPE)OrderGetInteger(ORDER_TYPE);
+      if(ot != ORDER_TYPE_BUY_LIMIT && ot != ORDER_TYPE_SELL_LIMIT) continue;
+
+      string comment = OrderGetString(ORDER_COMMENT);
+      int sid = 0;
+      int hashPos = StringFind(comment, "#");
+      if(hashPos >= 0)
+         sid = (int)StringToInteger(StringSubstr(comment, hashPos + 1));
 
       // Insert sorted by signal ID descending
-      int idx = sCount;
-      for(int j = 0; j < sCount; j++) { if(sid > sId[j]) { idx = j; break; } }
-      for(int j = sCount; j > idx; j--)
+      int idx = pCount;
+      for(int j = 0; j < pCount; j++) { if(sid > pId[j]) { idx = j; break; } }
+      for(int j = pCount; j > idx; j--)
       {
-         sId[j]    = sId[j-1];    sPair[j]  = sPair[j-1];
-         sDir[j]   = sDir[j-1];   sStat[j]  = sStat[j-1];
-         sEntry[j] = sEntry[j-1]; sSL[j]    = sSL[j-1];
-         sTP[j]    = sTP[j-1];
+         pId[j]    = pId[j-1];    pSym[j]   = pSym[j-1];
+         pDir[j]   = pDir[j-1];
+         pEntry[j] = pEntry[j-1]; pSL[j]    = pSL[j-1];
+         pTP[j]    = pTP[j-1];
       }
-      sId[idx]    = sid;
-      sPair[idx]  = pair;
-      sDir[idx]   = (dir == 1) ? "BUY" : (dir == 2) ? "SELL" : "-";
-      sEntry[idx] = entry;
-      sSL[idx]    = sl;
-      sTP[idx]    = tp;
-      sStat[idx]  = "STANDBY";
-      sCount++;
+      pId[idx]    = sid;
+      pSym[idx]   = OrderGetString(ORDER_SYMBOL);
+      pDir[idx]   = (ot == ORDER_TYPE_BUY_LIMIT) ? "BUY" : "SELL";
+      pEntry[idx] = OrderGetDouble(ORDER_PRICE_OPEN);
+      pSL[idx]    = OrderGetDouble(ORDER_SL);
+      pTP[idx]    = OrderGetDouble(ORDER_TP);
+      pCount++;
    }
 
-   // Check if any stored signal has a pending order
-   for(int i = 0; i < sCount; i++)
-   {
-      string sym = FindSymbol(sPair[i]);
-      if(sym != "" && HasPendingForSymbol(sym))
-         sStat[i] = "PENDING";
-   }
-
-   //--- Render signal rows
+   //--- Render signal rows from broker pending orders
    int rowH = 16, sigY = g_pY + 37;
    for(int r = 0; r < MAX_SIG_ROWS; r++)
    {
       string txt = "";
       color  c   = C'90,100,115';
 
-      if(r < sCount)
+      if(r < pCount)
       {
-         int dc = (StringFind(sPair[r], "XAU") >= 0 || StringFind(sPair[r], "XAG") >= 0 ||
-                   StringFind(sPair[r], "BTC") >= 0 || StringFind(sPair[r], "ETH") >= 0 ||
-                   StringFind(sPair[r], "XRP") >= 0) ? 2 : 5;
-         string live = "";
-         string sym = FindSymbol(sPair[r]);
-         if(sym != "")
-         {
-            double bid = SymbolInfoDouble(sym, SYMBOL_BID);
-            double ask = SymbolInfoDouble(sym, SYMBOL_ASK);
-            if(bid > 0 && ask > 0)
-               live = "  Bid:" + DoubleToString(bid, dc) + "  Ask:" + DoubleToString(ask, dc);
-         }
-         txt = "#" + IntegerToString(sId[r]) + "  " + sPair[r] + "  " + sDir[r]
-             + "  @" + DoubleToString(sEntry[r], dc)
-             + "  SL:" + DoubleToString(sSL[r], dc)
-             + "  TP:" + DoubleToString(sTP[r], dc)
+         int dc = (StringFind(pSym[r], "XAU") >= 0 || StringFind(pSym[r], "XAG") >= 0 ||
+                   StringFind(pSym[r], "BTC") >= 0 || StringFind(pSym[r], "ETH") >= 0 ||
+                   StringFind(pSym[r], "XRP") >= 0) ? 2 : 5;
+         double bid = SymbolInfoDouble(pSym[r], SYMBOL_BID);
+         double ask = SymbolInfoDouble(pSym[r], SYMBOL_ASK);
+         string live = (bid > 0 && ask > 0)
+            ? "  Bid:" + DoubleToString(bid, dc) + "  Ask:" + DoubleToString(ask, dc)
+            : "";
+
+         txt = (pId[r] > 0 ? "#" + IntegerToString(pId[r]) + "  " : "") + pSym[r] + "  " + pDir[r]
+             + "  @" + DoubleToString(pEntry[r], dc)
+             + "  SL:" + DoubleToString(pSL[r], dc)
+             + "  TP:" + DoubleToString(pTP[r], dc)
              + live
-             + "  " + sStat[r];
-         if(sStat[r] == "PENDING")      c = C'0,230,255';
-         else if(sDir[r] == "BUY")      c = C'0,255,200';
-         else if(sDir[r] == "SELL")     c = C'255,60,140';
+             + "  PENDING";
+         c = C'0,230,255';
       }
       else if(r == 0)
       {
