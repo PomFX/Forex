@@ -124,31 +124,43 @@ router.post('/auto-run', async (req, res) => {
 
     for (const pair of enabledPairs) {
       try {
-        const prompt = `You are a Professional Smart Money Concepts (SMC) analyst specializing in ${pair}.
+        const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}.
 
-Analyze ${pair} on the M15 timeframe using SMC concepts:
+Analyze ${pair} on the M15 timeframe using BOS + Order Block strategy:
 
-1. Market Structure — Identify HH/HL, LH/LL. Has there been a Change of Character (CHoCH) or Break of Structure (BOS)?
-2. Order Block — Are there clear Bullish or Bearish Order Blocks?
-3. Fair Value Gap — Is there an imbalance (FVG) from 3-candle momentum?
-4. Liquidity — Where are the buy-side / sell-side liquidity pools? Any stop hunts?
-5. Entry Condition — Both conditions must be met:
-   A. Clear market structure shift (BOS or CHoCH confirmed on M15)
-   B. Price at a valid Order Block or FVG zone with liquidity taken nearby
+🔵 1. Bullish BOS (Buy Setup)
+   - Price closes above previous HH (Break of Structure to the upside)
+   - Identify the last bearish candle (Down Close Candle / Order Block) just before the bullish breakout
+   - Entry: BUY LIMIT at Low of that Order Block
+   - SL: below Order Block low or nearest Swing Low
+   - TP: next Swing High (TP1=R:R 1:2, TP2=R:R 1:3, TP3=R:R 1:5)
 
-If there is a clear SMC setup, return signal details. Otherwise return "NO_SETUP".
+🔴 2. Bearish BOS (Sell Setup)
+   - Price closes below previous LL (Break of Structure to the downside)
+   - Identify the last bullish candle (Up Close Candle / Order Block) just before the bearish breakout
+   - Entry: SELL LIMIT at High of that Order Block
+   - SL: above Order Block high or nearest Swing High
+   - TP: next Swing Low (TP1=R:R 1:2, TP2=R:R 1:3, TP3=R:R 1:5)
+
+3. Entry Condition — ONLY generate when:
+   A. Clear BOS confirmed (close beyond previous HH or LL)
+   B. Price is retracing toward the Order Block zone
+
+Order Type: Always BUY LIMIT (entry below current price) / SELL LIMIT (entry above current price).
+
+If there is a clear BOS setup, return signal details. Otherwise return "NO_SETUP".
 
 Return ONLY valid JSON (no markdown, no code blocks):
 {
   "pair": "${pair}",
   "hasSetup": true/false,
   "direction": "BUY" or "SELL",
-  "entry": "price",
-  "tp1": "price",
-  "tp2": "price",
-  "tp3": "price",
-  "sl": "price",
-  "reason": "3-bullet Thai reason: 1) Market Structure 2) OB/FVG 3) Liquidity + entry rationale"
+  "entry": "price at Order Block",
+  "tp1": "price (R:R 1:2)",
+  "tp2": "price (R:R 1:3)",
+  "tp3": "price (R:R 1:5)",
+  "sl": "price (below OB low for BUY / above OB high for SELL)",
+  "reason": "3-line Thai: 1) BOS direction + structure 2) Order Block zone 3) Entry rationale + R:R"
 }`;
 
         const completion = await openai.chat.completions.create({
@@ -211,31 +223,43 @@ router.post('/analyze', authMiddleware, adminMiddleware, async (req, res) => {
 
     for (const pair of enabledPairs) {
       try {
-        const prompt = `You are a Professional Smart Money Concepts (SMC) analyst specializing in ${pair}.
+        const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}.
 
-Analyze ${pair} on the M15 timeframe using SMC concepts:
+Analyze ${pair} on the M15 timeframe using BOS + Order Block strategy:
 
-1. Market Structure — Identify HH/HL, LH/LL. Has there been a Change of Character (CHoCH) or Break of Structure (BOS)?
-2. Order Block — Are there clear Bullish or Bearish Order Blocks?
-3. Fair Value Gap — Is there an imbalance (FVG) from 3-candle momentum?
-4. Liquidity — Where are the buy-side / sell-side liquidity pools? Any stop hunts?
-5. Entry Condition — Both conditions must be met:
-   A. Clear market structure shift (BOS or CHoCH confirmed on M15)
-   B. Price at a valid Order Block or FVG zone with liquidity taken nearby
+🔵 1. Bullish BOS (Buy Setup)
+   - Price closes above previous HH (Break of Structure to the upside)
+   - Identify the last bearish candle (Down Close Candle / Order Block) just before the bullish breakout
+   - Entry: BUY LIMIT at Low of that Order Block
+   - SL: below Order Block low or nearest Swing Low
+   - TP: next Swing High (TP1=R:R 1:2, TP2=R:R 1:3, TP3=R:R 1:5)
 
-If there is a clear SMC setup, return signal details. Otherwise return "NO_SETUP".
+🔴 2. Bearish BOS (Sell Setup)
+   - Price closes below previous LL (Break of Structure to the downside)
+   - Identify the last bullish candle (Up Close Candle / Order Block) just before the bearish breakout
+   - Entry: SELL LIMIT at High of that Order Block
+   - SL: above Order Block high or nearest Swing High
+   - TP: next Swing Low (TP1=R:R 1:2, TP2=R:R 1:3, TP3=R:R 1:5)
+
+3. Entry Condition — ONLY generate when:
+   A. Clear BOS confirmed (close beyond previous HH or LL)
+   B. Price is retracing toward the Order Block zone
+
+Order Type: Always BUY LIMIT (entry below current price) / SELL LIMIT (entry above current price).
+
+If there is a clear BOS setup, return signal details. Otherwise return "NO_SETUP".
 
 Return ONLY valid JSON (no markdown, no code blocks):
 {
   "pair": "${pair}",
   "hasSetup": true/false,
   "direction": "BUY" or "SELL",
-  "entry": "price",
-  "tp1": "price",
-  "tp2": "price",
-  "tp3": "price",
-  "sl": "price",
-  "reason": "3-bullet Thai reason: 1) Market Structure 2) OB/FVG 3) Liquidity + entry rationale"
+  "entry": "price at Order Block",
+  "tp1": "price (R:R 1:2)",
+  "tp2": "price (R:R 1:3)",
+  "tp3": "price (R:R 1:5)",
+  "sl": "price (below OB low for BUY / above OB high for SELL)",
+  "reason": "3-line Thai: 1) BOS direction + structure 2) Order Block zone 3) Entry rationale + R:R"
 }`;
 
         const completion = await openai.chat.completions.create({

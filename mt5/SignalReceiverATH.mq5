@@ -5,7 +5,7 @@
 //|          MULTI-PAIR + Interactive Draggable Dashboard + State Save  |
 //+------------------------------------------------------------------+
 #property copyright "ATH Trader"
-#property version   "3.0"
+#property version   "3.1"
 #property description "Multi-symbol Pending Order EA with Drag & Drop Dashboard"
 #property description "Docs: https://forex-rouge-gamma.vercel.app"
 
@@ -162,7 +162,7 @@ void CreateDashboard()
    CreatePanel("MainBackground", g_pX, g_pY, g_pWidth, currentHeight, PANEL_BG_COLOR, PANEL_BORDER);
    CreatePanel("HeaderBar", g_pX, g_pY, g_pWidth, 35, C'28,33,46', PANEL_BORDER);
    CreateButton("BtnResize", resizeBtnText, g_pX + g_pWidth - 65, g_pY + 5, 55, 24, "Segoe UI", 9, clrWhite, C'45,55,72');
-   CreateLabel("Title", "ATH TRADER v3.0", g_pX + 15, g_pY + 8, 11, C'0,230,255');
+   CreateLabel("Title", "ATH TRADER v3.1 — BOS + LIMIT", g_pX + 15, g_pY + 8, 11, C'0,230,255');
 
    if(g_isMinimized)
    {
@@ -670,7 +670,7 @@ ENUM_ORDER_TYPE_FILLING GetFillingMode(string symbol)
 }
 
 //+------------------------------------------------------------------+
-//| Place pending order (auto STOP/LIMIT based on entry vs market)    |
+//| Place pending order (BOS Strategy — always LIMIT)                  |
 //+------------------------------------------------------------------+
 bool PlacePending(string symbol, string direction, double entry, double tp, double sl, int signalId)
 {
@@ -713,49 +713,38 @@ bool PlacePending(string symbol, string direction, double entry, double tp, doub
 
    entry = NormalizeDouble(entry, digits);
 
+   // BOS Strategy: Always use LIMIT orders
+   // BUY LIMIT  = entry BELOW current Ask (price retraces to Order Block)
+   // SELL LIMIT = entry ABOVE current Bid (price retraces to Order Block)
    ENUM_ORDER_TYPE orderType;
    double price = entry;
 
    if(direction == "BUY")
    {
-      if(entry < ask)
+      orderType = ORDER_TYPE_BUY_LIMIT;
+      if(entry >= ask)
       {
-         orderType = ORDER_TYPE_BUY_LIMIT;
-         if(entry >= bid - stopDist)
-         {
-            price = NormalizeDouble(bid - stopDist - point, digits);
-            Print("[SignalReceiver] BUY LIMIT entry adjusted: ", entry, " -> ", price, " (too close to Bid)");
-         }
+         price = NormalizeDouble(ask - stopDist - point, digits);
+         Print("[SignalReceiver] BUY entry above Ask — adjusted for BUY LIMIT: ", entry, " -> ", price);
       }
-      else
+      else if(entry >= bid - stopDist)
       {
-         orderType = ORDER_TYPE_BUY_STOP;
-         if(entry <= ask + stopDist)
-         {
-            price = NormalizeDouble(ask + stopDist + point, digits);
-            Print("[SignalReceiver] BUY STOP entry adjusted: ", entry, " -> ", price, " (too close to Ask)");
-         }
+         price = NormalizeDouble(bid - stopDist - point, digits);
+         Print("[SignalReceiver] BUY LIMIT entry adjusted: ", entry, " -> ", price, " (too close to Bid)");
       }
    }
    else // SELL
    {
-      if(entry > bid)
+      orderType = ORDER_TYPE_SELL_LIMIT;
+      if(entry <= bid)
       {
-         orderType = ORDER_TYPE_SELL_LIMIT;
-         if(entry <= ask + stopDist)
-         {
-            price = NormalizeDouble(ask + stopDist + point, digits);
-            Print("[SignalReceiver] SELL LIMIT entry adjusted: ", entry, " -> ", price, " (too close to Ask)");
-         }
+         price = NormalizeDouble(bid + stopDist + point, digits);
+         Print("[SignalReceiver] SELL entry below Bid — adjusted for SELL LIMIT: ", entry, " -> ", price);
       }
-      else
+      else if(entry <= ask + stopDist)
       {
-         orderType = ORDER_TYPE_SELL_STOP;
-         if(entry >= bid - stopDist)
-         {
-            price = NormalizeDouble(bid - stopDist - point, digits);
-            Print("[SignalReceiver] SELL STOP entry adjusted: ", entry, " -> ", price, " (too close to Bid)");
-         }
+         price = NormalizeDouble(ask + stopDist + point, digits);
+         Print("[SignalReceiver] SELL LIMIT entry adjusted: ", entry, " -> ", price, " (too close to Ask)");
       }
    }
 

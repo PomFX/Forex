@@ -44,15 +44,18 @@
 | **Model** | `gpt-4o-mini` (OpenAI) |
 | **Manual** | `workflow_dispatch` — กดรันเองได้ที่ GitHub Actions |
 
-## Signal Analysis — SMC (Smart Money Concepts)
+## Signal Analysis — BOS + Order Block
 
 | Detail | Value |
 |--------|-------|
 | **Timeframe** | M15 |
-| **Method** | SMC — Market Structure (HH/HL, LH/LL, CHoCH, BOS), Order Block, Fair Value Gap, Liquidity |
-| **Condition** | สร้างสัญญาณเมื่อ SMC setup ครบเท่านั้น (BOS/CHoCH + OB/FVG + Liquidity sweep) |
+| **Method** | BOS (Break of Structure) + Order Block — ไม่ใช้ FVG/Liquidity |
+| **BUY Setup** | Bullish BOS (ปิดเหนือ HH) → **BUY LIMIT** ที่ Low ของแท่ง Bearish สุดท้ายก่อน Breakout (Order Block) |
+| **SELL Setup** | Bearish BOS (ปิดใต้ LL) → **SELL LIMIT** ที่ High ของแท่ง Bullish สุดท้ายก่อน Breakout (Order Block) |
+| **SL** | ใต้ OB Low (Buy) / เหนือ OB High (Sell) หรือ Swing Low/High ล่าสุด |
+| **TP** | TP1=R:R 1:2, TP2=R:R 1:3, TP3=R:R 1:5 — ใช้ Swing High/Low ถัดไป |
 | **Max/Day** | ไม่เกิน 4 สัญญาณ/วัน |
-| **Reason** | 3 บรรทัดภาษาไทย: (1) Market Structure (2) OB/FVG (3) Liquidity + เหตุผลเข้า |
+| **Reason** | 3 บรรทัดภาษาไทย: (1) BOS + โครงสร้าง (2) Order Block (3) Entry rationale + R:R |
 
 ## AI Article — Gold Analysis Prompt
 
@@ -139,7 +142,7 @@
 | **api/index.js** | import app.js → initDB → export serverless handler |
 | **ข้อดี** | เพิ่ม route ครั้งเดียว ไม่ต้องลงทะเบียนซ้ำ 2 ที่ |
 
-## Status (2026-06-08)
+## Status (2026-06-10)
 
 | Item | Status |
 |------|--------|
@@ -154,7 +157,7 @@
 | **Database** | ✅ ใช้งานได้ (production DB, ได้จาก Vercel env) |
 | **VIP Auto-Count** | ✅ เริ่ม 109 + เพิ่มวันละ 5-10 คน (deterministic cycle) |
 | **Middle Banner** | ✅ 300×250px Medium Rectangle, Admin แท็บ "กลาง" |
-| **AI Signals (SMC)** | ✅ M15 SMC: Market Structure, OB, FVG, Liquidity |
+| **AI Signals (BOS+OB)** | ✅ BOS + Order Block, LIMIT orders only, R:R 1:2/1:3/1:5 |
 | **MT5 Multi-Symbol** | ✅ API คืนทุก signal active (array), EA เปิด Pending ทุกคู่พร้อมกัน |
 | **MT5 Per-Symbol Replacement** | ✅ ยกเลิก Pending เฉพาะคู่ที่มี signal ใหม่, ไม่แตะคู่อื่น |
 | **MT5 Price Guard** | ✅ ตรวจสอบ Bid/Ask ก่อนวาง Pending — ถ้าไม่มีราคาข้ามรอบ |

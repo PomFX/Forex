@@ -56,66 +56,61 @@ async function generateSignal(marketData) {
     `${d.pair} | Price: ${d.price} | Change: ${d.change.toFixed(2)}%`
   ).join('\n');
 
-  const prompt = `You are a professional Smart Money Concepts (SMC) analyst specializing in XAU/USD (Gold). Analyze the M15 chart structure and determine if there is a valid SMC entry setup.
+  const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in XAU/USD (Gold). Analyze the M15 chart structure using BOS + Order Block strategy.
 
 Current Market Data:
 ${marketTable}
 
-SMC Analysis Framework (M15 Timeframe):
+BOS Analysis Framework (M15 Timeframe):
 
-1. Market Structure (โครงสร้างตลาด)
-   - Identify recent HH/HL (uptrend) or LH/LL (downtrend)
-   - Look for CHoCH (Change of Character) — last break of structure before reversal
-   - Look for BOS (Break of Structure) — price breaks previous HH or LL
+🔵 1. Bullish BOS (Buy Setup)
+   - Price closes above previous HH (Break of Structure to the upside)
+   - Identify the last bearish candle (Down Close Candle / Order Block) before the breakout
+   - Entry: BUY LIMIT at Low of that Order Block
+   - SL: below Order Block low or nearest Swing Low
+   - TP: next Swing High (TP1=R:R 1:2, TP2=R:R 1:3, TP3=R:R 1:5)
 
-2. Order Block (OB) — โซนคำสั่งสถาบัน
-   - Bullish OB: last bearish candle before a strong upward move
-   - Bearish OB: last bullish candle before a strong downward move
-   - Is price currently near a valid OB?
+🔴 2. Bearish BOS (Sell Setup)
+   - Price closes below previous LL (Break of Structure to the downside)
+   - Identify the last bullish candle (Up Close Candle / Order Block) before the breakout
+   - Entry: SELL LIMIT at High of that Order Block
+   - SL: above Order Block high or nearest Swing High
+   - TP: next Swing Low (TP1=R:R 1:2, TP2=R:R 1:3, TP3=R:R 1:5)
 
-3. Fair Value Gap (FVG) — ช่องว่างราคาที่น่าสนใจ
-   - 3-candle imbalance gap
-   - Is there an unfilled FVG that price may retest?
+3. Entry Condition — ONLY generate when:
+   A. Clear BOS confirmed (close beyond previous HH or LL)
+   B. Price is retracing toward the Order Block zone
 
-4. Liquidity (สภาพคล่อง)
-   - Above recent highs (Buy-side liquidity / Stop hunts)
-   - Below recent lows (Sell-side liquidity)
-   - Any liquidity sweep happened recently?
-
-5. Entry Condition — ONLY generate signal if BOTH conditions are met:
-   A. Clear market structure (BOS or CHoCH confirmed)
-   B. Price is at a valid OB or FVG zone with liquidity taken
-
-CRITICAL: If there is NO clear SMC setup — return an empty array [].
-Only generate 1 signal (XAU/USD only) when ALL SMC conditions align.
+CRITICAL: If there is NO clear BOS setup — return an empty array [].
+Only generate 1 signal (XAU/USD only) when ALL conditions align.
 
 For each signal provide:
 - pair: always "XAU/USD"
 - direction: BUY or SELL
-- entry: price at the OB/FVG zone
-- tp1: first liquidity target (nearest HH/HL or structural level)
-- tp2: second target
-- tp3: third target
-- sl: beyond the opposite side of the OB (below OB low for buy, above OB high for sell)
+- entry: price at Order Block (below current for BUY LIMIT, above current for SELL LIMIT)
+- tp1: next Swing High/Low (R:R ~1:2)
+- tp2: next target (R:R ~1:3)
+- tp3: next target (R:R ~1:5)
+- sl: beyond the Order Block (below OB low for buy, above OB high for sell)
 - reason: in Thai (3 lines max) explaining:
-  1. Market Structure + BOS/CHoCH ที่เกิดขึ้น
-  2. Order Block หรือ FVG ที่ราคากำลังทดสอบ
-  3. Liquidity ถูกเก็บ + เหตุผลการเข้าเทรด
+  1. BOS ที่เกิดขึ้น + โครงสร้างตลาด
+  2. Order Block zone ที่รอ Retest
+  3. Entry rationale + R:R
 
 Return ONLY a valid JSON array (no markdown, no code blocks, no extra text):
-[] — if no valid SMC setup
+[] — if no valid BOS setup
 
 Or if conditions met:
 [
   {
     "pair": "XAU/USD",
     "direction": "BUY",
-    "entry": "4450.00",
+    "entry": "4445.00",
     "tp1": "4470.00",
     "tp2": "4485.00",
     "tp3": "4500.00",
-    "sl": "4440.00",
-    "reason": "BOS เกิดขึ้น ทะลุ High เดิม 4450\nราคากำลัง Retest Order Block โซน 4440-4450\nLiquidity ถูกเก็บด้านล่าง 4430 ก่อนดีดตัวขึ้น"
+    "sl": "4435.00",
+    "reason": "BOS ทะลุ High เดิม 4460\nรอ Buy Limit ที่ Low ของแท่ง Bearish สุดท้าย 4445\nSL ใต้ OB 4435 TP1 4470 (R:R 1:2)"
   }
 ]`;
 
