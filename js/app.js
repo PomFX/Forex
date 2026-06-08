@@ -41,13 +41,18 @@ const App = {
 
   // ====== MIDDLE BANNER ======
   async renderMiddleBanner() {
-    try {
-      const banner = await API.getBanner('middle');
-      const el = document.getElementById('homeBannerMiddle');
-      if (!banner.enabled || !banner.html) { el.style.display = 'none'; return; }
-      el.innerHTML = banner.html;
-      el.style.display = 'block';
-    } catch (err) { document.getElementById('homeBannerMiddle').style.display = 'none'; }
+    const slots = ['middle_1', 'middle_2', 'middle_3'];
+    for (let i = 0; i < slots.length; i++) {
+      try {
+        const banner = await API.getBanner(slots[i]);
+        const el = document.getElementById('homeBannerMiddle' + (i + 1));
+        if (!banner.enabled || !banner.html) { el.style.display = 'none'; continue; }
+        el.innerHTML = banner.html;
+        el.style.display = 'block';
+      } catch (err) {
+        document.getElementById('homeBannerMiddle' + (i + 1)).style.display = 'none';
+      }
+    }
   },
 
   // ====== HOME GOLD STATS ======

@@ -43,7 +43,7 @@ async function saveBannerToDB(key, data) {
 
 router.get('/banner', async (req, res) => {
   try {
-    const side = ['left', 'right', 'middle'].includes(req.query.side) ? req.query.side : 'right';
+    const side = ['left', 'right', 'middle_1', 'middle_2', 'middle_3'].includes(req.query.side) ? req.query.side : 'right';
     const data = await getBannerFromDB('banner_' + side);
     res.json(data);
   } catch (err) {
@@ -54,7 +54,7 @@ router.get('/banner', async (req, res) => {
 
 router.put('/banner', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const side = ['left', 'right', 'middle'].includes(req.query.side) ? req.query.side : 'right';
+    const side = ['left', 'right', 'middle_1', 'middle_2', 'middle_3'].includes(req.query.side) ? req.query.side : 'right';
     const { html, enabled } = req.body;
     await saveBannerToDB('banner_' + side, { html: html || '', enabled: !!enabled });
     res.json({ ok: true });

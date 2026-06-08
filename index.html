@@ -84,7 +84,11 @@
           <div style="text-align:center;margin-top:1rem"><a href="#/signals" class="btn btn-outline">ดูทั้งหมด</a></div>
         </section>
 
-        <div class="home-banner-middle" id="homeBannerMiddle"></div>
+        <div class="home-banner-middle-row" id="homeBannerMiddleRow">
+          <div class="home-banner-middle" id="homeBannerMiddle1"></div>
+          <div class="home-banner-middle" id="homeBannerMiddle2"></div>
+          <div class="home-banner-middle" id="homeBannerMiddle3"></div>
+        </div>
 
         <section class="section">
           <h2 class="section-title">บทความล่าสุด</h2>
@@ -429,12 +433,14 @@
 
           <!-- Banner Settings -->
           <div class="admin-page-content" id="admin-banner">
-            <h1>จัดการแบนเนอร์ข้างเว็บ</h1>
+            <h1>จัดการแบนเนอร์</h1>
             <form class="admin-form" id="bannerForm">
               <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
                 <button type="button" class="btn btn-outline btn-sm banner-tab active" data-side="right">ด้านขวา</button>
                 <button type="button" class="btn btn-outline btn-sm banner-tab" data-side="left">ด้านซ้าย</button>
-                <button type="button" class="btn btn-outline btn-sm banner-tab" data-side="middle">กลาง</button>
+                <button type="button" class="btn btn-outline btn-sm banner-tab" data-side="middle_1">กลาง 1</button>
+                <button type="button" class="btn btn-outline btn-sm banner-tab" data-side="middle_2">กลาง 2</button>
+                <button type="button" class="btn btn-outline btn-sm banner-tab" data-side="middle_3">กลาง 3</button>
               </div>
               <input type="hidden" id="bannerSide" value="right">
               <div class="form-group">

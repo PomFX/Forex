@@ -483,7 +483,7 @@ const Admin = {
         btn.classList.add('active');
         const side = btn.dataset.side;
         document.getElementById('bannerSide').value = side;
-        const label = { left: 'ซ้าย', right: 'ขวา', middle: 'กลาง' }[side] || side;
+        const label = { left: 'ซ้าย', right: 'ขวา', middle_1: 'กลาง 1', middle_2: 'กลาง 2', middle_3: 'กลาง 3' }[side] || side;
         document.getElementById('bannerSideLabel').textContent = label;
         document.getElementById('bannerHtmlLabel').textContent = '(' + label + ')';
         await this.renderBannerSettings(side);
@@ -500,7 +500,7 @@ const Admin = {
         }, side);
         App.toast('บันทึกแบนเนอร์แล้ว');
         App.renderSideBanner();
-        if (side === 'middle') App.renderMiddleBanner();
+        App.renderMiddleBanner();
       } catch (err) {
         App.toast('เกิดข้อผิดพลาด', true);
         console.error('Update banner error:', err);
