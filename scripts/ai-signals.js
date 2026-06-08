@@ -7,23 +7,26 @@ const API_BASE = process.env.AI_API_URL || 'http://localhost:8080';
 async function fetchOHLCContext(pair) {
   try {
     const res = await fetch(`${API_BASE}/api/market/ohlc?pair=${pair}`);
-    if (!res.ok) return null;
+    if (!res.ok) return { context: null, currentPrice: null };
     const data = await res.json();
-    return data.context || null;
+    return {
+      context: data.context || null,
+      currentPrice: data.structure?.currentPrice || null,
+    };
   } catch (err) {
     console.warn('OHLC fetch error:', err.message);
-    return null;
+    return { context: null, currentPrice: null };
   }
 }
 
-async function generateSignal(marketData) {
+async function generateSignal() {
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  const ohlcContext = await fetchOHLCContext('XAU/USD');
+  const ohlc = await fetchOHLCContext('XAU/USD');
+  const ohlcContext = ohlc.context;
+  const currentPrice = ohlc.currentPrice;
 
-  const marketTable = marketData.map(d =>
-    `${d.pair} | Price: ${d.price} | Change: ${d.change.toFixed(2)}%`
-  ).join('\n');
+  const marketTable = `XAU/USD | Price: ${currentPrice !== null ? currentPrice : 'N/A'} | Change: 0.00%`;
 
   const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in XAU/USD (Gold). Analyze the M15 chart structure using BOS + Order Block strategy.
 
@@ -148,10 +151,8 @@ async function main() {
   console.log(`API URL: ${API_BASE}`);
   console.log('Fetching OHLC market data from server...\n');
 
-  const marketData = [{ pair: 'XAU/USD', price: 0, change: 0 }];
-
   console.log('Generating AI signals...');
-  const signals = await generateSignal(marketData);
+  const signals = await generateSignal();
   console.log(`Generated ${signals.length} signal(s)\n`);
 
   if (signals.length === 0) {
