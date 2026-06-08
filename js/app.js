@@ -76,7 +76,7 @@ const App = {
     if (raw) {
       try { promo = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch {}
     }
-    if (!promo.enabled || !promo.name) return '';
+    if (!promo || !promo.enabled || !promo.name) return '';
     const data = encodeURIComponent(JSON.stringify({ broker: brokerName, name: promo.name, images: promo.images }));
     return `<div class="broker-promo" onclick="App.showPromotionModal('${data}')">
       <div class="broker-promo-title">${escHtml(promo.name)}</div>
@@ -104,7 +104,7 @@ const App = {
   async renderHomeBrokers() {
     try {
       const brokers = await API.getBrokers();
-      const topBrokers = brokers.filter(b => b.rating >= 5);
+      const topBrokers = brokers.filter(b => b.rating >= 4);
       const el = document.getElementById('homeBrokers');
       const list = document.getElementById('homeBrokerList');
       if (topBrokers.length === 0) {
