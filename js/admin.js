@@ -31,6 +31,23 @@ const Admin = {
         console.error('Upload broker logo error:', err);
       }
     });
+
+    for (let i = 1; i <= 3; i++) {
+      document.getElementById('promoImg' + i + 'Upload').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        document.getElementById('promoImg' + i + 'Name').textContent = 'กำลังอัปโหลด...';
+        try {
+          const url = await this.uploadFile(file);
+          document.getElementById('promoImg' + i).value = url;
+          document.getElementById('promoImg' + i + 'Name').textContent = '✔ อัปโหลดสำเร็จ';
+        } catch (err) {
+          document.getElementById('promoImg' + i + 'Name').textContent = '✖ ล้มเหลว';
+          App.toast('อัปโหลดล้มเหลว', true);
+          console.error('Upload promo image ' + i + ' error:', err);
+        }
+      });
+    }
   },
 
   async uploadFile(file) {
@@ -310,6 +327,15 @@ const Admin = {
         description: document.getElementById('brokerDesc').value,
         ibLink: document.getElementById('brokerLink').value,
         logo: document.getElementById('brokerLogo').value,
+        promotions: JSON.stringify({
+          name: document.getElementById('promoName').value,
+          enabled: document.getElementById('promoEnabled').checked,
+          images: [
+            document.getElementById('promoImg1').value,
+            document.getElementById('promoImg2').value,
+            document.getElementById('promoImg3').value,
+          ].filter(Boolean),
+        }),
       };
 
       try {
@@ -360,6 +386,18 @@ const Admin = {
       document.getElementById('brokerEditId').value = b.id;
       document.getElementById('brokerSubmit').textContent = 'อัปเดตโบรกเกอร์';
       document.getElementById('brokerCancel').style.display = 'inline-block';
+
+      // Load promotions
+      let promo = { name: '', enabled: false, images: [] };
+      if (b.promotions) {
+        try { promo = typeof b.promotions === 'string' ? JSON.parse(b.promotions) : b.promotions; } catch {}
+      }
+      document.getElementById('promoName').value = promo.name || '';
+      document.getElementById('promoEnabled').checked = promo.enabled || false;
+      document.getElementById('promoImg1').value = (promo.images && promo.images[0]) || '';
+      document.getElementById('promoImg2').value = (promo.images && promo.images[1]) || '';
+      document.getElementById('promoImg3').value = (promo.images && promo.images[2]) || '';
+
       window.scrollTo({ top: document.getElementById('admin-brokers').offsetTop - 60, behavior: 'smooth' });
     } catch (err) { console.error('editBroker:', err); }
   },

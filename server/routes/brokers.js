@@ -15,10 +15,11 @@ router.get('/', async (req, res) => {
 
 router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { name, description, ibLink, logo, rating } = req.body;
+    const { name, description, ibLink, logo, rating, promotions } = req.body;
+    const promos = promotions ? (typeof promotions === 'string' ? promotions : JSON.stringify(promotions)) : '';
     const result = await pool.query(
-      'INSERT INTO brokers (name, description, ib_link, logo, rating) VALUES ($1,$2,$3,$4,$5) RETURNING *',
-      [name, description || '', ibLink || '', logo || '', rating || 0]
+      'INSERT INTO brokers (name, description, ib_link, logo, rating, promotions) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
+      [name, description || '', ibLink || '', logo || '', rating || 0, promos]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -29,10 +30,11 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
 
 router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { name, description, ibLink, logo, rating } = req.body;
+    const { name, description, ibLink, logo, rating, promotions } = req.body;
+    const promos = promotions ? (typeof promotions === 'string' ? promotions : JSON.stringify(promotions)) : '';
     const result = await pool.query(
-      'UPDATE brokers SET name=$1, description=$2, ib_link=$3, logo=$4, rating=$5 WHERE id=$6 RETURNING *',
-      [name, description, ibLink, logo || '', rating, req.params.id]
+      'UPDATE brokers SET name=$1, description=$2, ib_link=$3, logo=$4, rating=$5, promotions=$6 WHERE id=$7 RETURNING *',
+      [name, description, ibLink, logo || '', rating, promos, req.params.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
     res.json(result.rows[0]);

@@ -54,6 +54,7 @@ async function initDB() {
         rating DECIMAL(2,1) DEFAULT 0
       );
     `);
+    await client.query(`ALTER TABLE brokers ADD COLUMN IF NOT EXISTS promotions TEXT DEFAULT ''`);
 
     // Seed data if empty
     const brokerCount = await client.query('SELECT COUNT(*) FROM brokers');

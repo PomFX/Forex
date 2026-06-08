@@ -371,6 +371,32 @@ img { max-width: 100%; height: auto; }
 .broker-card .rating { color: var(--gold); margin-bottom: 0.5rem; }
 .broker-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem; }
 
+/* ====== BROKER PROMOTIONS ====== */
+.broker-promo {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+.broker-promo-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+}
+.broker-promo-images {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+.broker-promo-images img {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  border-radius: var(--radius);
+  object-fit: contain;
+}
+
 /* ====== CONTACT PAGE ====== */
 .contact-page {
   display: grid;

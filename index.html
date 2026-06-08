@@ -365,6 +365,34 @@
     <span id="brokerLogoName" style="font-size:0.8rem;color:var(--text-muted)"></span>
   </div>
 </div>
+              <div class="form-group" style="border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem">
+                <label style="font-size:1.1rem;color:var(--gold)">โปรโมชั่น</label>
+                <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-top:0.5rem">
+                  <input type="text" id="promoName" placeholder="ชื่อโปรโมชั่น" style="flex:1;min-width:150px">
+                  <label class="switch"><input type="checkbox" id="promoEnabled"><span class="slider"></span></label>
+                  <span style="font-size:0.85rem;color:var(--text-muted)">เปิด/ปิดโปรโมชั่น</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.8rem">
+                  <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                    <input type="text" id="promoImg1" placeholder="รูปที่ 1 (URL)" style="flex:1;min-width:150px">
+                    <input type="file" id="promoImg1Upload" accept="image/*" style="display:none">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('promoImg1Upload').click()">เลือกรูป 1</button>
+                    <span id="promoImg1Name" style="font-size:0.8rem;color:var(--text-muted)"></span>
+                  </div>
+                  <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                    <input type="text" id="promoImg2" placeholder="รูปที่ 2 (URL)" style="flex:1;min-width:150px">
+                    <input type="file" id="promoImg2Upload" accept="image/*" style="display:none">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('promoImg2Upload').click()">เลือกรูป 2</button>
+                    <span id="promoImg2Name" style="font-size:0.8rem;color:var(--text-muted)"></span>
+                  </div>
+                  <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                    <input type="text" id="promoImg3" placeholder="รูปที่ 3 (URL)" style="flex:1;min-width:150px">
+                    <input type="file" id="promoImg3Upload" accept="image/*" style="display:none">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('promoImg3Upload').click()">เลือกรูป 3</button>
+                    <span id="promoImg3Name" style="font-size:0.8rem;color:var(--text-muted)"></span>
+                  </div>
+                </div>
+              </div>
               <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
                 <button type="submit" class="btn btn-gold" id="brokerSubmit">เพิ่มโบรกเกอร์</button>
                 <button type="button" class="btn btn-outline" id="brokerCancel" style="display:none">ยกเลิก</button>

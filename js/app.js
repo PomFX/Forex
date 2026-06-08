@@ -71,6 +71,20 @@ const App = {
   },
 
   // ====== HOME BROKERS ======
+  _promotionsHTML(raw) {
+    let promo = { name: '', enabled: false, images: [] };
+    if (raw) {
+      try { promo = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch {}
+    }
+    if (!promo.enabled || !promo.name) return '';
+    return `<div class="broker-promo">
+      <div class="broker-promo-title">${escHtml(promo.name)}</div>
+      <div class="broker-promo-images">${(promo.images || []).map(url =>
+        url ? `<img src="${escHtml(url)}" alt="โปรโมชั่น" onerror="this.style.display='none'">` : ''
+      ).join('')}</div>
+    </div>`;
+  },
+
   async renderHomeBrokers() {
     try {
       const brokers = await API.getBrokers();
@@ -90,6 +104,7 @@ const App = {
           <div class="rating">${'★'.repeat(Math.floor(b.rating))}${b.rating % 1 >= 0.5 ? '½' : ''} ${b.rating}</div>
           <p>${escHtml(b.description)}</p>
           <a href="${escHtml(b.ib_link)}" target="_blank" class="btn btn-gold btn-sm">สมัครผ่าน IB</a>
+          ${this._promotionsHTML(b.promotions)}
         </div>`;
       }).join('');
     } catch (err) { console.error('renderHomeBrokers:', err); }
@@ -149,6 +164,7 @@ const App = {
           <div class="rating">${'★'.repeat(Math.floor(b.rating))}${b.rating % 1 >= 0.5 ? '½' : ''} ${b.rating}</div>
           <p>${escHtml(b.description)}</p>
           <a href="${escHtml(b.ib_link)}" target="_blank" class="btn btn-gold btn-sm">สมัครผ่าน IB</a>
+          ${this._promotionsHTML(b.promotions)}
         </div>`;
       }).join('');
     } catch (err) { console.error('renderBrokers:', err); }
