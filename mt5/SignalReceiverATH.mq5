@@ -1040,9 +1040,9 @@ void RunOfflineBOS()
    // Find swing points
    double swingHighs[], swingLows[];
    int swingHighBars[], swingLowBars[];
-   int swingCount = FindSwingPoints(swingHighs, swingLows, swingHighBars, swingLowBars);
+   FindSwingPoints(swingHighs, swingLows, swingHighBars, swingLowBars);
 
-   if(swingCount < 2)
+   if(ArraySize(swingHighs) < 1 && ArraySize(swingLows) < 1)
    {
       Print("[SignalReceiver] OFFLINE: Not enough swing points");
       g_isBusy = false;
@@ -1061,13 +1061,16 @@ void RunOfflineBOS()
    int lastSwingHighBar = -1, lastSwingLowBar = -1;
    double lastSwingHigh = 0, lastSwingLow = 0;
 
-   for(int i = 0; i < swingCount; i++)
+   for(int i = 0; i < ArraySize(swingHighs); i++)
    {
       if(swingHighBars[i] < 20 && swingHighs[i] > lastSwingHigh)
       {
          lastSwingHigh = swingHighs[i];
          lastSwingHighBar = swingHighBars[i];
       }
+   }
+   for(int i = 0; i < ArraySize(swingLows); i++)
+   {
       if(swingLowBars[i] < 20 && (swingLows[i] < lastSwingLow || lastSwingLow == 0))
       {
          lastSwingLow = swingLows[i];
