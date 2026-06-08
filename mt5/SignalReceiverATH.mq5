@@ -260,69 +260,57 @@ void ToggleMode()
 }
 
 //+------------------------------------------------------------------+
-//| GUI DASHBOARD                                                     |
+//| GUI DASHBOARD — Horizontal signal list                             |
 //+------------------------------------------------------------------+
+#define MAX_SIG_ROWS 10
+
 void CreateDashboard()
 {
    ObjectsDeleteAll(0, UI_PREFIX);
 
-   int currentHeight = g_isMinimized ? 35 : g_pHeight;
+   int rowH = 16;
+   int sigH = rowH * MAX_SIG_ROWS + 2;
+   int footH = 40;
+   int totalH = g_isMinimized ? 35 : 35 + sigH + footH;
    string resizeBtnText = g_isMinimized ? "🗖 Max" : "🗕 Min";
    g_modeStr = (g_mode == 0) ? "ONLINE" : "OFFLINE BOS";
 
-   CreatePanel("MainBackground", g_pX, g_pY, g_pWidth, currentHeight, PANEL_BG_COLOR, PANEL_BORDER);
+   CreatePanel("MainBackground", g_pX, g_pY, g_pWidth, totalH, PANEL_BG_COLOR, PANEL_BORDER);
    CreatePanel("HeaderBar", g_pX, g_pY, g_pWidth, 35, C'28,33,46', PANEL_BORDER);
    CreateButton("BtnResize", resizeBtnText, g_pX + g_pWidth - 65, g_pY + 5, 55, 24, "Segoe UI", 9, clrWhite, C'45,55,72');
 
-   string modeBtnColor = (g_mode == 0) ? "0,200,255" : "255,180,50";
    string modeLabel = (g_mode == 0) ? "🔵 Online" : "🟠 Offline";
    CreateButton("BtnMode", modeLabel, g_pX + g_pWidth - 130, g_pY + 5, 60, 24, "Segoe UI", 8, clrWhite, C'35,45,60');
 
    CreateLabel("Title", "ATH TRADER v4.2 — " + g_modeStr, g_pX + 15, g_pY + 8, 11, C'0,230,255');
 
-   if(g_isMinimized)
-   {
-      ChartRedraw(0);
-      return;
-   }
-
-   CreatePanel("Divider", g_pX + 255, g_pY + 50, 2, 170, PANEL_BORDER, PANEL_BORDER);
-   CreateLabel("Author", "BOS + LIMIT ENGINE", g_pX + 350, g_pY + 10, 8, C'115,128,142');
-
-   int xLeft = g_pX + 15;
-   CreateLabel("L_AutoTitle",    "Auto Trading:",    xLeft, g_pY + 55,  9, C'150,160,175');
-   CreateLabel("L_PendingTitle",  "Pending Orders:",   xLeft, g_pY + 85,  9, C'150,160,175');
-   CreateLabel("L_PositionTitle", "Active Positions:", xLeft, g_pY + 115, 9, C'150,160,175');
-   CreateLabel("L_PairsTitle",    "Active Pairs:",     xLeft, g_pY + 145, 9, C'150,160,175');
-   CreateLabel("L_TimeTitle",     "Last Update:",      xLeft, g_pY + 175, 9, C'150,160,175');
-   CreateLabel("L_ShortcutHint",  "[F5] Refresh | [F6] Cancel All | [F7] Toggle", xLeft, g_pY + 215, 8, C'90,100,115');
-
    if(g_expiryDt > 0)
-   {
-      string expiryLabel = "Expires: " + EXPIRY_DATE;
-      CreateLabel("R_Expiry", expiryLabel, g_pX + 15, g_pY + 200, 8, C'255,180,50');
-   }
+      CreateLabel("Expiry", "Exp:" + EXPIRY_DATE, g_pX + g_pWidth - 200, g_pY + 10, 8, C'255,180,50');
 
-   int xRight = g_pX + 270;
-   CreateLabel("R_LatestTitle",   "Latest Signal:",    xRight, g_pY + 55,  9, C'150,160,175');
-   CreateLabel("R_PairTitle",     "Symbol:",           xRight, g_pY + 85,  9, C'150,160,175');
-   CreateLabel("R_EntryTitle",    "Entry Price:",      xRight, g_pY + 115, 9, C'150,160,175');
-   CreateLabel("R_SlTitle",       "Stop Loss (SL):",   xRight, g_pY + 145, 9, C'150,160,175');
-   CreateLabel("R_TpTitle",       "Take Profit (TP):", xRight, g_pY + 175, 9, C'150,160,175');
-   CreateLabel("R_StatusTitle",   "Engine Status:",    xRight, g_pY + 210, 8, C'115,128,142');
+   if(g_isMinimized) { ChartRedraw(0); return; }
 
-   CreateLabel("V_Auto",      "CHECKING...", xLeft+115, g_pY + 55,  9, clrWhite);
-   CreateLabel("V_Pending",   "0",            xLeft+115, g_pY + 85,  9, clrWhite);
-   CreateLabel("V_Position",  "0",            xLeft+115, g_pY + 115, 9, clrWhite);
-   CreateLabel("V_Pairs",     "0",            xLeft+115, g_pY + 145, 9, clrWhite);
-   CreateLabel("V_Time",      "Never",        xLeft+115, g_pY + 175, 9, clrWhite);
+   // Signal rows (created once, updated via UpdateDashboard)
+   int sigY = g_pY + 37;
+   for(int i = 0; i < MAX_SIG_ROWS; i++)
+      CreateLabel("Sig" + IntegerToString(i), "", g_pX + 12, sigY + i * rowH, 9, clrWhite);
 
-   CreateLabel("V_Latest",    "NONE",         xRight+115, g_pY + 55,  9, clrWhite);
-   CreateLabel("V_Pair",      "WAITING...",   xRight+115, g_pY + 85,  11, clrWhite);
-   CreateLabel("V_Entry",     "0.00000",      xRight+115, g_pY + 115, 9, clrWhite);
-   CreateLabel("V_Sl",        "0.00000",      xRight+115, g_pY + 145, 9, clrWhite);
-   CreateLabel("V_Tp",        "0.00000",      xRight+115, g_pY + 175, 9, clrWhite);
-   CreateLabel("V_Status",    "STANDBY",      xRight+115, g_pY + 210, 8, clrWhite);
+   // Footer
+   int footY = g_pY + 37 + sigH;
+   CreateLabel("FT_Auto",  "Auto:", g_pX + 12, footY, 9, C'150,160,175');
+   CreateLabel("FT_Pend",  "Pend:", g_pX + 90, footY, 9, C'150,160,175');
+   CreateLabel("FT_Pos",   "Pos:",  g_pX + 175, footY, 9, C'150,160,175');
+   CreateLabel("FT_Pairs", "Pairs:",g_pX + 250, footY, 9, C'150,160,175');
+   CreateLabel("FT_Time",  "Time:", g_pX + 340, footY, 9, C'150,160,175');
+   CreateLabel("FT_Status","Status:",g_pX + 430, footY, 9, C'150,160,175');
+
+   CreateLabel("FV_Auto",  "---", g_pX + 46, footY, 9, clrWhite);
+   CreateLabel("FV_Pend",  "0",   g_pX + 128, footY, 9, clrWhite);
+   CreateLabel("FV_Pos",   "0",   g_pX + 208, footY, 9, clrWhite);
+   CreateLabel("FV_Pairs", "0",   g_pX + 290, footY, 9, clrWhite);
+   CreateLabel("FV_Time",  "Idle",g_pX + 380, footY, 9, clrWhite);
+   CreateLabel("FV_Status","---", g_pX + 472, footY, 9, clrWhite);
+
+   CreateLabel("Shortcut", "[F5]Refresh [F6]Cancel [F7]Toggle", g_pX + 12, footY + 18, 8, C'90,100,115');
 
    UpdateDashboard();
 }
@@ -331,8 +319,8 @@ void UpdateDashboard()
 {
    if(g_isMinimized) return;
 
-   int pendingCount = 0;
-   int activePairs = 0;
+   //--- Collect pending orders info
+   int pendingCount = 0, activePairs = 0, posCount = CountPositions();
    string pairsList = "";
    int total = OrdersTotal();
    for(int i = 0; i < total; i++)
@@ -340,117 +328,120 @@ void UpdateDashboard()
       ulong ticket = OrderGetTicket(i);
       if(ticket > 0 && OrderGetInteger(ORDER_MAGIC) == MAGIC_NUMBER)
       {
-         ENUM_ORDER_TYPE orderType = (ENUM_ORDER_TYPE)OrderGetInteger(ORDER_TYPE);
-         if(orderType == ORDER_TYPE_BUY_LIMIT  ||
-            orderType == ORDER_TYPE_SELL_LIMIT ||
-            orderType == ORDER_TYPE_BUY_STOP   ||
-            orderType == ORDER_TYPE_SELL_STOP)
+         ENUM_ORDER_TYPE ot = (ENUM_ORDER_TYPE)OrderGetInteger(ORDER_TYPE);
+         if(ot == ORDER_TYPE_BUY_LIMIT || ot == ORDER_TYPE_SELL_LIMIT ||
+            ot == ORDER_TYPE_BUY_STOP  || ot == ORDER_TYPE_SELL_STOP)
          {
             pendingCount++;
             string sym = OrderGetString(ORDER_SYMBOL);
             if(StringFind(pairsList, sym) < 0)
             {
-               if(pairsList != "") pairsList += ", ";
+               if(pairsList != "") pairsList += ",";
                pairsList += sym;
                activePairs++;
             }
          }
       }
    }
-   int posCount = CountPositions();
 
-   bool tradeAllowed = TerminalInfoInteger(TERMINAL_TRADE_ALLOWED);
-   bool algoAllowed  = MQLInfoInteger(MQL_TRADE_ALLOWED);
-   color autoColor = (tradeAllowed && algoAllowed) ? C'50,220,100' : C'255,80,100';
-   string autoTxt  = (tradeAllowed && algoAllowed) ? "ACTIVE" : "DISABLED";
+   bool tradeOk = TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) && MQLInfoInteger(MQL_TRADE_ALLOWED);
+   bool fg = IsChartForeground();
 
-   int latestSignalId = 0;
-   string latestPair = "WAITING...";
-   string latestDir = "-";
-   double latestEntry = 0;
-   double latestSl = 0;
-   double latestTp = 0;
+   //--- Collect stored signals from GlobalVariables (up to MAX_SIG_ROWS)
+   int    sId[MAX_SIG_ROWS];
+   string sPair[MAX_SIG_ROWS], sDir[MAX_SIG_ROWS], sStat[MAX_SIG_ROWS];
+   double sEntry[MAX_SIG_ROWS], sSL[MAX_SIG_ROWS], sTP[MAX_SIG_ROWS];
+   int    sCount = 0;
 
    int gvTotal = GlobalVariablesTotal();
-   for(int i = 0; i < gvTotal; i++)
+   for(int i = 0; i < gvTotal && sCount < MAX_SIG_ROWS; i++)
    {
       string name = GlobalVariableName(i);
-      if(StringFind(name, "ATH_SignalId_") == 0)
+      if(StringFind(name, "ATH_SignalId_") != 0) continue;
+      int sid = (int)GlobalVariableGet(name);
+      if(sid <= 0) continue;
+
+      string pair = StringSubstr(name, 14);
+      StringReplace(pair, "_", "/");
+      double entry = GlobalVariableGet(GvKey(pair, "Entry"));
+      double sl    = GlobalVariableGet(GvKey(pair, "SL"));
+      double tp    = GlobalVariableGet(GvKey(pair, "TP"));
+      double dir   = GlobalVariableGet(GvKey(pair, "Dir"));
+
+      // Insert sorted by signal ID descending
+      int idx = sCount;
+      for(int j = 0; j < sCount; j++) { if(sid > sId[j]) { idx = j; break; } }
+      for(int j = sCount; j > idx; j--)
       {
-         int sid = (int)GlobalVariableGet(name);
-         if(sid > latestSignalId)
-         {
-            latestSignalId = sid;
-            latestPair = StringSubstr(name, 14);
-            StringReplace(latestPair, "_", "/");
-            double gvEntry = GlobalVariableGet(GvKey(latestPair, "Entry"));
-            double gvSL = GlobalVariableGet(GvKey(latestPair, "SL"));
-            double gvTP = GlobalVariableGet(GvKey(latestPair, "TP"));
-            double gvDir = GlobalVariableGet(GvKey(latestPair, "Dir"));
-            if(gvEntry > 0) latestEntry = gvEntry;
-            if(gvSL > 0) latestSl = gvSL;
-            if(gvTP > 0) latestTp = gvTP;
-            if(gvDir == 1) latestDir = "BUY";
-            else if(gvDir == 2) latestDir = "SELL";
-         }
+         sId[j]    = sId[j-1];    sPair[j]  = sPair[j-1];
+         sDir[j]   = sDir[j-1];   sStat[j]  = sStat[j-1];
+         sEntry[j] = sEntry[j-1]; sSL[j]    = sSL[j-1];
+         sTP[j]    = sTP[j-1];
       }
+      sId[idx]    = sid;
+      sPair[idx]  = pair;
+      sDir[idx]   = (dir == 1) ? "BUY" : (dir == 2) ? "SELL" : "-";
+      sEntry[idx] = entry;
+      sSL[idx]    = sl;
+      sTP[idx]    = tp;
+      sStat[idx]  = "STANDBY";
+      sCount++;
    }
 
-   // If no signal data, show current symbol
-   if(latestSignalId == 0)
+   // Check if any stored signal has a pending order
+   for(int i = 0; i < sCount; i++)
    {
-      latestPair = Symbol();
-      latestEntry = SymbolInfoDouble(latestPair, SYMBOL_BID);
-      latestSl = SymbolInfoDouble(latestPair, SYMBOL_ASK);
-      latestDir = "-";
+      string sym = FindSymbol(sPair[i]);
+      if(sym != "" && HasPendingForSymbol(sym))
+         sStat[i] = "PENDING";
    }
 
-   color dirColor = clrWhite;
-   if(latestDir == "BUY") dirColor = C'0,255,200';
-   else if(latestDir == "SELL") dirColor = C'255,60,140';
-
-   string timeStr = (g_isBusy) ? TimeToString(TimeCurrent(), TIME_DATE|TIME_MINUTES) : "Idle";
-
-   ObjectSetString(0, UI_PREFIX+"V_Auto", OBJPROP_TEXT, autoTxt);
-   ObjectSetInteger(0, UI_PREFIX+"V_Auto", OBJPROP_COLOR, autoColor);
-   ObjectSetString(0, UI_PREFIX+"V_Pending", OBJPROP_TEXT, IntegerToString(pendingCount));
-   ObjectSetString(0, UI_PREFIX+"V_Position", OBJPROP_TEXT, IntegerToString(posCount));
-   ObjectSetString(0, UI_PREFIX+"V_Pairs", OBJPROP_TEXT, IntegerToString(activePairs));
-   ObjectSetString(0, UI_PREFIX+"V_Time", OBJPROP_TEXT, timeStr);
-
-   string sigTxt = (latestSignalId > 0) ? "#" + IntegerToString(latestSignalId) : "LIVE";
-   ObjectSetString(0, UI_PREFIX+"V_Latest", OBJPROP_TEXT, sigTxt);
-   ObjectSetString(0, UI_PREFIX+"V_Pair", OBJPROP_TEXT, latestPair);
-   ObjectSetInteger(0, UI_PREFIX+"V_Pair", OBJPROP_COLOR, dirColor);
-
-   if(latestSignalId > 0)
+   //--- Render signal rows
+   int rowH = 16, sigY = g_pY + 37;
+   for(int r = 0; r < MAX_SIG_ROWS; r++)
    {
-      ObjectSetString(0, UI_PREFIX+"V_Entry", OBJPROP_TEXT, DoubleToString(latestEntry, 5));
-      ObjectSetString(0, UI_PREFIX+"V_Sl", OBJPROP_TEXT, DoubleToString(latestSl, 5));
-      ObjectSetInteger(0, UI_PREFIX+"V_Sl", OBJPROP_COLOR, latestSl > 0 ? C'255,100,100' : clrWhite);
-      ObjectSetString(0, UI_PREFIX+"V_Tp", OBJPROP_TEXT, DoubleToString(latestTp, 5));
-      ObjectSetInteger(0, UI_PREFIX+"V_Tp", OBJPROP_COLOR, latestTp > 0 ? C'100,255,100' : clrWhite);
+      int dc = (StringFind(sPair[r], "/") > 0 && StringFind(sPair[r], "XAU") < 0 && StringFind(sPair[r], "XAG") < 0 && StringFind(sPair[r], "BTC") < 0 && StringFind(sPair[r], "ETH") < 0 && StringFind(sPair[r], "XRP") < 0) ? 5 : 2;
+      string txt = (r < sCount)
+         ? "#" + IntegerToString(sId[r]) + "  " + sPair[r] + "  " + sDir[r]
+           + "  @" + DoubleToString(sEntry[r], dc)
+           + "  SL:" + DoubleToString(sSL[r], dc)
+           + "  TP:" + DoubleToString(sTP[r], dc)
+           + "  " + sStat[r]
+         : (r == 0 ? "⏳ Waiting for signal..." : "");
+
+      color c = clrWhite;
+      if(r < sCount)
+      {
+         if(sStat[r] == "PENDING")      c = C'0,230,255';
+         else if(sDir[r] == "BUY")      c = C'0,255,200';
+         else if(sDir[r] == "SELL")     c = C'255,60,140';
+      }
+      else
+      {
+         c = C'90,100,115';
+      }
+      ObjectSetString(0, UI_PREFIX+"Sig"+IntegerToString(r), OBJPROP_TEXT, txt);
+      ObjectSetInteger(0, UI_PREFIX+"Sig"+IntegerToString(r), OBJPROP_COLOR, c);
    }
-   else
-   {
-      string sym = Symbol();
-      double bid = SymbolInfoDouble(sym, SYMBOL_BID);
-      double ask = SymbolInfoDouble(sym, SYMBOL_ASK);
-      int dg = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
-      ObjectSetString(0, UI_PREFIX+"V_Entry", OBJPROP_TEXT, "Bid: " + DoubleToString(bid, dg));
-      ObjectSetString(0, UI_PREFIX+"V_Sl", OBJPROP_TEXT, "Ask: " + DoubleToString(ask, dg));
-      ObjectSetInteger(0, UI_PREFIX+"V_Sl", OBJPROP_COLOR, C'100,200,255');
-      ObjectSetString(0, UI_PREFIX+"V_Tp", OBJPROP_TEXT, "Spr: " + DoubleToString((ask - bid) / SymbolInfoDouble(sym, SYMBOL_POINT), 1));
-      ObjectSetInteger(0, UI_PREFIX+"V_Tp", OBJPROP_COLOR, C'115,128,142');
-   }
-   bool fg = IsChartForeground();
+
+   //--- Footer values
+   string autoTxt = tradeOk ? "ACTIVE" : "DISABLED";
+   color  autoClr = tradeOk ? C'50,220,100' : C'255,80,100';
+   ObjectSetString(0, UI_PREFIX+"FV_Auto", OBJPROP_TEXT, autoTxt);
+   ObjectSetInteger(0, UI_PREFIX+"FV_Auto", OBJPROP_COLOR, autoClr);
+   ObjectSetString(0, UI_PREFIX+"FV_Pend", OBJPROP_TEXT, IntegerToString(pendingCount));
+   ObjectSetString(0, UI_PREFIX+"FV_Pos", OBJPROP_TEXT, IntegerToString(posCount));
+   ObjectSetString(0, UI_PREFIX+"FV_Pairs", OBJPROP_TEXT, IntegerToString(activePairs));
+   ObjectSetString(0, UI_PREFIX+"FV_Time", OBJPROP_TEXT, g_isBusy ? TimeToString(TimeCurrent(), TIME_DATE|TIME_MINUTES) : "Idle");
+
    string statusTxt = "STANDBY";
    color  statusClr = clrWhite;
-   if(g_isBusy)                { statusTxt = "PROCESSING..."; statusClr = C'255,200,50'; }
-   else if(!fg)                { statusTxt = "PAUSED";        statusClr = C'255,80,80';  }
-   else if(tradeAllowed && algoAllowed) { statusTxt = "ACTIVE"; statusClr = C'50,220,100'; }
-   ObjectSetString(0, UI_PREFIX+"V_Status", OBJPROP_TEXT, statusTxt);
-   ObjectSetInteger(0, UI_PREFIX+"V_Status", OBJPROP_COLOR, statusClr);
+   if(g_isBusy)              { statusTxt = "PROCESSING..."; statusClr = C'255,200,50'; }
+   else if(!fg)              { statusTxt = "PAUSED";        statusClr = C'255,80,80';  }
+   else if(tradeOk)          { statusTxt = "ACTIVE";        statusClr = C'50,220,100'; }
+
+   ObjectSetString(0, UI_PREFIX+"FV_Status", OBJPROP_TEXT, statusTxt);
+   ObjectSetInteger(0, UI_PREFIX+"FV_Status", OBJPROP_COLOR, statusClr);
 
    ChartRedraw(0);
 }
