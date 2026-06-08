@@ -391,10 +391,20 @@ void UpdateDashboard()
          int dc = (StringFind(sPair[r], "XAU") >= 0 || StringFind(sPair[r], "XAG") >= 0 ||
                    StringFind(sPair[r], "BTC") >= 0 || StringFind(sPair[r], "ETH") >= 0 ||
                    StringFind(sPair[r], "XRP") >= 0) ? 2 : 5;
+         string live = "";
+         string sym = FindSymbol(sPair[r]);
+         if(sym != "")
+         {
+            double bid = SymbolInfoDouble(sym, SYMBOL_BID);
+            double ask = SymbolInfoDouble(sym, SYMBOL_ASK);
+            if(bid > 0 && ask > 0)
+               live = "  Bid:" + DoubleToString(bid, dc) + "  Ask:" + DoubleToString(ask, dc);
+         }
          txt = "#" + IntegerToString(sId[r]) + "  " + sPair[r] + "  " + sDir[r]
              + "  @" + DoubleToString(sEntry[r], dc)
              + "  SL:" + DoubleToString(sSL[r], dc)
              + "  TP:" + DoubleToString(sTP[r], dc)
+             + live
              + "  " + sStat[r];
          if(sStat[r] == "PENDING")      c = C'0,230,255';
          else if(sDir[r] == "BUY")      c = C'0,255,200';
