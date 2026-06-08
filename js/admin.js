@@ -882,54 +882,6 @@ const Admin = {
   // ====== EA DASHBOARD ======
   async renderEaDashboard() {
     try {
-      const config = await API.getEaConfig();
-      document.getElementById('eaEnabled').checked = config.enabled || false;
-      document.getElementById('eaLotSize').value = config.lotSize || 0.01;
-      document.getElementById('eaTpMode').value = String(config.tpMode || 1);
-
-      const pairsContainer = document.getElementById('eaAllowedPairs');
-      const allPairs = config.allPairs || ['XAU/USD','XAG/USD','EUR/USD','GBP/USD','USD/JPY','USD/CHF','AUD/USD','NZD/USD','USD/CAD','BTC/USD','ETH/USD','XRP/USD'];
-      const allowed = config.allowedPairs || [];
-      pairsContainer.innerHTML = allPairs.map(p => {
-        const checked = allowed.includes(p);
-        return `<label class="pair-toggle ${checked ? 'on' : ''}" style="margin:0">
-          <input type="checkbox" class="ea-pair-cb" data-pair="${p}" ${checked ? 'checked' : ''}>
-          <span class="pair-name">${p}</span>
-        </label>`;
-      }).join('');
-
-      pairsContainer.querySelectorAll('.ea-pair-cb').forEach(cb => {
-        cb.addEventListener('change', () => {
-          cb.closest('.pair-toggle').classList.toggle('on', cb.checked);
-        });
-      });
-
-      document.getElementById('eaConfigForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const selected = [];
-        document.querySelectorAll('.ea-pair-cb:checked').forEach(cb => selected.push(cb.dataset.pair));
-        try {
-          await API.saveEaConfig({
-            enabled: document.getElementById('eaEnabled').checked,
-            lotSize: parseFloat(document.getElementById('eaLotSize').value),
-            tpMode: parseInt(document.getElementById('eaTpMode').value),
-            allowedPairs: selected,
-          });
-          App.toast('บันทึก EA Config แล้ว');
-        } catch (err) { App.toast('บันทึกผิดพลาด', true); }
-      };
-
-      // Load logs
-      await this._loadEaLogs();
-      document.getElementById('eaClearLogsBtn').onclick = async () => {
-        try {
-          await API.clearEaLogs();
-          document.getElementById('eaLogContent').innerHTML = '<p style="color:#888">— ลบ Log แล้ว —</p>';
-          App.toast('ลบ Log แล้ว');
-        } catch (err) { App.toast('ลบ Log ล้มเหลว', true); }
-      };
-
-      // Load connected accounts
       await this._loadEaAccounts();
       document.getElementById('eaClearAccountsBtn').onclick = async () => {
         try {
@@ -939,23 +891,6 @@ const Admin = {
         } catch (err) { App.toast('ลบบัญชีล้มเหลว', true); }
       };
     } catch (err) { console.error('renderEaDashboard:', err); }
-  },
-
-  async _loadEaLogs() {
-    try {
-      const data = await API.getEaLogs();
-      const logDiv = document.getElementById('eaLogContent');
-      if (!data.logs) {
-        logDiv.innerHTML = '<p style="color:#888">— ยังไม่มี Log —</p>';
-        return;
-      }
-      logDiv.innerHTML = Object.entries(data.logs).map(([k, v]) => {
-        const val = typeof v === 'object' ? JSON.stringify(v) : v;
-        return `<div><span style="color:var(--gold)">${k}:</span> ${escHtml(String(val))}</div>`;
-      }).join('');
-    } catch (err) {
-      document.getElementById('eaLogContent').innerHTML = '<p style="color:#888">— ยังไม่มี Log —</p>';
-    }
   },
 
   async _loadEaAccounts() {

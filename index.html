@@ -588,38 +588,12 @@
           <!-- EA Dashboard -->
           <div class="admin-page-content" id="admin-eadashboard">
             <h1>EA Dashboard</h1>
-            <p style="color:#888;margin-bottom:1rem;font-size:0.85rem">จัดการการทำงานของ MT5 Expert Advisor</p>
-            <form class="admin-form" id="eaConfigForm">
-              <div class="form-group">
-                <label>เปิดใช้งาน EA</label>
-                <label class="switch"><input type="checkbox" id="eaEnabled"><span class="slider"></span></label>
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label>Lot Size</label><input type="number" id="eaLotSize" step="0.01" min="0.01" value="0.01" style="width:120px"></div>
-                <div class="form-group"><label>TP Mode</label>
-                  <select id="eaTpMode" style="width:120px">
-                    <option value="1">TP1</option>
-                    <option value="2">TP2</option>
-                    <option value="3">TP3</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group"><label>คู่เงินที่อนุญาตให้ EA เข้า Order</label>
-                <div id="eaAllowedPairs" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.3rem"></div>
-              </div>
-              <button type="submit" class="btn btn-gold">💾 บันทึก</button>
-            </form>
+            <p style="color:#888;margin-bottom:1rem;font-size:0.85rem">ตรวจสอบบัญชีลูกค้าที่เชื่อมต่อกับ EA</p>
 
-            <div style="margin-top:2rem">
+            <div>
               <h3 style="color:#d4a017;font-size:1rem;margin-bottom:0.5rem">📊 บัญชีที่เชื่อมต่อ (Account Monitor)</h3>
               <div id="eaAccountsContent" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;min-height:60px;overflow-x:auto"></div>
               <button class="btn btn-danger btn-sm" id="eaClearAccountsBtn" style="margin-top:0.5rem">🗑 ลบบัญชีทั้งหมด</button>
-            </div>
-
-            <div style="margin-top:2rem">
-              <h3 style="color:#d4a017;font-size:1rem;margin-bottom:0.5rem">Activity Log</h3>
-              <div id="eaLogContent" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;font-family:monospace;font-size:0.8rem;min-height:60px"></div>
-              <button class="btn btn-danger btn-sm" id="eaClearLogsBtn" style="margin-top:0.5rem">🗑 ลบ Log</button>
             </div>
           </div>
         </main>
