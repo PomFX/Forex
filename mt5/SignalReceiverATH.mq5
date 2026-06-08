@@ -1360,6 +1360,8 @@ bool SendAccountInfo()
    double profit  = AccountInfoDouble(ACCOUNT_PROFIT);
    string modeStr = (g_mode == 0) ? "online" : "offline";
 
+   Print("[SignalReceiver] SendAccountInfo() called — broker=", broker, " login=", login);
+
    string json = "{"
       + "\"broker\":\""   + broker  + "\","
       + "\"login\":"      + IntegerToString(login) + ","
@@ -1384,9 +1386,11 @@ bool SendAccountInfo()
    if(res == -1)
    {
       int err = GetLastError();
-      if(err != 0) Print("[SignalReceiver] AccountInfo WebRequest FAILED LastError=", err);
+      Print("[SignalReceiver] AccountInfo WebRequest FAILED res=", res, " LastError=", err);
       return false;
    }
+
+   Print("[SignalReceiver] AccountInfo WebRequest HTTP ", res);
    if(res == 200) Print("[SignalReceiver] AccountInfo sent OK (", broker, " #", login, " $", DoubleToString(balance, 2), ")");
    return (res == 200);
 }
