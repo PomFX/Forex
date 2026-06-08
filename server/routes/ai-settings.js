@@ -1,13 +1,14 @@
 const express = require('express');
 const { pool } = require('../db');
 const { authMiddleware, adminMiddleware } = require('./auth');
+const { getMarketContext } = require('../services/market-data');
 const router = express.Router();
 
 const SETTINGS_KEY = 'ai_settings';
 
 const DEFAULT_SETTINGS = {
   model: 'gpt-4o-mini',
-  prompt: `You are a Professional BOS (Break of Structure) analyst specializing in {pair}.
+  prompt: `You are a Professional BOS (Break of Structure) analyst specializing in {pair}.{ohlc}
 
 Analyze {pair} on the M15 timeframe using BOS + Order Block strategy:
 
@@ -97,7 +98,17 @@ router.post('/test', authMiddleware, adminMiddleware, async (req, res) => {
 
     const settings = await getSettings();
     const model = settings.model || 'gpt-4o-mini';
-    const filledPrompt = prompt.replace(/\{pair\}/g, pair || 'XAU/USD');
+    const targetPair = pair || 'XAU/USD';
+
+    let ohlcContext = '';
+    try {
+      const ctx = await getMarketContext(targetPair);
+      if (ctx && ctx.context) ohlcContext = '\n\nReal M15 OHLC Structure:\n' + ctx.context;
+    } catch {}
+
+    const filledPrompt = prompt
+      .replace(/\{pair\}/g, targetPair)
+      .replace(/\{ohlc\}/g, ohlcContext);
 
     const { OpenAI } = require('openai');
     const openai = new OpenAI({ apiKey: openaiKey });

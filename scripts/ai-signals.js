@@ -2,55 +2,24 @@ require('dotenv').config();
 const OpenAI = require('openai');
 const { sendSignalMessage } = require('./line');
 
-const FOREX_MAP = {
-  'EUR/USD': { from: 'EUR', to: 'USD' },
-  'GBP/USD': { from: 'GBP', to: 'USD' },
-  'USD/JPY': { from: 'USD', to: 'JPY' },
-  'USD/CHF': { from: 'USD', to: 'CHF' },
-  'AUD/USD': { from: 'AUD', to: 'USD' },
-  'USD/CAD': { from: 'USD', to: 'CAD' },
-};
+const API_BASE = process.env.AI_API_URL || 'http://localhost:8080';
 
-async function fetchMarketData() {
-  let forexData = {};
+async function fetchOHLCContext(pair) {
   try {
-    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    const res = await fetch(`${API_BASE}/api/market/ohlc?pair=${pair}`);
+    if (!res.ok) return null;
     const data = await res.json();
-    if (data.rates) {
-      forexData = data.rates;
-    }
+    return data.context || null;
   } catch (err) {
-    console.warn('Forex API error:', err.message);
+    console.warn('OHLC fetch error:', err.message);
+    return null;
   }
-
-  const results = [];
-
-  // XAU/USD always first
-  try {
-    const res = await fetch('https://api.gold-api.com/price/XAU');
-    const data = await res.json();
-    if (data && data.price) {
-      results.push({ pair: 'XAU/USD', price: data.price, change: 0 });
-    }
-  } catch {}
-
-  for (const [pair, { from, to }] of Object.entries(FOREX_MAP)) {
-    let price = null;
-    if (from === 'USD') {
-      price = forexData[to] || null;
-    } else {
-      price = forexData[from] ? (1 / forexData[from]) : null;
-    }
-    if (price) {
-      results.push({ pair, price: parseFloat(price.toFixed(5)), change: 0 });
-    }
-  }
-
-  return results;
 }
 
 async function generateSignal(marketData) {
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+  const ohlcContext = await fetchOHLCContext('XAU/USD');
 
   const marketTable = marketData.map(d =>
     `${d.pair} | Price: ${d.price} | Change: ${d.change.toFixed(2)}%`
@@ -60,6 +29,9 @@ async function generateSignal(marketData) {
 
 Current Market Data:
 ${marketTable}
+
+M15 OHLC Structure (Real Data):
+${ohlcContext || 'ไม่มีข้อมูล OHLC — ใช้ราคาปัจจุบันประเมินเท่าที่ทำได้'}
 
 BOS Analysis Framework (M15 Timeframe):
 
@@ -170,20 +142,17 @@ async function main() {
     process.exit(1);
   }
 
-  console.log('Fetching market data...');
-  const marketData = await fetchMarketData();
-  if (marketData.length === 0) {
-    console.error('No market data available');
-    process.exit(1);
-  }
-  marketData.forEach(d => console.log(`  ${d.pair}: ${d.price} (${d.change.toFixed(2)}%)`));
+  console.log(`API URL: ${API_BASE}`);
+  console.log('Fetching OHLC market data from server...\n');
 
-  console.log('\nGenerating AI signals...');
+  const marketData = [{ pair: 'XAU/USD', price: 0, change: 0 }];
+
+  console.log('Generating AI signals...');
   const signals = await generateSignal(marketData);
   console.log(`Generated ${signals.length} signal(s)\n`);
 
   if (signals.length === 0) {
-    console.log('No valid SMC setup found — skipping');
+    console.log('No valid BOS setup found — skipping');
     return;
   }
 
@@ -200,4 +169,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { fetchMarketData, generateSignal, postSignals };
+module.exports = { fetchOHLCContext, generateSignal, postSignals };

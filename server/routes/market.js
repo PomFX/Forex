@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { getMarketContext, PAIR_MAP } = require('../services/market-data');
 
 const FOREX_API = 'https://open.er-api.com/v6/latest/USD';
 const GOLD_API = 'https://api.gold-api.com/price/XAU';
@@ -43,6 +44,30 @@ router.get('/prices', async (req, res) => {
   } catch (err) {
     console.error('Market prices error:', err.message);
     res.status(500).json({ error: 'Failed to fetch prices' });
+  }
+});
+
+router.get('/ohlc', async (req, res) => {
+  try {
+    const pair = req.query.pair || 'XAU/USD';
+    if (!PAIR_MAP[pair]) {
+      return res.status(400).json({ error: `Unsupported pair: ${pair}` });
+    }
+
+    const result = await getMarketContext(pair);
+    if (!result) {
+      return res.status(503).json({ error: 'No OHLC data available — check TWELVEDATA_API_KEY' });
+    }
+
+    res.json({
+      pair: result.pair,
+      structure: result.structure,
+      context: result.context,
+      candles: result.candles.slice(-20),
+    });
+  } catch (err) {
+    console.error('OHLC error:', err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 

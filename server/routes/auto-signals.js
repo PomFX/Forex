@@ -1,6 +1,7 @@
 const express = require('express');
 const { pool } = require('../db');
 const { authMiddleware, adminMiddleware } = require('./auth');
+const { getMarketContext } = require('../services/market-data');
 const router = express.Router();
 
 const SETTINGS_KEY = 'auto_signals';
@@ -124,7 +125,13 @@ router.post('/auto-run', async (req, res) => {
 
     for (const pair of enabledPairs) {
       try {
-        const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}.
+        let ohlcContext = '';
+        try {
+          const ctx = await getMarketContext(pair);
+          if (ctx && ctx.context) ohlcContext = '\nReal M15 OHLC Structure:\n' + ctx.context + '\n';
+        } catch {}
+
+        const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}.${ohlcContext}
 
 Analyze ${pair} on the M15 timeframe using BOS + Order Block strategy:
 
@@ -223,7 +230,13 @@ router.post('/analyze', authMiddleware, adminMiddleware, async (req, res) => {
 
     for (const pair of enabledPairs) {
       try {
-        const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}.
+        let ohlcContext = '';
+        try {
+          const ctx = await getMarketContext(pair);
+          if (ctx && ctx.context) ohlcContext = '\nReal M15 OHLC Structure:\n' + ctx.context + '\n';
+        } catch {}
+
+        const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}.${ohlcContext}
 
 Analyze ${pair} on the M15 timeframe using BOS + Order Block strategy:
 
