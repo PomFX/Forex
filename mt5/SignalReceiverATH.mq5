@@ -43,7 +43,7 @@ input color    PANEL_BG_COLOR     = C'20,24,35';
 input color    PANEL_BORDER       = C'45,55,72';
 input int      INPUT_PANEL_X      = 30;          // Dashboard X Position
 input int      INPUT_PANEL_Y      = 50;          // Dashboard Y Position
-input int      INPUT_PANEL_W      = 520;         // Dashboard Width
+input int      INPUT_PANEL_W      = 620;         // Dashboard Width
 input int      INPUT_PANEL_H      = 240;         // Dashboard Height
 
 //--- Global Variables
@@ -374,6 +374,15 @@ void UpdateDashboard()
       }
    }
 
+   // If no signal data, show current symbol
+   if(latestSignalId == 0)
+   {
+      latestPair = Symbol();
+      latestEntry = SymbolInfoDouble(latestPair, SYMBOL_BID);
+      latestSl = SymbolInfoDouble(latestPair, SYMBOL_ASK);
+      latestDir = "-";
+   }
+
    color dirColor = clrWhite;
    if(latestDir == "BUY") dirColor = C'0,255,200';
    else if(latestDir == "SELL") dirColor = C'255,60,140';
@@ -387,15 +396,31 @@ void UpdateDashboard()
    ObjectSetString(0, UI_PREFIX+"V_Pairs", OBJPROP_TEXT, IntegerToString(activePairs));
    ObjectSetString(0, UI_PREFIX+"V_Time", OBJPROP_TEXT, timeStr);
 
-   string sigTxt = (latestSignalId > 0) ? "#" + IntegerToString(latestSignalId) : "NO SIGNAL";
+   string sigTxt = (latestSignalId > 0) ? "#" + IntegerToString(latestSignalId) : "LIVE";
    ObjectSetString(0, UI_PREFIX+"V_Latest", OBJPROP_TEXT, sigTxt);
    ObjectSetString(0, UI_PREFIX+"V_Pair", OBJPROP_TEXT, latestPair);
    ObjectSetInteger(0, UI_PREFIX+"V_Pair", OBJPROP_COLOR, dirColor);
-   ObjectSetString(0, UI_PREFIX+"V_Entry", OBJPROP_TEXT, DoubleToString(latestEntry, 5));
-   ObjectSetString(0, UI_PREFIX+"V_Sl", OBJPROP_TEXT, DoubleToString(latestSl, 5));
-   ObjectSetInteger(0, UI_PREFIX+"V_Sl", OBJPROP_COLOR, latestSl > 0 ? C'255,100,100' : clrWhite);
-   ObjectSetString(0, UI_PREFIX+"V_Tp", OBJPROP_TEXT, DoubleToString(latestTp, 5));
-   ObjectSetInteger(0, UI_PREFIX+"V_Tp", OBJPROP_COLOR, latestTp > 0 ? C'100,255,100' : clrWhite);
+
+   if(latestSignalId > 0)
+   {
+      ObjectSetString(0, UI_PREFIX+"V_Entry", OBJPROP_TEXT, DoubleToString(latestEntry, 5));
+      ObjectSetString(0, UI_PREFIX+"V_Sl", OBJPROP_TEXT, DoubleToString(latestSl, 5));
+      ObjectSetInteger(0, UI_PREFIX+"V_Sl", OBJPROP_COLOR, latestSl > 0 ? C'255,100,100' : clrWhite);
+      ObjectSetString(0, UI_PREFIX+"V_Tp", OBJPROP_TEXT, DoubleToString(latestTp, 5));
+      ObjectSetInteger(0, UI_PREFIX+"V_Tp", OBJPROP_COLOR, latestTp > 0 ? C'100,255,100' : clrWhite);
+   }
+   else
+   {
+      string sym = Symbol();
+      double bid = SymbolInfoDouble(sym, SYMBOL_BID);
+      double ask = SymbolInfoDouble(sym, SYMBOL_ASK);
+      int dg = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
+      ObjectSetString(0, UI_PREFIX+"V_Entry", OBJPROP_TEXT, "Bid: " + DoubleToString(bid, dg));
+      ObjectSetString(0, UI_PREFIX+"V_Sl", OBJPROP_TEXT, "Ask: " + DoubleToString(ask, dg));
+      ObjectSetInteger(0, UI_PREFIX+"V_Sl", OBJPROP_COLOR, C'100,200,255');
+      ObjectSetString(0, UI_PREFIX+"V_Tp", OBJPROP_TEXT, "Spr: " + DoubleToString((ask - bid) / SymbolInfoDouble(sym, SYMBOL_POINT), 1));
+      ObjectSetInteger(0, UI_PREFIX+"V_Tp", OBJPROP_COLOR, C'115,128,142');
+   }
    ObjectSetString(0, UI_PREFIX+"V_Status", OBJPROP_TEXT, g_isBusy ? "PROCESSING..." : "STANDBY");
 
    ChartRedraw(0);
