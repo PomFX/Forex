@@ -603,6 +603,23 @@ void CacheAdd(string pair, string symbol)
 //+------------------------------------------------------------------+
 //| Helpers                                                           |
 //+------------------------------------------------------------------+
+bool IsExpired()
+{
+   return (TimeCurrent() > g_expiryDt);
+}
+
+string GetPairCategory(string pair)
+{
+   if(pair == "XAU/USD" || pair == "XAG/USD") return "commodities";
+   string forexPairs[] = {"EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "NZD/USD", "USD/CAD"};
+   for(int i = 0; i < ArraySize(forexPairs); i++)
+      if(pair == forexPairs[i]) return "forex";
+   string cryptoPairs[] = {"BTC/USD", "ETH/USD", "XRP/USD"};
+   for(int i = 0; i < ArraySize(cryptoPairs); i++)
+      if(pair == cryptoPairs[i]) return "crypto";
+   return "unknown";
+}
+
 bool IsWeekend()
 {
    MqlDateTime dt;
