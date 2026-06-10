@@ -366,7 +366,10 @@ router.post('/cron', async (req, res) => {
     const { OpenAI } = require('openai');
     const openai = new OpenAI({ apiKey: openaiKey });
 
-    const results = await Promise.all(enabledPairs.map(async (pair) => {
+    const results = [];
+    for (const pair of enabledPairs) {
+      // Small delay to respect TwelveData rate limit (8/min)
+      if (results.length > 0) await new Promise(r => setTimeout(r, 2000));
       try {
         let ohlcContext = '';
         let swingHigh = null, swingLow = null, currentPrice = null;
@@ -423,14 +426,14 @@ If no setup: {"pair": "${pair}", "hasSetup": false}`;
             [data.pair, data.direction, parsePrice(data.entry), parsePrice(data.tp1), parsePrice(data.tp2), parsePrice(data.tp3), parsePrice(data.sl), data.reason || '']
           );
           console.log(`[Cron] Signal saved: ${pair} ${data.direction} (id: ${result.rows[0].id})`);
-          return { pair, hasSignal: true, signalId: result.rows[0].id, direction: data.direction };
+          results.push({ pair, hasSignal: true, signalId: result.rows[0].id, direction: data.direction });
         }
-        return { pair, hasSignal: false, swingHigh, swingLow, currentPrice };
+        results.push({ pair, hasSignal: false, swingHigh, swingLow, currentPrice });
       } catch (err) {
         console.error(`[Cron] Error for ${pair}:`, err.message);
-        return { pair, hasSignal: false, error: err.message };
+        results.push({ pair, hasSignal: false, error: err.message });
       }
-    }));
+    }
 
     // Send LINE notification
     const lineToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
