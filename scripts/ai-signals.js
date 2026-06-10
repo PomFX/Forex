@@ -1,21 +1,24 @@
 require('dotenv').config();
 const OpenAI = require('openai');
-const { sendSignalMessage } = require('./line');
+const { sendSignalMessage, sendBOSLevelsMessage } = require('./line');
 
 const API_BASE = process.env.AI_API_URL || 'http://localhost:8080';
 
 async function fetchOHLCContext(pair) {
   try {
     const res = await fetch(`${API_BASE}/api/market/ohlc?pair=${pair}`);
-    if (!res.ok) return { context: null, currentPrice: null };
+    if (!res.ok) return { context: null, currentPrice: null, swingHigh: null, swingLow: null };
     const data = await res.json();
+    const s = data.structure || {};
     return {
       context: data.context || null,
-      currentPrice: data.structure?.currentPrice || null,
+      currentPrice: s.currentPrice || null,
+      swingHigh: s.latestSwingHigh || null,
+      swingLow: s.latestSwingLow || null,
     };
   } catch (err) {
     console.warn('OHLC fetch error:', err.message);
-    return { context: null, currentPrice: null };
+    return { context: null, currentPrice: null, swingHigh: null, swingLow: null };
   }
 }
 
@@ -100,7 +103,8 @@ Or if conditions met:
 
   const text = completion.choices[0].message.content.trim();
   const cleaned = text.replace(/```json?/gi, '').replace(/```/g, '').trim();
-  return JSON.parse(cleaned);
+  const signals = JSON.parse(cleaned);
+  return { signals, swingHigh: ohlc.swingHigh, swingLow: ohlc.swingLow, currentPrice: ohlc.currentPrice };
 }
 
 async function postSignals(signals) {
@@ -152,11 +156,17 @@ async function main() {
   console.log('Fetching OHLC market data from server...\n');
 
   console.log('Generating AI signals...');
-  const signals = await generateSignal();
+  const { signals, swingHigh, swingLow, currentPrice } = await generateSignal();
   console.log(`Generated ${signals.length} signal(s)\n`);
 
   if (signals.length === 0) {
-    console.log('No valid BOS setup found — skipping');
+    console.log('No valid BOS setup found — sending BOS levels to LINE');
+    await sendBOSLevelsMessage({
+      pair: 'XAU/USD',
+      currentPrice,
+      swingHigh,
+      swingLow,
+    });
     return;
   }
 

@@ -52,4 +52,41 @@ async function sendSignalMessage(s, action) {
   }
 }
 
-module.exports = { sendSignalMessage };
+async function sendBOSLevelsMessage(data) {
+  if (!TOKEN || !TARGET) return;
+  if (!data.swingHigh && !data.swingLow) return;
+
+  const line = '⏳ ATH Trader — ไม่มีสัญญาณขณะนี้\n'
+    + '\n'
+    + '📊 ' + (data.pair || 'XAU/USD') + '\n'
+    + '💰 ราคาปัจจุบัน: ' + (data.currentPrice || 'N/A') + '\n'
+    + '\n'
+    + (data.swingHigh ? '🟢 Bullish BOS: ต้องปิดเหนือ ' + data.swingHigh + '\n' : '')
+    + (data.swingLow ? '🔴 Bearish BOS: ต้องปิดต่ำกว่า ' + data.swingLow + '\n' : '')
+    + '\n'
+    + '⏰ ' + new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', hour12: false });
+
+  try {
+    const res = await fetch(LINE_API, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + TOKEN,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to: TARGET,
+        messages: [{ type: 'text', text: line }],
+      }),
+    });
+    if (res.ok) {
+      console.log('LINE: sent BOS levels');
+    } else {
+      const err = await res.text();
+      console.error('LINE BOS levels error:', res.status, err);
+    }
+  } catch (err) {
+    console.error('LINE BOS levels API error:', err.message);
+  }
+}
+
+module.exports = { sendSignalMessage, sendBOSLevelsMessage };
