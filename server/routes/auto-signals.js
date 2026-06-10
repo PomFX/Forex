@@ -337,4 +337,150 @@ router.post('/confirm', authMiddleware, adminMiddleware, async (req, res) => {
   }
 });
 
+// POST /auto-signals/cron — external cron endpoint (every 1h), sends LINE
+router.post('/cron', async (req, res) => {
+  try {
+    const apiKey = req.headers['x-ai-key'];
+    const expectedKey = process.env.AI_SIGNAL_API_KEY;
+    if (!expectedKey || apiKey !== expectedKey) {
+      return res.status(403).json({ error: 'Invalid AI key' });
+    }
+
+    const openaiKey = process.env.OPENAI_API_KEY;
+    if (!openaiKey) {
+      return res.status(400).json({ error: 'OPENAI_API_KEY not set' });
+    }
+
+    const settings = await getSettings();
+    const enabledPairs = [];
+    for (const cat of ['commodities', 'forex', 'crypto']) {
+      if (!Array.isArray(settings[cat])) continue;
+      for (const p of settings[cat]) {
+        if (p.enabled) enabledPairs.push(p.pair);
+      }
+    }
+    if (enabledPairs.length === 0) {
+      return res.json({ skipped: true, reason: 'no pairs enabled' });
+    }
+
+    const { OpenAI } = require('openai');
+    const openai = new OpenAI({ apiKey: openaiKey });
+
+    const results = await Promise.all(enabledPairs.map(async (pair) => {
+      try {
+        let ohlcContext = '';
+        let swingHigh = null, swingLow = null, currentPrice = null;
+        try {
+          const ctx = await getMarketContext(pair);
+          if (ctx) {
+            ohlcContext = '\nReal M15 OHLC Structure:\n' + (ctx.context || '') + '\n';
+            const s = ctx.structure || {};
+            swingHigh = s.latestSwingHigh || null;
+            swingLow = s.latestSwingLow || null;
+            currentPrice = s.currentPrice || null;
+          }
+        } catch {}
+
+        const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}.${ohlcContext}
+
+Analyze ${pair} on the M15 timeframe using BOS + Order Block strategy:
+
+🔵 1. Bullish BOS (Buy Setup) — close above previous HH → BUY LIMIT at OB Low
+🔴 2. Bearish BOS (Sell Setup) — close below previous LL → SELL LIMIT at OB High
+
+Entry Condition — ONLY generate when clear BOS confirmed + price retracing to OB zone.
+
+IMPORTANT: Return ALL price values as numeric strings WITHOUT $ or commas.
+Example: "1.08750", not "$1.08750", not "price at OB".
+
+Return ONLY valid JSON (no markdown):
+{
+  "pair": "${pair}",
+  "hasSetup": true/false,
+  "direction": "BUY" or "SELL",
+  "entry": "1.08750",
+  "tp1": "1.09200",
+  "tp2": "1.09500",
+  "tp3": "1.09800",
+  "sl": "1.08400",
+  "reason": "บรรทัด1\\nบรรทัด2\\nบรรทัด3"
+}
+
+If no setup: {"pair": "${pair}", "hasSetup": false}`;
+
+        const completion = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.7,
+        });
+        const text = completion.choices[0].message.content.trim();
+        const cleaned = text.replace(/```json?/gi, '').replace(/```/g, '').trim();
+        const data = JSON.parse(cleaned);
+
+        if (data.hasSetup) {
+          const result = await pool.query(
+            "INSERT INTO signals (pair, direction, entry, tp1, tp2, tp3, sl, status, reason) VALUES ($1,$2,$3,$4,$5,$6,$7,'active',$8) RETURNING *",
+            [data.pair, data.direction, parsePrice(data.entry), parsePrice(data.tp1), parsePrice(data.tp2), parsePrice(data.tp3), parsePrice(data.sl), data.reason || '']
+          );
+          console.log(`[Cron] Signal saved: ${pair} ${data.direction} (id: ${result.rows[0].id})`);
+          return { pair, hasSignal: true, signalId: result.rows[0].id, direction: data.direction };
+        }
+        return { pair, hasSignal: false, swingHigh, swingLow, currentPrice };
+      } catch (err) {
+        console.error(`[Cron] Error for ${pair}:`, err.message);
+        return { pair, hasSignal: false, error: err.message };
+      }
+    }));
+
+    // Send LINE notification
+    const lineToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+    const lineTarget = process.env.LINE_GROUP_ID || process.env.LINE_USER_ID;
+    if (lineToken && lineTarget) {
+      const lines = [];
+      const hasAnySignal = results.some(r => r.hasSignal);
+      lines.push(hasAnySignal ? '🆕 ATH Trader — มีสัญญาณใหม่' : '⏳ ATH Trader — ไม่มีสัญญาณขณะนี้');
+      lines.push('');
+
+      for (const r of results) {
+        const p = r.pair || '?';
+        const price = r.currentPrice || 'N/A';
+        if (r.hasSignal) {
+          lines.push('✅ ' + p + ' @' + price + ' — ' + (r.direction || '') + ' #' + r.signalId);
+        } else {
+          lines.push('📊 ' + p + ' @' + price);
+          if (r.swingHigh) lines.push('   🟢 BOS เหนือ ' + r.swingHigh);
+          if (r.swingLow)  lines.push('   🔴 BOS ต่ำกว่า ' + r.swingLow);
+        }
+        lines.push('********************************');
+      }
+
+      lines.push('');
+      const now = new Date();
+      lines.push('⏰ ' + now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', hour12: false }));
+
+      try {
+        await fetch('https://api.line.me/v2/bot/message/push', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + lineToken,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: lineTarget,
+            messages: [{ type: 'text', text: lines.join('\n') }],
+          }),
+        });
+        console.log('[Cron] LINE sent');
+      } catch (err) {
+        console.error('[Cron] LINE error:', err.message);
+      }
+    }
+
+    res.json({ posted: results.filter(r => r.hasSignal).length, results });
+  } catch (err) {
+    console.error('[Cron] Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
