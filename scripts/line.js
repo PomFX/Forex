@@ -75,6 +75,7 @@ async function sendBOSLevelsMessage(results) {
       if (r.swingHigh) lines.push('   🟢 BOS เหนือ ' + r.swingHigh);
       if (r.swingLow)  lines.push('   🔴 BOS ต่ำกว่า ' + r.swingLow);
     }
+    lines.push('********************************');
   }
 
   lines.push('');
