@@ -27,7 +27,6 @@ async function sendSignalMessage(s, action) {
     console.warn('LINE notify: TOKEN or TARGET not set');
     return;
   }
-  if (s.pair !== 'XAU/USD') return;
 
   try {
     const res = await fetch(LINE_API, {
@@ -52,19 +51,34 @@ async function sendSignalMessage(s, action) {
   }
 }
 
-async function sendBOSLevelsMessage(data) {
+async function sendBOSLevelsMessage(results) {
   if (!TOKEN || !TARGET) return;
-  if (!data.swingHigh && !data.swingLow) return;
+  if (!Array.isArray(results) || results.length === 0) return;
 
-  const line = '⏳ ATH Trader — ไม่มีสัญญาณขณะนี้\n'
-    + '\n'
-    + '📊 ' + (data.pair || 'XAU/USD') + '\n'
-    + '💰 ราคาปัจจุบัน: ' + (data.currentPrice || 'N/A') + '\n'
-    + '\n'
-    + (data.swingHigh ? '🟢 Bullish BOS: ต้องปิดเหนือ ' + data.swingHigh + '\n' : '')
-    + (data.swingLow ? '🔴 Bearish BOS: ต้องปิดต่ำกว่า ' + data.swingLow + '\n' : '')
-    + '\n'
-    + '⏰ ' + new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', hour12: false });
+  const hasAnySignal = results.some(r => r.hasSignal);
+  const lines = [];
+
+  if (hasAnySignal) {
+    lines.push('🆕 ATH Trader — มีสัญญาณใหม่');
+  } else {
+    lines.push('⏳ ATH Trader — ไม่มีสัญญาณขณะนี้');
+  }
+  lines.push('');
+
+  for (const r of results) {
+    const pair = r.pair || '?';
+    const price = r.currentPrice || 'N/A';
+    if (r.hasSignal) {
+      lines.push('✅ ' + pair + ' @' + price + ' — มีสัญญาณ');
+    } else {
+      lines.push('📊 ' + pair + ' @' + price);
+      if (r.swingHigh) lines.push('   🟢 BOS เหนือ ' + r.swingHigh);
+      if (r.swingLow)  lines.push('   🔴 BOS ต่ำกว่า ' + r.swingLow);
+    }
+  }
+
+  lines.push('');
+  lines.push('⏰ ' + new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', hour12: false }));
 
   try {
     const res = await fetch(LINE_API, {
@@ -75,11 +89,11 @@ async function sendBOSLevelsMessage(data) {
       },
       body: JSON.stringify({
         to: TARGET,
-        messages: [{ type: 'text', text: line }],
+        messages: [{ type: 'text', text: lines.join('\n') }],
       }),
     });
     if (res.ok) {
-      console.log('LINE: sent BOS levels');
+      console.log('LINE: sent BOS levels (' + results.length + ' pairs)');
     } else {
       const err = await res.text();
       console.error('LINE BOS levels error:', res.status, err);

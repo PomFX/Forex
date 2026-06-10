@@ -22,19 +22,30 @@ async function fetchOHLCContext(pair) {
   }
 }
 
-async function generateSignal() {
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+async function getEnabledPairs() {
+  try {
+    const res = await fetch(`${API_BASE}/api/auto-signals/settings`);
+    if (!res.ok) return ['XAU/USD'];
+    const settings = await res.json();
+    const pairs = [];
+    for (const cat of ['commodities', 'forex', 'crypto']) {
+      if (!Array.isArray(settings[cat])) continue;
+      for (const p of settings[cat]) {
+        if (p.enabled) pairs.push(p.pair);
+      }
+    }
+    return pairs.length > 0 ? pairs : ['XAU/USD'];
+  } catch {
+    return ['XAU/USD'];
+  }
+}
 
-  const ohlc = await fetchOHLCContext('XAU/USD');
-  const ohlcContext = ohlc.context;
-  const currentPrice = ohlc.currentPrice;
-
-  const marketTable = `XAU/USD | Price: ${currentPrice !== null ? currentPrice : 'N/A'} | Change: 0.00%`;
-
-  const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in XAU/USD (Gold). Analyze the M15 chart structure using BOS + Order Block strategy.
+function buildPrompt(pair, ohlcContext, currentPrice) {
+  const mkt = `${pair} | Price: ${currentPrice !== null ? currentPrice : 'N/A'}`;
+  return `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}. Analyze the M15 chart structure using BOS + Order Block strategy.
 
 Current Market Data:
-${marketTable}
+${mkt}
 
 M15 OHLC Structure (Real Data):
 ${ohlcContext || 'ไม่มีข้อมูล OHLC — ใช้ราคาปัจจุบันประเมินเท่าที่ทำได้'}
@@ -59,41 +70,32 @@ BOS Analysis Framework (M15 Timeframe):
    A. Clear BOS confirmed (close beyond previous HH or LL)
    B. Price is retracing toward the Order Block zone
 
-CRITICAL: If there is NO clear BOS setup — return an empty array [].
-Only generate 1 signal (XAU/USD only) when ALL conditions align.
+CRITICAL: If there is NO clear BOS setup — return "NO_SETUP".
+Only generate signal when ALL conditions align.
 
 IMPORTANT: Return ALL price values as numeric strings WITHOUT $ or commas.
 Example: "4317.01", not "$4317.01", not "price at OB".
 
-For each signal provide:
-- pair: always "XAU/USD"
-- direction: BUY or SELL
-- entry: numeric string (below current for BUY LIMIT, above current for SELL LIMIT)
-- tp1: numeric string (R:R ~1:2)
-- tp2: numeric string (R:R ~1:3)
-- tp3: numeric string (R:R ~1:5)
-- sl: numeric string (below OB low for buy, above OB high for sell)
-- reason: in Thai (3 lines max) explaining:
-  1. BOS ที่เกิดขึ้น + โครงสร้างตลาด
-  2. Order Block zone ที่รอ Retest
-  3. Entry rationale + R:R
+Return ONLY valid JSON (no markdown, no code blocks):
+{
+  "pair": "${pair}",
+  "hasSetup": true/false,
+  "direction": "BUY" or "SELL",
+  "entry": "4317.01",
+  "tp1": "4325.61",
+  "tp2": "4332.61",
+  "tp3": "4344.62",
+  "sl": "4268.19",
+  "reason": "บรรทัด1\\nบรรทัด2\\nบรรทัด3"
+}
 
-Return ONLY a valid JSON array (no markdown, no code blocks, no extra text):
-[] — if no valid BOS setup
+If no setup, return: {"pair": "${pair}", "hasSetup": false}`;
+}
 
-Or if conditions met:
-[
-  {
-    "pair": "XAU/USD",
-    "direction": "BUY",
-    "entry": "4445.00",
-    "tp1": "4470.00",
-    "tp2": "4485.00",
-    "tp3": "4500.00",
-    "sl": "4435.00",
-    "reason": "BOS ทะลุ High เดิม 4460\nรอ Buy Limit ที่ Low ของแท่ง Bearish สุดท้าย 4445\nSL ใต้ OB 4435 TP1 4470 (R:R 1:2)"
-  }
-]`;
+async function generatePairSignal(pair) {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const ohlc = await fetchOHLCContext(pair);
+  const prompt = buildPrompt(pair, ohlc.context, ohlc.currentPrice);
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
@@ -103,7 +105,9 @@ Or if conditions met:
 
   const text = completion.choices[0].message.content.trim();
   const cleaned = text.replace(/```json?/gi, '').replace(/```/g, '').trim();
-  const signals = JSON.parse(cleaned);
+  const data = JSON.parse(cleaned);
+  const signals = data.hasSetup ? [data] : [];
+
   return { signals, swingHigh: ohlc.swingHigh, swingLow: ohlc.swingLow, currentPrice: ohlc.currentPrice };
 }
 
@@ -153,27 +157,27 @@ async function main() {
   }
 
   console.log(`API URL: ${API_BASE}`);
-  console.log('Fetching OHLC market data from server...\n');
+  const pairs = await getEnabledPairs();
+  console.log(`Enabled pairs: ${pairs.join(', ')}\n`);
 
-  console.log('Generating AI signals...');
-  const { signals, swingHigh, swingLow, currentPrice } = await generateSignal();
-  console.log(`Generated ${signals.length} signal(s)\n`);
+  const posted = [];
+  const bosData = [];
 
-  if (signals.length === 0) {
-    console.log('No valid BOS setup found — sending BOS levels to LINE');
-    await sendBOSLevelsMessage({
-      pair: 'XAU/USD',
-      currentPrice,
-      swingHigh,
-      swingLow,
-    });
-    return;
+  for (const pair of pairs) {
+    console.log(`Analyzing ${pair}...`);
+    const { signals, swingHigh, swingLow, currentPrice } = await generatePairSignal(pair);
+    if (signals.length > 0) {
+      console.log(`  ✔ ${pair}: ${signals[0].direction} signal generated`);
+      const saved = await postSignals(signals);
+      posted.push(...saved.filter(r => r.ok));
+    } else {
+      console.log(`  ✖ ${pair}: no BOS setup`);
+    }
+    bosData.push({ pair, currentPrice, swingHigh, swingLow, hasSignal: signals.length > 0 });
   }
 
-  console.log('Posting to API...');
-  await postSignals(signals);
-
-  console.log('\n=== Done ===');
+  await sendBOSLevelsMessage(bosData);
+  console.log(`\n=== Done — ${posted.length} signal(s) posted ===`);
 }
 
 if (require.main === module) {
@@ -183,4 +187,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { fetchOHLCContext, generateSignal, postSignals };
+module.exports = { fetchOHLCContext, generatePairSignal, postSignals };
