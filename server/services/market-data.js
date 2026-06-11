@@ -16,7 +16,7 @@ const PAIR_MAP = {
   'XRP/USD': 'XRP/USD',
 };
 
-async function fetchOHLC(pair, interval = '15min', outputsize = 40) {
+async function fetchOHLC(pair, interval = '5min', outputsize = 60) {
   const symbol = PAIR_MAP[pair];
   if (!symbol) return null;
   const key = API_KEY();

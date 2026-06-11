@@ -3,7 +3,7 @@ const { pool } = require('../server/db');
 
 const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in {pair}.
 
-Analyze {pair} on the M15 timeframe using BOS + Order Block strategy:
+Analyze {pair} on the M5 timeframe using BOS + Order Block strategy:
 
 🔵 1. Bullish BOS (Buy Setup)
    - Price closes above previous HH (Break of Structure to the upside)

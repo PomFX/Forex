@@ -42,15 +42,15 @@ async function getEnabledPairs() {
 
 function buildPrompt(pair, ohlcContext, currentPrice) {
   const mkt = `${pair} | Price: ${currentPrice !== null ? currentPrice : 'N/A'}`;
-  return `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}. Analyze the M15 chart structure using BOS + Order Block strategy.
+  return `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}. Analyze the M5 chart structure using BOS + Order Block strategy.
 
 Current Market Data:
 ${mkt}
 
-M15 OHLC Structure (Real Data):
+M5 OHLC Structure (Real Data):
 ${ohlcContext || 'ไม่มีข้อมูล OHLC — ใช้ราคาปัจจุบันประเมินเท่าที่ทำได้'}
 
-BOS Analysis Framework (M15 Timeframe):
+BOS Analysis Framework (M5 Timeframe):
 
 🔵 1. Bullish BOS (Buy Setup)
    - Price closes above previous HH (Break of Structure to the upside)

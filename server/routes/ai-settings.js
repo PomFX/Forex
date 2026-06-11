@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS = {
   model: 'gpt-4o-mini',
   prompt: `You are a Professional BOS (Break of Structure) analyst specializing in {pair}.{ohlc}
 
-Analyze {pair} on the M15 timeframe using BOS + Order Block strategy:
+Analyze {pair} on the M5 timeframe using BOS + Order Block strategy:
 
 🔵 1. Bullish BOS (Buy Setup)
    - Price closes above previous HH (Break of Structure to the upside)
@@ -106,7 +106,7 @@ router.post('/test', authMiddleware, adminMiddleware, async (req, res) => {
     let ohlcContext = '';
     try {
       const ctx = await getMarketContext(targetPair);
-      if (ctx && ctx.context) ohlcContext = '\n\nReal M15 OHLC Structure:\n' + ctx.context;
+      if (ctx && ctx.context) ohlcContext = '\n\nReal M5 OHLC Structure:\n' + ctx.context;
     } catch {}
 
     const filledPrompt = prompt

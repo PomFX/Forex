@@ -135,12 +135,12 @@ router.post('/auto-run', async (req, res) => {
         let ohlcContext = '';
         try {
           const ctx = await getMarketContext(pair);
-          if (ctx && ctx.context) ohlcContext = '\nReal M15 OHLC Structure:\n' + ctx.context + '\n';
+          if (ctx && ctx.context) ohlcContext = '\nReal M5 OHLC Structure:\n' + ctx.context + '\n';
         } catch {}
 
         const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}.${ohlcContext}
 
-Analyze ${pair} on the M15 timeframe using BOS + Order Block strategy:
+Analyze ${pair} on the M5 timeframe using BOS + Order Block strategy:
 
 🔵 1. Bullish BOS (Buy Setup)
    - Price closes above previous HH (Break of Structure to the upside)
@@ -243,12 +243,12 @@ router.post('/analyze', authMiddleware, adminMiddleware, async (req, res) => {
         let ohlcContext = '';
         try {
           const ctx = await getMarketContext(pair);
-          if (ctx && ctx.context) ohlcContext = '\nReal M15 OHLC Structure:\n' + ctx.context + '\n';
+          if (ctx && ctx.context) ohlcContext = '\nReal M5 OHLC Structure:\n' + ctx.context + '\n';
         } catch {}
 
         const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}.${ohlcContext}
 
-Analyze ${pair} on the M15 timeframe using BOS + Order Block strategy:
+Analyze ${pair} on the M5 timeframe using BOS + Order Block strategy:
 
 🔵 1. Bullish BOS (Buy Setup)
    - Price closes above previous HH (Break of Structure to the upside)
@@ -376,7 +376,7 @@ router.post('/cron', async (req, res) => {
         try {
           const ctx = await getMarketContext(pair);
           if (ctx) {
-            ohlcContext = '\nReal M15 OHLC Structure:\n' + (ctx.context || '') + '\n';
+            ohlcContext = '\nReal M5 OHLC Structure:\n' + (ctx.context || '') + '\n';
             const s = ctx.structure || {};
             swingHigh = s.latestSwingHigh || null;
             swingLow = s.latestSwingLow || null;
@@ -386,7 +386,7 @@ router.post('/cron', async (req, res) => {
 
         const prompt = `You are a Professional BOS (Break of Structure) analyst specializing in ${pair}.${ohlcContext}
 
-Analyze ${pair} on the M15 timeframe using BOS + Order Block strategy:
+Analyze ${pair} on the M5 timeframe using BOS + Order Block strategy:
 
 🔵 1. Bullish BOS (Buy Setup) — close above previous HH → BUY LIMIT at OB Low
 🔴 2. Bearish BOS (Sell Setup) — close below previous LL → SELL LIMIT at OB High
