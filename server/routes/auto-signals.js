@@ -435,7 +435,9 @@ If no setup: {"pair": "${pair}", "hasSetup": false}`;
       }
     }
 
-    // Send LINE notification
+    // ปิดการส่ง LINE จากระบบเก่า (auto-signals cron) เพื่อประหยัดโควต้า
+    // สัญญาณใหม่จะส่งผ่าน MT5 Bridge เท่านั้น
+    /*
     const lineToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
     const lineTarget = process.env.LINE_GROUP_ID || process.env.LINE_USER_ID;
     if (lineToken && lineTarget) {
@@ -478,6 +480,7 @@ If no setup: {"pair": "${pair}", "hasSetup": false}`;
         console.error('[Cron] LINE error:', err.message);
       }
     }
+    */
 
     res.json({ posted: results.filter(r => r.hasSignal).length, results });
   } catch (err) {
