@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { authMiddleware, adminMiddleware } = require('./auth');
 const router = express.Router();
 
 router.post('/webhook', express.json(), async (req, res) => {
@@ -28,6 +29,28 @@ router.get('/group-id', async (req, res) => {
       res.json({ groupId: null });
     }
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// LINE Messaging API quota info
+router.get('/quota', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+    if (!token) return res.status(500).json({ error: 'LINE_CHANNEL_ACCESS_TOKEN not set' });
+
+    const headers = { Authorization: 'Bearer ' + token };
+    const [quotaRes, usageRes] = await Promise.all([
+      fetch('https://api.line.me/v2/bot/message/quota', { headers }),
+      fetch('https://api.line.me/v2/bot/message/quota/consumption', { headers }),
+    ]);
+
+    const quota = quotaRes.ok ? await quotaRes.json() : { error: await quotaRes.text() };
+    const usage = usageRes.ok ? await usageRes.json() : { error: await usageRes.text() };
+
+    res.json({ quota, usage });
+  } catch (err) {
+    console.error('LINE quota error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });

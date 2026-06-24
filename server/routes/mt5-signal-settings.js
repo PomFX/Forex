@@ -89,6 +89,56 @@ router.put('/', authMiddleware, adminMiddleware, async (req, res) => {
   }
 });
 
+router.get('/usage', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const totalResult = await pool.query("SELECT COUNT(*) FROM line_logs");
+    const total = parseInt(totalResult.rows[0].count);
+
+    const monthResult = await pool.query(
+      "SELECT COUNT(*) FROM line_logs WHERE sent_at >= DATE_TRUNC('month', NOW())"
+    );
+    const thisMonth = parseInt(monthResult.rows[0].count);
+
+    const dayResult = await pool.query(
+      "SELECT DATE(sent_at) as day, COUNT(*) as count FROM line_logs WHERE sent_at >= NOW() - INTERVAL '30 days' GROUP BY DATE(sent_at) ORDER BY day DESC"
+    );
+
+    const duplicateResult = await pool.query(
+      `SELECT signal_id, target_id, COUNT(*) as count
+       FROM line_logs
+       WHERE signal_id IS NOT NULL AND signal_id != ''
+       GROUP BY signal_id, target_id
+       HAVING COUNT(*) > 1
+       ORDER BY count DESC
+       LIMIT 20`
+    );
+
+    const statusResult = await pool.query(
+      "SELECT status, COUNT(*) as count FROM line_logs GROUP BY status"
+    );
+
+    const sourceResult = await pool.query(
+      `SELECT
+         CASE WHEN signal_id = 'TEST' THEN 'test' ELSE 'signal' END as source,
+         COUNT(*) as count
+       FROM line_logs
+       GROUP BY CASE WHEN signal_id = 'TEST' THEN 'test' ELSE 'signal' END`
+    );
+
+    res.json({
+      total,
+      thisMonth,
+      perDay: dayResult.rows,
+      duplicates: duplicateResult.rows,
+      byStatus: statusResult.rows,
+      bySource: sourceResult.rows,
+    });
+  } catch (err) {
+    console.error('Get LINE usage error:', err.message);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
+  }
+});
+
 router.get('/logs', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 50, 200);

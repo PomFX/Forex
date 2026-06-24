@@ -1060,6 +1060,65 @@ const Admin = {
     }
   },
 
+  async _renderMt5LineQuota() {
+    try {
+      const data = await API.getLineQuota();
+      const container = document.getElementById('mt5LineQuota');
+      const quota = data.quota || {};
+      const usage = data.usage || {};
+      const limit = quota.value || quota.type || 'ไม่ระบุ';
+      const used = usage.totalUsage ?? 'ไม่ระบุ';
+      const remaining = typeof limit === 'number' && typeof used === 'number' ? limit - used : null;
+      const pct = typeof limit === 'number' && typeof used === 'number' && limit > 0 ? Math.round((used / limit) * 100) : null;
+
+      container.innerHTML = `
+        <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+          <div><strong>แพลน:</strong> ${escHtml(quota.type || '-')}</div>
+          <div><strong>โควต้ารวม:</strong> ${typeof limit === 'number' ? limit.toLocaleString() : limit}</div>
+          <div><strong>ใช้ไป:</strong> ${typeof used === 'number' ? used.toLocaleString() : used}</div>
+          ${remaining !== null ? `<div><strong>คงเหลือ:</strong> ${remaining.toLocaleString()}</div>` : ''}
+          ${pct !== null ? `<div><strong>ใช้ไป:</strong> <span style="color:${pct >= 90 ? 'var(--red)' : pct >= 70 ? 'var(--gold)' : 'var(--green)'}">${pct}%</span></div>` : ''}
+        </div>
+      `;
+    } catch (err) {
+      console.error('_renderMt5LineQuota:', err);
+      document.getElementById('mt5LineQuota').innerHTML = '<p style="color:#888">— ไม่สามารถโหลดโควต้าได้ —</p>';
+    }
+  },
+
+  async _renderMt5LineUsage() {
+    try {
+      const data = await API.getMt5SignalUsage();
+      const container = document.getElementById('mt5LineUsage');
+      const dupRows = (data.duplicates || []).map(d => `
+        <tr>
+          <td>${escHtml(d.signal_id)}</td>
+          <td>${escHtml(d.target_id)}</td>
+          <td style="color:var(--red);font-weight:600">${d.count} ครั้ง</td>
+        </tr>
+      `).join('');
+
+      container.innerHTML = `
+        <div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem">
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:0.75rem 1rem">
+            <div style="font-size:0.8rem;color:#888">ส่งทั้งหมด</div>
+            <div style="font-size:1.25rem;font-weight:700">${(data.total || 0).toLocaleString()}</div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:0.75rem 1rem">
+            <div style="font-size:0.8rem;color:#888">เดือนนี้</div>
+            <div style="font-size:1.25rem;font-weight:700">${(data.thisMonth || 0).toLocaleString()}</div>
+          </div>
+        </div>
+
+        <h4 style="color:#d4a017;font-size:0.9rem;margin:1rem 0 0.5rem">ส่งซ้ำ (signal เดียวกัน → เป้าหมายเดียวกัน มากกว่า 1 ครั้ง)</h4>
+        ${dupRows ? `<div class="table-wrapper"><table class="admin-table"><thead><tr><th>Signal ID</th><th>Target ID</th><th>จำนวนครั้ง</th></tr></thead><tbody>${dupRows}</tbody></table></div>` : '<p style="color:#888">— ไม่พบการส่งซ้ำ —</p>'}
+      `;
+    } catch (err) {
+      console.error('_renderMt5LineUsage:', err);
+      document.getElementById('mt5LineUsage').innerHTML = '<p style="color:#888">— โหลดสถิติไม่สำเร็จ —</p>';
+    }
+  },
+
   async renderMt5SignalSettings() {
     try {
       const settings = await API.getMt5SignalSettings();
@@ -1069,6 +1128,8 @@ const Admin = {
       document.getElementById('mt5AiAnalysis').checked = !!settings.aiAnalysis;
       document.getElementById('mt5MinConfidence').value = Number(settings.minConfidence ?? 60);
       this._renderMt5Targets();
+      this._renderMt5LineQuota();
+      this._renderMt5LineUsage();
       this._renderMt5LineLogs();
 
       document.getElementById('mt5AddTargetBtn').onclick = () => this._addMt5Target();

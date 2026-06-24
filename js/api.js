@@ -241,6 +241,14 @@ const API = {
     return this._fetch('/mt5-signal-settings/logs?limit=' + limit);
   },
 
+  async getMt5SignalUsage() {
+    return this._fetch('/mt5-signal-settings/usage');
+  },
+
+  async getLineQuota() {
+    return this._fetch('/line/quota');
+  },
+
   async approveSignal(id) {
     return this._fetch('/signals/' + id + '/approve', { method: 'POST' });
   },
