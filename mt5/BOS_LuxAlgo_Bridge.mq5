@@ -9,7 +9,7 @@
 
 //--- Input Parameters
 input string   API_URL        = "https://forex-rouge-gamma.vercel.app";
-input string   API_KEY        = "";           // ใส่ MT5_API_KEY จาก Vercel Environment Variables
+input string   API_KEY        = "8765471ef4ba70cfd8c4b813abf272f490a6faee84fd8a183ab37a5ca7ccb5a4";
 input string   PAIR_NAME      = "";           // ปล่อยว่าง = auto-detect
 input bool     SEND_BOS       = true;         // ส่ง BOS signals
 input bool     SEND_CHOCH     = true;         // ส่ง CHoCH signals

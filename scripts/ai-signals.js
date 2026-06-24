@@ -176,7 +176,8 @@ async function main() {
     bosData.push({ pair, currentPrice, swingHigh, swingLow, hasSignal: signals.length > 0 });
   }
 
-  await sendBOSLevelsMessage(bosData);
+  // ปิดการส่งสรุป BOS levels เพื่อประหยัดโควต้า LINE
+  // await sendBOSLevelsMessage(bosData);
   console.log(`\n=== Done — ${posted.length} signal(s) posted ===`);
 }
 
