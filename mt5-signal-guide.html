@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คู่มือระบบส่ง Signal MT5 → LINE | ATH Trader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-card: #111827;
+      --bg-hover: #1a2332;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --gold: #d4a017;
+      --gold-light: #f0c24e;
+      --green: #22c55e;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --border: #1e293b;
+      --radius: 12px;
+      --shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: 'Prompt', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 2rem 1.5rem;
+      z-index: 100;
+      transition: transform .3s ease;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--gold), #b8860b);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: #000;
+      font-size: 1.1rem;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .logo-text span {
+      color: var(--gold);
+    }
+
+    .menu-title {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+      margin: 1.5rem 0 .75rem;
+      font-weight: 600;
+    }
+
+    .menu a {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .7rem 1rem;
+      border-radius: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: .95rem;
+      transition: all .2s;
+      margin-bottom: .25rem;
+    }
+
+    .menu a:hover {
+      background: var(--bg-hover);
+      color: var(--text);
+    }
+
+    .menu a.active {
+      background: rgba(212, 160, 23, .12);
+      color: var(--gold);
+      border: 1px solid rgba(212, 160, 23, .25);
+    }
+
+    .menu a .icon {
+      width: 22px;
+      text-align: center;
+    }
+
+    /* Main */
+    .main {
+      margin-left: 300px;
+      flex: 1;
+      padding: 3rem;
+      max-width: 900px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(212,160,23,.12), transparent);
+      border: 1px solid rgba(212,160,23,.25);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .hero h1 {
+      margin: 0 0 1rem;
+      font-size: 2.25rem;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      margin: 3rem 0 1rem;
+      padding-bottom: .75rem;
+      border-bottom: 2px solid var(--gold);
+      display: inline-block;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      color: var(--gold-light);
+      margin: 2rem 0 1rem;
+    }
+
+    h4 {
+      font-size: 1.05rem;
+      color: var(--text);
+      margin: 1.5rem 0 .5rem;
+    }
+
+    p { color: var(--text-muted); margin: .75rem 0; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: .25rem .75rem;
+      border-radius: 999px;
+      font-size: .8rem;
+      font-weight: 600;
+      margin-right: .5rem;
+    }
+
+    .badge-green { background: rgba(34,197,94,.15); color: var(--green); }
+    .badge-blue { background: rgba(59,130,246,.15); color: var(--blue); }
+    .badge-gold { background: rgba(212,160,23,.15); color: var(--gold-light); }
+    .badge-red { background: rgba(239,68,68,.15); color: var(--red); }
+
+    code, pre {
+      font-family: 'Fira Code', 'Consolas', monospace;
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    code {
+      padding: .2rem .5rem;
+      font-size: .9rem;
+      color: var(--gold-light);
+    }
+
+    pre {
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-size: .9rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+
+    .steps {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+    }
+
+    .steps li {
+      position: relative;
+      padding-left: 3rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .steps li::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, var(--gold), #b8860b);
+      color: #000;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: .9rem;
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+
+    .checklist li {
+      padding-left: 1.75rem;
+      position: relative;
+      margin-bottom: .75rem;
+      color: var(--text-muted);
+    }
+
+    .checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .warning {
+      background: rgba(239,68,68,.08);
+      border-left: 4px solid var(--red);
+      padding: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+
+    .tip {
+      background: rgba(34,197,94,.08);
+      border-left: 4px solid var(--green);
+      padding: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: .95rem;
+    }
+
+    th, td {
+      padding: .9rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--bg-hover);
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+
+    tr:hover td { background: rgba(255,255,255,.02); }
+
+    .img-placeholder {
+      background: var(--bg-hover);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 3rem;
+      text-align: center;
+      color: var(--text-muted);
+      margin: 1.5rem 0;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+
+    .back-link:hover { color: var(--gold-light); }
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 200;
+      background: var(--gold);
+      color: #000;
+      border: none;
+      padding: .75rem 1rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; padding: 5rem 1.5rem 2rem; }
+      .mobile-toggle { display: block; }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰ เมนู</button>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">ATH</div>
+      <div class="logo-text">ATH <span>Trader</span></div>
+    </div>
+
+    <div class="menu-title">ภาพรวม</div>
+    <nav class="menu">
+      <a href="#intro" class="active"><span class="icon">🚀</span> แนะนำระบบ</a>
+      <a href="#flow"><span class="icon">🔄</span> Flow การทำงาน</a>
+    </nav>
+
+    <div class="menu-title">การตั้งค่า</div>
+    <nav class="menu">
+      <a href="#vercel"><span class="icon">⚙️</span> Vercel Environment</a>
+      <a href="#admin"><span class="icon">🖥️</span> หน้า Admin</a>
+      <a href="#line"><span class="icon">💬</span> LINE Official Account</a>
+    </nav>
+
+    <div class="menu-title">MT5</div>
+    <nav class="menu">
+      <a href="#mt5-install"><span class="icon">📁</span> ติดตั้ง EA</a>
+      <a href="#mt5-config"><span class="icon">🔧</span> ตั้งค่า EA</a>
+      <a href="#mt5-test"><span class="icon">✅</span> ทดสอบ</a>
+    </nav>
+
+    <div class="menu-title">แก้ไขปัญหา</div>
+    <nav class="menu">
+      <a href="#troubleshoot"><span class="icon">🔍</span> Troubleshooting</a>
+      <a href="#quota"><span class="icon">📊</span> โควต้า LINE</a>
+      <a href="#faq"><span class="icon">❓</span> FAQ</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+
+    <a href="index.html" class="back-link">← กลับหน้าหลัก</a>
+
+    <section id="intro" class="hero">
+      <h1>คู่มือระบบส่ง Signal MT5 → LINE</h1>
+      <p>ระบบรับสัญญาณ BOS/CHoCH จาก LuxAlgo SMC บน MetaTrader 5 ประมวลผลด้วย AI แล้วส่งแจ้งเตือนเข้ากลุ่ม/ผู้ใช้ LINE อัตโนมัติ</p>
+    </section>
+
+    <section id="flow">
+      <h2>🔄 Flow การทำงาน</h2>
+      <div class="card">
+        <div class="card-title">ขั้นตอนทั้งหมด</div>
+        <ol class="steps">
+          <li><strong>MT5 ตรวจจับ BOS/CHoCH</strong> จาก LuxAlgo SMC indicator บน chart</li>
+          <li><strong>EA ส่งข้อมูล</strong> ผ่าน HTTP POST ไปยัง Backend ของ ATH Trader</li>
+          <li><strong>Backend คำนวณ</strong> Entry / SL / TP1-3 ตามกลยุทธ์ BOS + Order Block</li>
+          <li><strong>AI วิเคราะห์</strong> Confidence และ Risk:Reward (ถ้าเปิดใช้งาน)</li>
+          <li><strong>บันทึกลง Database</strong> เป็นสัญญาณเทรด</li>
+          <li><strong>ส่งแจ้งเตือน LINE</strong> ตามเป้าหมายและ Plan ที่ตั้งไว้</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="vercel">
+      <h2>⚙️ Vercel Environment Variables</h2>
+      <p>ตั้งค่าตัวแปรเหล่านี้ใน <strong>Vercel Dashboard → Settings → Environment Variables</strong></p>
+
+      <table>
+        <thead>
+          <tr><th>ตัวแปร</th><th>ค่าที่ใส่</th><th>จำเป็น</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>DATABASE_URL</code></td><td>PostgreSQL connection string</td><td><span class="badge badge-red">จำเป็น</span></td></tr>
+          <tr><td><code>JWT_SECRET</code></td><td>Secret สำหรับ sign token</td><td><span class="badge badge-red">จำเป็น</span></td></tr>
+          <tr><td><code>ADMIN_EMAIL</code></td><td>Email Super Admin</td><td><span class="badge badge-red">จำเป็น</span></td></tr>
+          <tr><td><code>ADMIN_PASSWORD</code></td><td>Password Super Admin</td><td><span class="badge badge-red">จำเป็น</span></td></tr>
+          <tr><td><code>MT5_API_KEY</code></td><td>API key สำหรับ MT5 bridge</td><td><span class="badge badge-red">จำเป็น</span></td></tr>
+          <tr><td><code>OPENAI_API_KEY</code></td><td>OpenAI API key</td><td><span class="badge badge-gold">ถ้าใช้ AI</span></td></tr>
+          <tr><td><code>LINE_CHANNEL_ACCESS_TOKEN</code></td><td>Token จาก LINE OA</td><td><span class="badge badge-red">จำเป็น</span></td></tr>
+          <tr><td><code>LINE_CHANNEL_SECRET</code></td><td>Secret จาก LINE OA</td><td><span class="badge badge-blue">แนะนำ</span></td></tr>
+          <tr><td><code>LINE_USER_ID</code></td><td>User ID ของคุณ</td><td><span class="badge badge-blue">แนะนำ</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="warning">
+        <strong>⚠️ สำคัญ:</strong> ทุกครั้งที่แก้ Environment Variables ต้องกด <strong>Save</strong> แล้ว <strong>Redeploy</strong> เพื่อให้ค่ามีผล
+      </div>
+    </section>
+
+    <section id="admin">
+      <h2>🖥️ หน้า MT5 Signal Settings</h2>
+      <p>เข้าถึงที่: <code>/#/admin/mt5signals</code> (ต้อง login เป็น Admin ก่อน)</p>
+
+      <div class="card">
+        <div class="card-title">ตัวเลือกหลัก</div>
+        <ul class="checklist">
+          <li><strong>Admin อนุมัติก่อนส่ง LINE</strong> — Signal จาก MT5 จะบันทึกเป็น pending ต้องกดอนุมัติจึงส่ง LINE</li>
+          <li><strong>ให้ AI วิเคราะห์เพิ่ม</strong> — AI จะประเมิน Confidence และ R:R ก่อนบันทึก</li>
+          <li><strong>Confidence ขั้นต่ำ</strong> — ถ้า AI ให้คะแนนต่ำกว่าค่านี้ ระบบจะข้ามสัญญาณ</li>
+        </ul>
+      </div>
+
+      <h3>เป้าหมาย LINE</h3>
+      <p>สามารถเพิ่มได้หลายเป้าหมาย แต่ละเป้าหมายมี:</p>
+      <table>
+        <thead>
+          <tr><th>ช่อง</th><th>คำอธิบาย</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ชื่อ</td><td>ชื่อสำหรับจดจำ เช่น กลุ่มหลัก, VIP Group</td></tr>
+          <tr><td>Type</td><td>Group หรือ User</td></tr>
+          <tr><td>Plan</td><td>Full = TP1-3, Basic = TP1 เท่านั้น</td></tr>
+          <tr><td>ID</td><td>LINE Group ID หรือ User ID</td></tr>
+          <tr><td>ใช้งาน</td><td>เปิด/ปิดการส่งไปเป้าหมายนี้</td></tr>
+        </tbody>
+      </table>
+
+      <div class="tip">
+        <strong>💡 Tip:</strong> ใช้ Plan Basic สำหรับกลุ่ม Free และ Plan Full สำหรับกลุ่ม VIP เพื่อแบ่งระดับข้อมูล
+      </div>
+    </section>
+
+    <section id="line">
+      <h2>💬 LINE Official Account</h2>
+      <h3>1. สร้าง OA ใหม่ (ถ้าโควต้าเก่าหมด)</h3>
+      <ol class="steps">
+        <li>เข้า <a href="https://developers.line.biz/console/" target="_blank" style="color:var(--gold)">LINE Developers Console</a></li>
+        <li>สร้าง Provider และ Messaging API channel</li>
+        <li>ไปที่แท็บ <strong>Basic settings</strong> คัดลอก <strong>Channel Secret</strong></li>
+        <li>ไปที่แท็บ <strong>Messaging API</strong> กด <strong>Issue</strong> Channel Access Token</li>
+        <li>เปิด <strong>Allow bot to join group chats</strong> เป็น Enabled</li>
+        <li>ใส่ Webhook URL: <code>https://forex-rouge-gamma.vercel.app/api/line/webhook</code></li>
+      </ol>
+
+      <h3>2. เอา Group ID</h3>
+      <ol class="steps">
+        <li>เชิญ OA เข้ากลุ่ม</li>
+        <li>ให้มีคนส่งข้อความในกลุ่ม 1 ครั้ง</li>
+        <li>เปิด URL: <code>https://forex-rouge-gamma.vercel.app/api/line/group-id</code></li>
+        <li>เอา Group ID ไปใส่ใน MT5 Signal Settings</li>
+      </ol>
+
+      <div class="warning">
+        <strong>⚠️ ระวัง:</strong> ถ้าเปลี่ยน OA ใหม่ ต้องใช้ Group ID ใหม่เสมอ แม้จะเป็นกลุ่มเดียวกันก็ตาม
+      </div>
+    </section>
+
+    <section id="mt5-install">
+      <h2>📁 ติดตั้ง EA ใน MT5</h2>
+      <ol class="steps">
+        <li>ดาวน์โหลดไฟล์ <code>mt5/BOS_LuxAlgo_Bridge.mq5</code> จาก GitHub</li>
+        <li>คัดลอกไปที่โฟลเดอร์ <code>MQL5/Experts/</code> ของ MT5</li>
+        <li>เปิด MetaEditor</li>
+        <li>กด <strong>Compile (F7)</strong></li>
+      </ol>
+
+      <div class="tip">
+        <strong>💡 Tip:</strong> ถ้า compile ไม่ผ่าน ตรวจสอบว่า LuxAlgo SMC indicator ได้ติดตั้งใน chart แล้ว
+      </div>
+    </section>
+
+    <section id="mt5-config">
+      <h2>🔧 ตั้งค่า EA</h2>
+      <p>พอลาก EA ลง Chart จะมีหน้าต่าง Input ให้ตั้งค่า:</p>
+
+      <table>
+        <thead>
+          <tr><th>Input</th><th>ค่าที่ใส่</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>API_URL</code></td><td><code>https://forex-rouge-gamma.vercel.app</code></td></tr>
+          <tr><td><code>API_KEY</code></td><td>ค่า <code>MT5_API_KEY</code> จาก Vercel</td></tr>
+          <tr><td><code>PAIR_NAME</code></td><td>ปล่อยว่าง = auto-detect</td></tr>
+          <tr><td><code>SEND_BOS</code></td><td>true</td></tr>
+          <tr><td><code>SEND_CHOCH</code></td><td>true</td></tr>
+          <tr><td><code>DEBOUNCE_BARS</code></td><td>3</td></tr>
+          <tr><td><code>HEARTBEAT_MIN</code></td><td>15</td></tr>
+          <tr><td><code>DEBUG_MODE</code></td><td>true (ระหว่างทดสอบ)</td></tr>
+        </tbody>
+      </table>
+
+      <div class="warning">
+        <strong>⚠️ สำคัญ:</strong> ต้องอนุญาต WebRequest ใน MT5: <strong>Tools → Options → Expert Advisors → Allow WebRequest</strong> แล้วเพิ่ม URL ของเว็บ
+      </div>
+    </section>
+
+    <section id="mt5-test">
+      <h2>✅ ทดสอบระบบ</h2>
+      <div class="card">
+        <div class="card-title">วิธีตรวจสอบว่าทำงาน</div>
+        <ol class="steps">
+          <li>รอให้มี BOS หรือ CHoCH ใหม่บน chart</li>
+          <li>ดู log MT5 ว่าขึ้น <code>[Bridge] ✅ SIGNAL CREATED!</code></li>
+          <li>เข้า <strong>Admin → สัญญาณเทรด</strong> ดูว่ามีสัญญาณใหม่</li>
+          <li>ตรวจสอบกลุ่ม LINE ว่าได้รับข้อความหรือไม่</li>
+        </ol>
+      </div>
+
+      <p>หรือทดสอบผ่านหน้า <strong>MT5 Signal Settings → ทดสอบส่ง LINE</strong> ได้เลย</p>
+    </section>
+
+    <section id="troubleshoot">
+      <h2>🔍 Troubleshooting</h2>
+
+      <h4>Authentication failed</h4>
+      <p>LINE Access Token ผิด หรือยังไม่ได้ redeploy หลังแก้ env</p>
+      <ul class="checklist">
+        <li>ตรวจสอบ token ว่าถูกต้องและไม่มีช่องว่าง</li>
+        <li>กด Redeploy ใน Vercel</li>
+        <li>ตรวจสอบว่า token ยังไม่หมดอายุ</li>
+      </ul>
+
+      <h4>You have reached your monthly limit</h4>
+      <p>โควต้า LINE หมดแล้ว ต้องสร้าง OA ใหม่หรืออัปเกรดแพลน</p>
+
+      <h4>Failed to send messages</h4>
+      <p>บอทยังไม่ได้อยู่ในกลุ่ม หรือ Group ID ผิด</p>
+      <ul class="checklist">
+        <li>เชิญ OA เข้ากลุ่ม</li>
+        <li>เปิด Allow bot to join group chats</li>
+        <li>เอา Group ID ใหม่จาก <code>/api/line/group-id</code></li>
+      </ul>
+
+      <h4>Signal ไม่ขึ้นใน Admin</h4>
+      <p>MT5 ยังไม่ส่งถึง backend</p>
+      <ul class="checklist">
+        <li>ตรวจสอบ API_URL ใน EA</li>
+        <li>ตรวจสอบ API_KEY ว่าตรงกับ Vercel</li>
+        <li>ตรวจสอบว่าเปิด Allow WebRequest ใน MT5 แล้ว</li>
+      </ul>
+    </section>
+
+    <section id="quota">
+      <h2>📊 โควต้า LINE</h2>
+      <p>แพลนฟรีของ LINE Messaging API มีโควต้า <strong>300 ข้อความ/เดือน</strong></p>
+      <p>ตรวจสอบโควต้าคงเหลือได้ที่หน้า <strong>Admin → MT5 Signal Settings → โควต้า LINE คงเหลือ</strong></p>
+
+      <div class="tip">
+        <strong>💡 ประหยัดโควต้า:</strong>
+        <ul style="margin:.5rem 0 0; padding-left:1.25rem; color:var(--text-muted)">
+          <li>เปิด Admin อนุมัติก่อนส่ง LINE</li>
+          <li>ปิด AI analysis ถ้าไม่จำเป็น</li>
+          <li>ไม่กดทดสอบบ่อยเกินไป</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="faq">
+      <h2>❓ FAQ</h2>
+
+      <h4>Q: ทำไมต้องสร้าง OA ใหม่?</h4>
+      <p>ถ้าโควต้า 300 ข้อความ/เดือนหมด จะไม่สามารถส่งได้จนกว่าจะรีเซ็ต (1 ของทุกเดือน) หรืออัปเกรดแพลน</p>
+
+      <h4>Q: สามารถส่งไปหลายกลุ่มพร้อมกันได้ไหม?</h4>
+      <p>ได้ ให้เพิ่มเป้าหมายใน MT5 Signal Settings แล้วติ๊กใช้งานทุกเป้าหมาย</p>
+
+      <h4>Q: ถ้าปิด AI analysis จะเกิดอะไรขึ้น?</h4>
+      <p>Signal จะถูกบันทึกทันทีโดยไม่ตรวจสอบ Confidence และข้อความ LINE จะใช้ template แบบเดิม</p>
+
+      <h4>Q: Admin อนุมัติคืออะไร?</h4>
+      <p>Signal จาก MT5 จะบันทึกเป็น pending ต้องไปที่หน้า Admin → สัญญาณเทรด แล้วกด อนุมัติ จึงจะส่ง LINE</p>
+    </section>
+
+    <footer style="margin-top:4rem; padding-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); text-align:center; font-size:.9rem;">
+      <p>© 2026 ATH Trader. คู่มือระบบส่ง Signal MT5 → LINE</p>
+    </footer>
+
+  </main>
+
+  <script>
+    // Active menu on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const menuLinks = document.querySelectorAll('.menu a');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(sec => {
+        const rect = sec.getBoundingClientRect();
+        if (rect.top <= 120) current = sec.getAttribute('id');
+      });
+      menuLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>
