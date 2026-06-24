@@ -81,7 +81,7 @@ router.get('/allowed-pairs', async (req, res) => {
 // MT5: heartbeat — EA sends status log (GET, legacy)
 router.get('/heartbeat', async (req, res) => {
   try {
-    const apiKey = req.headers['x-mt5-key'];
+    const apiKey = req.headers['x-mt5-key'] || req.query.key;
     const expectedKey = process.env.MT5_API_KEY;
     if (!expectedKey || apiKey !== expectedKey) {
       return res.status(403).json({ error: 'Invalid MT5 key' });
@@ -101,7 +101,7 @@ router.get('/heartbeat', async (req, res) => {
 // MT5: account info — EA sends broker, login, name, balance, profit (POST)
 router.post('/heartbeat', async (req, res) => {
   try {
-    const apiKey = req.headers['x-mt5-key'];
+    const apiKey = req.headers['x-mt5-key'] || req.query.key;
     const expectedKey = process.env.MT5_API_KEY;
     if (!expectedKey || apiKey !== expectedKey) {
       return res.status(403).json({ error: 'Invalid MT5 key' });

@@ -424,10 +424,11 @@ void SendHeartbeat()
               + "&pair="    + pairEncoded
               + "&version=LuxAlgo-Bridge-v1.3";
 
-   char data[], result[];
-   string headers = "Accept: application/json\r\n";
+    char data[], result[];
+    string headers = "Accept: application/json\r\n"
+                   + "X-MT5-Key: " + API_KEY + "\r\n";
 
-   int res = WebRequest("GET", url, headers, 10000, data, result, headers);
+    int res = WebRequest("GET", url, headers, 10000, data, result, headers);
 
    if (res == 200)
       Print("[Heartbeat] ✅ OK");
