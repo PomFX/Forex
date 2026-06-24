@@ -266,8 +266,9 @@
     <a href="#/admin/aisettings" class="admin-link" data-page="aisettings">AI Settings</a>
     <a href="#/admin/aiarticlesettings" class="admin-link" data-page="aiarticlesettings">AI Article</a>
     <a href="#/admin/performance" class="admin-link" data-page="performance">ผลงาน</a>
-    <a href="#/admin/eadashboard" class="admin-link" data-page="eadashboard">EA Dashboard</a>
-    <a href="#/admin/testsignal" class="admin-link" data-page="testsignal">ทดสอบส่ง Signal</a>
+            <a href="#/admin/eadashboard" class="admin-link" data-page="eadashboard">EA Dashboard</a>
+            <a href="#/admin/mt5signals" class="admin-link" data-page="mt5signals">MT5 Signal Settings</a>
+            <a href="#/admin/testsignal" class="admin-link" data-page="testsignal">ทดสอบส่ง Signal</a>
     <a href="#/admin/autosignalguide" class="admin-link" data-page="autosignalguide">คู่มือใช้งาน Ai</a>
     <a href="#/" class="admin-link admin-logout">กลับหน้าบ้าน</a>
           </nav>
@@ -630,6 +631,49 @@
               <h3 style="color:#d4a017;font-size:1rem;margin-bottom:0.5rem">📊 บัญชีที่เชื่อมต่อ (Account Monitor)</h3>
               <div id="eaAccountsContent" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;min-height:60px;overflow-x:auto"></div>
               <button class="btn btn-danger btn-sm" id="eaClearAccountsBtn" style="margin-top:0.5rem">🗑 ลบบัญชีทั้งหมด</button>
+            </div>
+          </div>
+
+          <!-- MT5 Signal Settings -->
+          <div class="admin-page-content" id="admin-mt5signals">
+            <h1>MT5 Signal Settings</h1>
+            <p style="color:#888;margin-bottom:1rem;font-size:0.85rem">ตั้งค่าการรับสัญญาณจาก MT5 (LuxAlgo Bridge)</p>
+
+            <form class="admin-form" id="mt5SignalSettingsForm" style="max-width:700px">
+              <div class="form-row" style="align-items:center;gap:1.5rem;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+                  <input type="checkbox" id="mt5RequireApproval">
+                  <span>Admin อนุมัติก่อนส่ง LINE</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+                  <input type="checkbox" id="mt5AiAnalysis">
+                  <span>ให้ AI วิเคราะห์เพิ่ม (Confidence / R:R)</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem">
+                  <span>Confidence ขั้นต่ำ:</span>
+                  <input type="number" id="mt5MinConfidence" min="0" max="100" value="60" style="width:70px">
+                  <span>%</span>
+                </label>
+              </div>
+
+              <h3 style="color:#d4a017;font-size:1rem;margin:1.5rem 0 0.75rem">เป้าหมาย LINE</h3>
+              <div id="mt5TargetsContainer" style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1rem"></div>
+              <button type="button" class="btn btn-outline btn-sm" id="mt5AddTargetBtn">+ เพิ่มเป้าหมาย</button>
+
+              <div style="margin-top:1.5rem;display:flex;gap:1rem">
+                <button type="submit" class="btn btn-primary">บันทึกการตั้งค่า</button>
+                <button type="button" class="btn btn-outline" id="mt5TestLineBtn">ทดสอบส่ง LINE</button>
+              </div>
+            </form>
+
+            <h3 style="color:#d4a017;font-size:1rem;margin:2rem 0 0.75rem">ประวัติการส่ง LINE (50 รายการล่าสุด)</h3>
+            <div class="table-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr><th>เวลา</th><th>Signal</th><th>เป้าหมาย</th><th>Plan</th><th>สถานะ</th><th>Response</th></tr>
+                </thead>
+                <tbody id="mt5LineLogsBody"><tr><td colspan="6" style="text-align:center">— กำลังโหลด —</td></tr></tbody>
+              </table>
             </div>
           </div>
         </main>

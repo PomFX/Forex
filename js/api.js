@@ -223,4 +223,25 @@ const API = {
   async getPerformanceStats() {
     return this._fetch('/stats/performance');
   },
+
+  // MT5 Signal Settings
+  async getMt5SignalSettings() {
+    return this._fetch('/mt5-signal-settings');
+  },
+
+  async saveMt5SignalSettings(data) {
+    return this._fetch('/mt5-signal-settings', { method: 'PUT', body: JSON.stringify(data) });
+  },
+
+  async testMt5SignalSettings() {
+    return this._fetch('/mt5-signal-settings/test', { method: 'POST' });
+  },
+
+  async getMt5SignalLogs(limit = 50) {
+    return this._fetch('/mt5-signal-settings/logs?limit=' + limit);
+  },
+
+  async approveSignal(id) {
+    return this._fetch('/signals/' + id + '/approve', { method: 'POST' });
+  },
 };

@@ -77,6 +77,20 @@ async function initDB() {
     // Add reason column for existing databases
     await client.query(`ALTER TABLE signals ADD COLUMN IF NOT EXISTS reason TEXT DEFAULT ''`);
 
+    // LINE notification logs
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS line_logs (
+        id SERIAL PRIMARY KEY,
+        signal_id VARCHAR(50),
+        target_id VARCHAR(100) NOT NULL,
+        target_name VARCHAR(100) DEFAULT '',
+        plan VARCHAR(20) DEFAULT 'full',
+        status VARCHAR(20) NOT NULL,
+        response TEXT DEFAULT '',
+        sent_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
     const articleCount = await client.query('SELECT COUNT(*) FROM articles');
     if (parseInt(articleCount.rows[0].count) === 0) {
       await client.query(`INSERT INTO articles (title, content) VALUES
@@ -95,6 +109,19 @@ async function initDB() {
     const contactExists = await client.query("SELECT COUNT(*) FROM site_settings WHERE key='contact'");
     if (parseInt(contactExists.rows[0].count) === 0) {
       await client.query(`INSERT INTO site_settings (key, value) VALUES ('contact', '{"line_id":"@athtrader","phone":"","email":"contact@athtrader.com","qr_code":"","facebook":"","website":"","tiktok":"","youtube":"","openchat":"","openchat_qr":"","tiktok_qr":""}')`);
+    }
+
+    // MT5 Signal routing defaults
+    const mt5SettingsExists = await client.query("SELECT COUNT(*) FROM site_settings WHERE key='mt5_signal_settings'");
+    if (parseInt(mt5SettingsExists.rows[0].count) === 0) {
+      const defaultTargets = [];
+      if (process.env.LINE_GROUP_ID) {
+        defaultTargets.push({ name: 'กลุ่มหลัก', type: 'group', id: process.env.LINE_GROUP_ID, enabled: true });
+      }
+      await client.query(
+        `INSERT INTO site_settings (key, value) VALUES ('mt5_signal_settings', $1)`,
+        [JSON.stringify({ requireApproval: false, aiAnalysis: false, minConfidence: 60, targets: defaultTargets })]
+      );
     }
 
     console.log('Database initialized');

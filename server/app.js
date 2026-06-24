@@ -27,5 +27,6 @@ app.use('/api/auto-signals', require('./routes/auto-signals'));
 app.use('/api/ai-settings', require('./routes/ai-settings'));
 app.use('/api/ai-article-settings', require('./routes/ai-article-settings'));
 app.use('/api/ea', require('./routes/ea-dashboard'));
+app.use('/api/mt5-signal-settings', require('./routes/mt5-signal-settings'));
 
 module.exports = app;

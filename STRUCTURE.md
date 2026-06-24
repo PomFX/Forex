@@ -91,7 +91,7 @@ Forex/
 │   ├── app.js               # Express app shared (routes + middleware)
 │   ├── server.js            # entry point (local dev, import app.js + listen)
 │   ├── db.js                # PostgreSQL connection + schema init + seed data
-│   └── routes/              # API route handlers (14 ไฟล์)
+│   └── routes/              # API route handlers (15 ไฟล์)
 │       ├── auth.js          # /api/auth (login, register, JWT + rate limiter)
 │       ├── signals.js       # /api/signals (CRUD + AI + MT5 + evaluate)
 │       ├── articles.js      # /api/articles (CRUD + AI endpoint)
@@ -105,7 +105,8 @@ Forex/
 │       ├── auto-signals.js  # /api/auto-signals (AI generate + settings + confirm)
 │       ├── ai-settings.js   # /api/ai-settings (AI signal config)
 │       ├── ai-article-settings.js # /api/ai-article-settings (AI article config)
-│       └── ea-dashboard.js  # /api/ea (EA config + logs + heartbeat)
+│       ├── ea-dashboard.js  # /api/ea (EA config + logs + heartbeat)
+│       └── mt5-signal-settings.js # /api/mt5-signal-settings (MT5 → LINE routing)
 │
 ├── api/
 │   └── index.js             # Vercel serverless entry (import app.js + initDB)
@@ -214,6 +215,7 @@ Admin sidebar อยู่ใน `<nav class="admin-nav">` (index.html ~line 254
 | AI Article | `#/admin/aiarticlesettings` | aiarticlesettings |
 | ผลงาน | `#/admin/performance` | performance |
 | EA Dashboard | `#/admin/eadashboard` | eadashboard |
+| MT5 Signal Settings | `#/admin/mt5signals` | mt5signals |
 
 **การเพิ่มเมนู Admin ใหม่:**
 1. เพิ่ม `<a href="#/admin/ชื่อ" data-page="ชื่อ">ชื่อเมนู</a>` ใน sidebar (`index.html`)
@@ -244,6 +246,8 @@ Admin sidebar อยู่ใน `<nav class="admin-nav">` (index.html ~line 254
 | DELETE | `/api/signals/:id` | signals.js | Admin | Delete signal |
 | POST | `/api/signals/ai` | signals.js | AI-Key | Create signal via AI |
 | GET | `/api/signals/mt5` | signals.js | MT5-Key | Get all active signals (array) |
+| POST | `/api/signals/mt5/bos-candidate` | signals.js | MT5-Key | Receive BOS/CHoCH from MT5 bridge |
+| POST | `/api/signals/:id/approve` | signals.js | Admin | Approve pending MT5 signal + send LINE |
 | PATCH | `/api/signals/ai/evaluate` | signals.js | AI-Key | Update signal status (win/loss) |
 | GET | `/api/articles` | articles.js | Public | Get all articles |
 | POST | `/api/articles` | articles.js | Admin | Create article |
@@ -287,6 +291,10 @@ Admin sidebar อยู่ใน `<nav class="admin-nav">` (index.html ~line 254
 | GET | `/api/ea/heartbeat` | ea-dashboard.js | MT5-Key | EA sends status log |
 | GET | `/api/ea/logs` | ea-dashboard.js | Admin | View EA activity logs |
 | DELETE | `/api/ea/logs` | ea-dashboard.js | Admin | Clear EA logs |
+| GET | `/api/mt5-signal-settings` | mt5-signal-settings.js | Admin | Get MT5 signal routing config |
+| PUT | `/api/mt5-signal-settings` | mt5-signal-settings.js | Admin | Save MT5 signal routing config |
+| POST | `/api/mt5-signal-settings/test` | mt5-signal-settings.js | Admin | Test LINE push targets |
+| GET | `/api/mt5-signal-settings/logs` | mt5-signal-settings.js | Admin | View LINE send logs |
 
 ### 4.3 Auth Middleware (server/routes/auth.js)
 
@@ -398,6 +406,7 @@ brokers (id SERIAL PK, name VARCHAR(100), description TEXT DEFAULT '',
          rating DECIMAL(2,1) DEFAULT 0)
 
 site_settings (key VARCHAR(50) PK, value TEXT NOT NULL)
+line_logs (id SERIAL PK, signal_id VARCHAR(50), target_id VARCHAR(100), target_name VARCHAR(100), plan VARCHAR(20), status VARCHAR(20), response TEXT, sent_at TIMESTAMP DEFAULT NOW())
 ```
 
 ### 6.2 site_settings keys
@@ -408,6 +417,7 @@ site_settings (key VARCHAR(50) PK, value TEXT NOT NULL)
 | `banner_left` / `banner_right` | JSON `{enabled, html}` | Side banner (120×600) |
 | `banner_middle` | JSON `{enabled, html}` | Middle banner (300×250) |
 | `auto_signal_settings` | JSON `{apiKey, model, prompt, pairs, interval, ...}` | Auto Signal config |
+| `mt5_signal_settings` | JSON `{requireApproval, aiAnalysis, targets[]}` | MT5 bridge → LINE routing |
 
 ### 6.3 การ migrate
 

@@ -175,7 +175,8 @@ const Admin = {
       const signals = await API.getSignals();
       document.getElementById('signalsBody').innerHTML = signals.length
         ? signals.map(s => {
-            const statusColors = { active: 'var(--text-muted)', win: 'var(--green)', loss: 'var(--red)' };
+            const statusColors = { active: 'var(--text-muted)', pending: 'var(--gold)', win: 'var(--green)', loss: 'var(--red)' };
+            const isPending = s.status === 'pending';
             const time = s.created_at || s.createdAt;
             const timeStr = time ? new Date(time).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', hour12: false }) : '';
             return `<tr>
@@ -188,6 +189,7 @@ const Admin = {
               <td style="font-size:0.75rem;color:var(--text-muted);max-width:180px;white-space:normal;line-height:1.3;cursor:pointer" onclick="Admin.showReason(${s.id})" title="คลิกดูเหตุผล">${escHtml((s.reason || '-').substring(0, 60))}${s.reason && s.reason.length > 60 ? '...' : ''}</td>
               <td style="font-size:0.8rem;color:var(--text-muted)">${timeStr}</td>
               <td>
+                ${isPending ? `<button class="btn btn-primary btn-xs" onclick="Admin.approveSignal(${s.id})">อนุมัติ</button>` : ''}
                 <button class="btn btn-outline btn-xs" onclick="Admin.editSignal(${s.id})">แก้ไข</button>
                 <button class="btn btn-danger btn-xs" onclick="Admin.deleteSignal(${s.id})">ลบ</button>
               </td>
@@ -242,6 +244,17 @@ const Admin = {
       this.renderSignals();
       App.toast('ลบสัญญาณแล้ว');
     } catch (err) { console.error('deleteSignal:', err); }
+  },
+
+  async approveSignal(id) {
+    try {
+      const result = await API.approveSignal(id);
+      this.renderSignals();
+      App.toast(result.lineSent ? 'อนุมัติและส่ง LINE แล้ว' : 'อนุมัติแล้ว (LINE ไม่ถูกส่ง)');
+    } catch (err) {
+      App.toast('อนุมัติล้มเหลว', true);
+      console.error('approveSignal:', err);
+    }
   },
 
   // ====== ARTICLES ======
@@ -966,6 +979,129 @@ const Admin = {
       </table>`;
     } catch (err) {
       document.getElementById('eaAccountsContent').innerHTML = '<p style="color:#888">— ยังไม่มีบัญชีที่เชื่อมต่อ —</p>';
+    }
+  },
+
+  // ====== MT5 SIGNAL SETTINGS ======
+  _mt5Targets: [],
+
+  _renderMt5Targets() {
+    const container = document.getElementById('mt5TargetsContainer');
+    container.innerHTML = this._mt5Targets.map((t, i) => `
+      <div class="form-row" style="gap:0.5rem;align-items:center">
+        <input type="text" placeholder="ชื่อ" class="mt5-target-name" data-idx="${i}" value="${escHtml(t.name)}" style="flex:1">
+        <select class="mt5-target-type" data-idx="${i}" style="width:90px">
+          <option value="group" ${t.type === 'group' ? 'selected' : ''}>Group</option>
+          <option value="user" ${t.type === 'user' ? 'selected' : ''}>User</option>
+        </select>
+        <select class="mt5-target-plan" data-idx="${i}" style="width:90px" title="Full=TP1-3, Basic=TP1 only">
+          <option value="full" ${t.plan === 'full' ? 'selected' : ''}>Full</option>
+          <option value="basic" ${t.plan === 'basic' ? 'selected' : ''}>Basic</option>
+        </select>
+        <input type="text" placeholder="ID" class="mt5-target-id" data-idx="${i}" value="${escHtml(t.id)}" style="flex:2">
+        <label style="display:flex;align-items:center;gap:0.25rem;white-space:nowrap">
+          <input type="checkbox" class="mt5-target-enabled" data-idx="${i}" ${t.enabled ? 'checked' : ''}>
+          ใช้งาน
+        </label>
+        <button type="button" class="btn btn-danger btn-xs" onclick="Admin._removeMt5Target(${i})">ลบ</button>
+      </div>
+    `).join('') || '<p style="color:#888">ยังไม่มีเป้าหมาย</p>';
+  },
+
+  _addMt5Target() {
+    this._mt5Targets.push({ name: '', type: 'group', plan: 'full', id: '', enabled: true });
+    this._renderMt5Targets();
+  },
+
+  _removeMt5Target(idx) {
+    this._mt5Targets.splice(idx, 1);
+    this._renderMt5Targets();
+  },
+
+  _readMt5TargetsFromUI() {
+    const rows = document.querySelectorAll('#mt5TargetsContainer > .form-row');
+    const targets = [];
+    rows.forEach(row => {
+      targets.push({
+        name: row.querySelector('.mt5-target-name').value.trim(),
+        type: row.querySelector('.mt5-target-type').value,
+        plan: row.querySelector('.mt5-target-plan').value,
+        id: row.querySelector('.mt5-target-id').value.trim(),
+        enabled: row.querySelector('.mt5-target-enabled').checked,
+      });
+    });
+    return targets;
+  },
+
+  async _renderMt5LineLogs() {
+    try {
+      const data = await API.getMt5SignalLogs(50);
+      const logs = data.logs || [];
+      const body = document.getElementById('mt5LineLogsBody');
+      if (logs.length === 0) {
+        body.innerHTML = '<tr><td colspan="6" style="text-align:center">— ยังไม่มีประวัติ —</td></tr>';
+        return;
+      }
+      body.innerHTML = logs.map(l => {
+        const time = l.sent_at ? new Date(l.sent_at).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', hour12: false }) : '-';
+        const statusColor = l.status === 'sent' ? 'var(--green)' : 'var(--red)';
+        return `<tr>
+          <td style="font-size:0.8rem">${time}</td>
+          <td>${escHtml(l.signal_id)}</td>
+          <td>${escHtml(l.target_name || l.target_id)}</td>
+          <td>${escHtml(l.plan)}</td>
+          <td style="color:${statusColor};font-weight:600">${escHtml(l.status)}</td>
+          <td style="font-size:0.75rem;max-width:200px;overflow:hidden;text-overflow:ellipsis">${escHtml(l.response || '-')}</td>
+        </tr>`;
+      }).join('');
+    } catch (err) {
+      console.error('_renderMt5LineLogs:', err);
+      document.getElementById('mt5LineLogsBody').innerHTML = '<tr><td colspan="6" style="text-align:center">— โหลดประวัติไม่สำเร็จ —</td></tr>';
+    }
+  },
+
+  async renderMt5SignalSettings() {
+    try {
+      const settings = await API.getMt5SignalSettings();
+      this._mt5Targets = settings.targets || [];
+
+      document.getElementById('mt5RequireApproval').checked = !!settings.requireApproval;
+      document.getElementById('mt5AiAnalysis').checked = !!settings.aiAnalysis;
+      document.getElementById('mt5MinConfidence').value = Number(settings.minConfidence ?? 60);
+      this._renderMt5Targets();
+      this._renderMt5LineLogs();
+
+      document.getElementById('mt5AddTargetBtn').onclick = () => this._addMt5Target();
+      document.getElementById('mt5TestLineBtn').onclick = async () => {
+        try {
+          const result = await API.testMt5SignalSettings();
+          App.toast(result.lineSent ? 'ส่งทดสอบสำเร็จ' : 'ส่งทดสอบไม่สำเร็จ ดู log');
+        } catch (err) {
+          App.toast('ทดสอบส่งล้มเหลว', true);
+          console.error('testMt5SignalSettings:', err);
+        }
+      };
+
+      const form = document.getElementById('mt5SignalSettingsForm');
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const data = {
+          requireApproval: document.getElementById('mt5RequireApproval').checked,
+          aiAnalysis: document.getElementById('mt5AiAnalysis').checked,
+          minConfidence: Number(document.getElementById('mt5MinConfidence').value || 60),
+          targets: this._readMt5TargetsFromUI(),
+        };
+        try {
+          await API.saveMt5SignalSettings(data);
+          App.toast('บันทึกการตั้งค่าแล้ว');
+        } catch (err) {
+          App.toast('บันทึกล้มเหลว', true);
+          console.error('saveMt5SignalSettings:', err);
+        }
+      };
+    } catch (err) {
+      console.error('renderMt5SignalSettings:', err);
+      App.toast('โหลดการตั้งค่าล้มเหลว', true);
     }
   },
 };
