@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คู่มือระบบ EA Bridge — BOS/LuxAlgo Signal Bridge</title>
+<style>
+  :root {
+    --bg: #0b0c10;
+    --panel: #12141a;
+    --panel-2: #161922;
+    --border: #252a33;
+    --text: #d1d5db;
+    --muted: #9ca3af;
+    --accent: #f59e0b;
+    --accent-2: #fbbf24;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --info: #38bdf8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    line-height: 1.7;
+  }
+  .sidebar {
+    width: 280px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+    padding: 1.5rem 0;
+  }
+  .brand {
+    padding: 0 1.5rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.75rem;
+  }
+  .brand h1 {
+    font-size: 1.1rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .brand p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+  .cat {
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 1.1rem 1.5rem 0.35rem;
+  }
+  .sidebar a {
+    display: block;
+    padding: 0.55rem 1.5rem;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.88rem;
+    border-left: 3px solid transparent;
+    transition: all 0.18s ease;
+  }
+  .sidebar a:hover {
+    color: var(--accent-2);
+    background: rgba(245, 158, 11, 0.06);
+  }
+  .sidebar a.active {
+    color: var(--accent-2);
+    border-left-color: var(--accent);
+    background: rgba(245, 158, 11, 0.1);
+  }
+  .main {
+    flex: 1;
+    padding: 2.5rem;
+    max-width: 960px;
+  }
+  .hero {
+    background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(56,189,248,0.08));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2.5rem;
+  }
+  .hero h2 {
+    font-size: 1.75rem;
+    color: var(--accent-2);
+    margin-bottom: 0.5rem;
+  }
+  .hero p {
+    color: var(--muted);
+    max-width: 720px;
+  }
+  section { margin-bottom: 3rem; }
+  h2 {
+    font-size: 1.35rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 1.05rem;
+    color: var(--accent-2);
+    margin: 1.5rem 0 0.6rem;
+  }
+  p, li {
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  ul, ol { padding-left: 1.4rem; margin: 0.75rem 0; }
+  li { margin-bottom: 0.4rem; }
+  a { color: var(--info); }
+  code {
+    background: #1b1e26;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.82rem;
+    color: var(--accent-2);
+  }
+  pre {
+    background: #0d0f14;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 0.82rem;
+    color: #c9cdd4;
+    overflow-x: auto;
+    margin: 0.75rem 0;
+  }
+  .box {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.1rem;
+    margin: 1rem 0;
+  }
+  .box.accent { border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.05); }
+  .box.success { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.04); }
+  .box.danger { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.04); }
+  .box.info { border-color: rgba(56,189,248,0.3); background: rgba(56,189,248,0.04); }
+  .badge {
+    display: inline-block;
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-right: 0.4rem;
+  }
+  .badge.gold { background: rgba(245,158,11,0.2); color: var(--accent-2); }
+  .badge.green { background: rgba(34,197,94,0.18); color: var(--success); }
+  .badge.red { background: rgba(239,68,68,0.18); color: var(--danger); }
+  .badge.gray { background: rgba(156,163,175,0.15); color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 0.8rem 0; }
+  th, td { padding: 0.65rem 0.85rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 700; background: rgba(245,158,11,0.05); }
+  td { color: var(--text); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 1rem 0;
+  }
+  .flow-step {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.82rem;
+  }
+  .flow-arrow { color: var(--accent); font-weight: 700; }
+  .step { display: flex; gap: 1rem; align-items: flex-start; margin: 1.1rem 0; }
+  .step-num {
+    background: var(--accent);
+    color: #111;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  .step-content { flex: 1; }
+  .step-content h4 { color: var(--accent-2); font-size: 0.98rem; margin-bottom: 0.25rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 900px) {
+    body { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--border); }
+    .main { padding: 1.5rem; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="brand">
+    <h1>EA Bridge Manual</h1>
+    <p>BOS / LuxAlgo Signal Bridge</p>
+  </div>
+
+  <div class="cat">เริ่มต้น</div>
+  <a href="#overview" class="active">ภาพรวมระบบ</a>
+  <a href="#components">องค์ประกอบ</a>
+  <a href="#requirements">สิ่งที่ต้องเตรียม</a>
+  <a href="#install">ติดตั้ง EA</a>
+
+  <div class="cat">การตั้งค่า</div>
+  <a href="#inputs">Inputs ของ EA</a>
+  <a href="#webrequest">ตั้งค่า WebRequest</a>
+
+  <div class="cat">การทำงาน</div>
+  <a href="#detection">ตรวจจับสัญญาณ</a>
+  <a href="#filters">กรองสัญญาณ</a>
+  <a href="#backend-flow">โฟลว์ Backend</a>
+  <a href="#line-routing">ส่ง LINE ตามกลุ่ม</a>
+
+  <div class="cat">แผงควบคุม</div>
+  <a href="#admin-settings">หน้า Admin Settings</a>
+
+  <div class="cat">ตรวจสอบ & แก้ไข</div>
+  <a href="#logs">อ่าน Log</a>
+  <a href="#troubleshoot">แก้ไขปัญหา</a>
+  <a href="#faq">คำถามที่พบบ่อย</a>
+  <a href="#support">ติดต่อสนับสนุน</a>
+</nav>
+
+<main class="main">
+
+  <div class="hero">
+    <h2>คู่มือระบบ EA Bridge</h2>
+    <p>เอกสารฉบับสมบูรณ์สำหรับ <strong>BOS_LuxAlgo_Bridge.mq5</strong> อธิบายตั้งแต่การติดตั้ง การตั้งค่า โฟลว์การทำงาน ไปจนถึงการอ่าน Log และแก้ไขปัญหาที่พบบ่อย</p>
+  </div>
+
+  <!-- ===== OVERVIEW ===== -->
+  <section id="overview">
+    <h2>ภาพรวมระบบ</h2>
+    <p><strong>BOS_LuxAlgo_Bridge</strong> เป็น Expert Advisor (EA) บน MetaTrader 5 ที่ทำหน้าที่เป็นสะพาน (Bridge) ระหว่างอินดิเคเตอร์ <strong>LuxAlgo Smart Money Concepts (SMC)</strong> กับ Backend ของ ATH Trader</p>
+
+    <div class="grid-2">
+      <div class="box accent">
+        <span class="badge gold">หน้าที่หลัก</span>
+        <p style="margin-top:0.5rem">อ่าน object BOS / CHoCH ที่ LuxAlgo วาดบน chart แล้วส่งข้อมูลสัญญาณไปยังเซิร์ฟเวอร์ เพื่อให้ AI วิเคราะห์ คิดระดับ TP/SL และส่งแจ้งเตือนไป LINE อัตโนมัติ</p>
+      </div>
+      <div class="box info">
+        <span class="badge gray">ข้อดี</span>
+        <p style="margin-top:0.5rem">ไม่ต้องเฝ้าหน้าจอตลอดเวลา ระบบช่วยกรองสัญญาณซ้ำ สัญญาณเก่า และสัญญาณที่ AI ไม่มั่นใจออกก่อนส่งไปกลุ่ม</p>
+      </div>
+    </div>
+
+    <p>EA นี้ทำงานร่วมกับระบบหลังบ้าน 2 ส่วนหลัก:</p>
+    <ul>
+      <li><code>/api/signals/mt5/bos-candidate</code> — รับข้อมูลสัญญาณจาก MT5</li>
+      <li><code>/api/ea/heartbeat</code> — รับสถานะความเป็นอยู่ของ EA เป็นระยะ</li>
+    </ul>
+  </section>
+
+  <!-- ===== COMPONENTS ===== -->
+  <section id="components">
+    <h2>องค์ประกอบของระบบ</h2>
+    <table>
+      <tr><th>ส่วนประกอบ</th><th>บทบาท</th></tr>
+      <tr><td>MetaTrader 5</td><td>แพลตฟอร์มหลักที่รัน EA และแสดง indicator LuxAlgo SMC</td></tr>
+      <tr><td>LuxAlgo SMC</td><td>วาด object BOS / CHoCH / Order Block บน chart ตาม Smart Money Concepts</td></tr>
+      <tr><td>BOS_LuxAlgo_Bridge.mq5</td><td>EA ที่อ่าน object จาก chart แล้วส่งไป backend</td></tr>
+      <tr><td>Backend (Vercel)</td><td>รับสัญญาณ เรียก AI วิเคราะห์ บันทึกฐานข้อมูล ส่ง LINE</td></tr>
+      <tr><td>LINE Messaging API</td><td>ช่องทางส่งข้อความแจ้งเตือนไปยังกลุ่มหรือผู้ใช้</td></tr>
+      <tr><td>Admin Dashboard</td><td>หน้าตั้งค่าการรับสัญญาณ กลุ่มเป้าหมาย approval และดูประวัติส่ง LINE</td></tr>
+    </table>
+  </section>
+
+  <!-- ===== REQUIREMENTS ===== -->
+  <section id="requirements">
+    <h2>สิ่งที่ต้องเตรียม</h2>
+    <ul>
+      <li>บัญชี MetaTrader 5 (เวอร์ชันล่าสุดแนะนำ)</li>
+      <li>อินดิเคเตอร์ <strong>LuxAlgo Smart Money Concepts</strong> ติดตั้งและเปิดใช้งานบน chart</li>
+      <li>ไฟล์ EA <code>BOS_LuxAlgo_Bridge.ex5</code> หรือ <code>.mq5</code></li>
+      <li>API Key จากระบบ ATH Trader (ตั้งค่าใน Vercel env <code>MT5_API_KEY</code>)</li>
+      <li>URL backend ที่ถูกต้อง เช่น <code>https://forex-rouge-gamma.vercel.app</code></li>
+      <li>อนุญาต WebRequest สำหรับ URL ดังกล่าวใน MT5</li>
+    </ul>
+  </section>
+
+  <!-- ===== INSTALL ===== -->
+  <section id="install">
+    <h2>ติดตั้ง EA</h2>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>คัดลอกไฟล์ EA</h4>
+        <p>นำไฟล์ <code>BOS_LuxAlgo_Bridge.ex5</code> ไปใส่ในโฟลเดอร์ <code>MQL5/Experts</code> ของ MT5 จากนั้นเปิด/รีสตาร์ท MT5 หรือคลิกขวาที่ Navigator เลือก <strong>Refresh</strong></p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>แนบ EA เข้า Chart</h4>
+        <p>ลาก <strong>BOS_LuxAlgo_Bridge</strong> จาก Navigator มาวางบน chart ที่มี LuxAlgo SMC กำลังทำงานอยู่ แนะนำ Timeframe M15 หรือ M30 ตามความเหมาะสม</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>ยืนยัน AutoTrading</h4>
+        <p>ตรวจสอบว่าปุ่ม <strong>AutoTrading</strong> บน toolbar ถูกเปิด (สีเขียว) EA นี้ไม่ได้เปิด order เอง แต่ต้องการสิทธิ์ให้ <code>WebRequest</code> ทำงานได้</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>ตั้งค่า Inputs</h4>
+        <p>กรอก <code>API_URL</code>, <code>API_KEY</code> ให้ถูกต้อง ปรับ <code>SEND_BOS</code>, <code>SEND_CHOCH</code>, <code>DEBOUNCE_BARS</code> ตามต้องการ</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>อนุญาต WebRequest</h4>
+        <p>ไปที่ <code>Tools &rarr; Options &rarr; Expert Advisors</code> แล้วเพิ่ม URL ของ backend ในรายการ <strong>Allowed WebRequest URLs</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== INPUTS ===== -->
+  <section id="inputs">
+    <h2>Inputs ของ EA</h2>
+    <table>
+      <tr><th>Input</th><th>ค่าเริ่มต้น</th><th>คำอธิบาย</th></tr>
+      <tr><td><code>API_URL</code></td><td><code>https://forex-rouge-gamma.vercel.app</code></td><td>URL ของ backend ที่ EA จะส่งสัญญาณไป</td></tr>
+      <tr><td><code>API_KEY</code></td><td>(จากระบบ)</td><td>คีย์สำหรับยืนยันตัวตนกับ backend ต้องตรงกับ <code>MT5_API_KEY</code> บนเซิร์ฟเวอร์</td></tr>
+      <tr><td><code>PAIR_NAME</code></td><td>ว่าง</td><td>ชื่อคู่เงินที่จะส่ง ปล่อยว่างให้ EA ตรวจจับอัตโนมัติจาก symbol</td></tr>
+      <tr><td><code>SEND_BOS</code></td><td>true</td><td>เปิด/ปิด การส่งสัญญาณ BOS</td></tr>
+      <tr><td><code>SEND_CHOCH</code></td><td>true</td><td>เปิด/ปิด การส่งสัญญาณ CHoCH</td></tr>
+      <tr><td><code>DEBOUNCE_BARS</code></td><td>3</td><td>จำนวนแท่งขั้นต่ำระหว่างสัญญาณชนิดเดียวกันของคู่เดียวกัน เพื่อป้องกันการส่งซ้ำถี่เกินไป</td></tr>
+      <tr><td><code>HEARTBEAT_MIN</code></td><td>15</td><td>ส่ง heartbeat ทุก N นาที (0 = ปิด) ใช้แจ้งให้ backend รู้ว่า EA ยังออนไลน์</td></tr>
+      <tr><td><code>DEBUG_MODE</code></td><td>true</td><td>เปิด log ละเอียดสำหรับตรวจสอบการทำงาน แนะนำให้เปิดตอนทดสอบ</td></tr>
+    </table>
+  </section>
+
+  <!-- ===== WEBREQUEST ===== -->
+  <section id="webrequest">
+    <h2>ตั้งค่า WebRequest ใน MT5</h2>
+    <p>หากไม่เปิด WebRequest EA จะได้ error <code>4014</code> เมื่อเรียก API</p>
+    <ol>
+      <li>ใน MT5 ไปที่ <strong>Tools &rarr; Options</strong></li>
+      <li>เลือกแท็บ <strong>Expert Advisors</strong></li>
+      <li>ติ๊ก <strong>Allow WebRequest for listed URL</strong></li>
+      <li>เพิ่ม URL backend เช่น <code>https://forex-rouge-gamma.vercel.app</code></li>
+      <li>กด OK แล้วรีโหลด EA</li>
+    </ol>
+    <div class="box info">
+      <strong>เคล็ดลับ:</strong> บาง broker/VPS อาจต้องเปิด URL ทั้ง domain และ endpoint เช่น <code>https://forex-rouge-gamma.vercel.app/api/signals/mt5/bos-candidate</code> หาก domain อย่างเดียวยังติด
+    </div>
+  </section>
+
+  <!-- ===== DETECTION ===== -->
+  <section id="detection">
+    <h2>ตรวจจับสัญญาณ</h2>
+    <p>EA ทำงานบน event <code>OnTick()</code> แต่จะประมวลผลจริงเฉพาะเมื่อมี <strong>แท่งใหม่</strong> (new bar) เท่านั้น เพื่อลดภาระการคำนวณ</p>
+
+    <h3>วิธีอ่าน Object จาก LuxAlgo</h3>
+    <ol>
+      <li>สแกน object ทั้งหมดบน chart ด้วย <code>ObjectsTotal()</code></li>
+      <li>อ่านข้อความของ object จาก <code>OBJPROP_TEXT</code></li>
+      <li>ตรวจว่าข้อความมีคำว่า <code>BOS</code> หรือ <code>CHoCH</code> หรือไม่</li>
+      <li>ข้าม object ที่เกี่ยวกับ EQL / Equilibrium (ไม่ใช่สัญญาณเทรด)</li>
+      <li>อ่านเวลาและราคาของ object ที่พบ</li>
+      <li>เลือก object ล่าสุดในแต่ละรอบ</li>
+    </ol>
+
+    <h3>ตรวจทิศทางจากสี</h3>
+    <p>EA ใช้สีของ object จาก LuxAlgo เพื่อตัดสินใจว่าเป็นสัญญาณ bullish หรือ bearish</p>
+    <table>
+      <tr><th>สี</th><th>ค่า RGB (BGR)</th><th>ทิศทาง</th></tr>
+      <tr><td>เขียวมิ้นท์</td><td><code>C'8,153,129'</code></td><td>Bullish</td></tr>
+      <tr><td>แดง</td><td><code>C'242,54,69'</code></td><td>Bearish</td></tr>
+      <tr><td>น้ำเงิน</td><td>dominant blue</td><td>ข้าม (OB zone)</td></tr>
+    </table>
+  </section>
+
+  <!-- ===== FILTERS ===== -->
+  <section id="filters">
+    <h2>การกรองสัญญาณ</h2>
+    <p>ก่อนส่งสัญญาณไป backend EA จะผ่านชั้นกรองหลายขั้น เพื่อลด noise และป้องกันการส่งซ้ำ</p>
+
+    <table>
+      <tr><th>Filter</th><th>รายละเอียด</th><th>ข้อความ Log</th></tr>
+      <tr><td>กรองสี/ทิศทาง</td><td>ข้าม object ที่ไม่ใช่ bullish/bearish เช่น สีน้ำเงิน</td><td><code>[Skip] Unknown color</code></td></tr>
+      <tr><td>กรองอายุสัญญาณ</td><td>รับเฉพาะ object ที่เกิดใน 100 แท่งล่าสุด</td><td><code>[Skip] Too old</code></td></tr>
+      <tr><td>กรองซ้ำ</td><td>ข้าม object ที่เคยส่งไปแล้วใน session ปัจจุบัน</td><td><code>[Skip] Already sent</code></td></tr>
+      <tr><td>Debounce</td><td>ห้ามส่งสัญญาณชนิดเดียวกันของคู่เดียวกันภายใน <code>DEBOUNCE_BARS</code> แท่ง</td><td><code>[Bridge] Debounce: skipping ...</code></td></tr>
+      <tr><td>EQ skip</td><td>ข้าม EQL / Equilibrium object โดยอัตโนมัติ</td><td>(ไม่แสดง log)</td></tr>
+    </table>
+
+    <div class="box success">
+      <span class="badge green">ผลลัพธ์</span>
+      <p style="margin-top:0.5rem">เมื่อผ่านทุก filter EA จะส่ง JSON payload ไปที่ <code>/api/signals/mt5/bos-candidate</code></p>
+    </div>
+  </section>
+
+  <!-- ===== BACKEND FLOW ===== -->
+  <section id="backend-flow">
+    <h2>โฟลว์ Backend</h2>
+    <p>หลังจาก EA ส่งข้อมูลมา ระบบหลังบ้านจะประมวลผลตามขั้นตอนดังนี้</p>
+
+    <div class="flow">
+      <div class="flow-step">1. รับ Candidate</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">2. บันทึก Signal</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">3. AI วิเคราะห์</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">4. ตรวจ Confidence</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">5. Approval</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">6. ส่ง LINE</div>
+    </div>
+
+    <h3>รายละเอียดแต่ละขั้นตอน</h3>
+    <ol>
+      <li><strong>รับ Candidate</strong> — endpoint ตรวจสอบ <code>X-MT5-Key</code> และรับ JSON จาก EA</li>
+      <li><strong>บันทึก Signal</strong> — บันทึกข้อมูลลงฐานข้อมูลก่อนเสมอ แม้ AI จะปฏิเสธ</li>
+      <li><strong>AI วิเคราะห์</strong> — เรียก OpenAI เพื่อประเมิน setup, คำนวณ TP/SL, R:R และให้คะแนนความมั่นใจ</li>
+      <li><strong>ตรวจ Confidence</strong> — หาคะแนนต่ำกว่า threshold ที่ตั้งไว้ ระบบจะปฏิเสธและไม่ส่ง LINE</li>
+      <li><strong>Approval</strong> — หากเปิดโหมด "ต้องอนุมัติก่อน" สัญญาณจะอยู่สถานะ pending จนกว่า Admin จะกดอนุมัติ</li>
+      <li><strong>ส่ง LINE</strong> — สัญญาณที่ผ่านทุกเงื่อนไขจะถูกส่งไปยังกลุ่มเป้าหมายตามการตั้งค่า</li>
+    </ol>
+
+    <div class="box accent">
+      <span class="badge gold">ข้อควรจำ</span>
+      <p style="margin-top:0.5rem">การบันทึก signal ก่อนเรียก AI ช่วยให้เราสามารถนำกลับมาวิเคราะห์ย้อนหลังได้ว่า AI ปฏิเสธอะไรบ้าง และปรับ prompt หรือ threshold ได้ถูกต้อง</p>
+    </div>
+  </section>
+
+  <!-- ===== LINE ROUTING ===== -->
+  <section id="line-routing">
+    <h2>ส่ง LINE ตามกลุ่มเป้าหมาย</h2>
+    <p>ระบบรองรับการส่งข้อความไปยังหลายกลุ่ม LINE พร้อมกัน โดยแต่ละกลุ่มสามารถเลือกรูปแบบข้อความได้ว่าจะได้ข้อมูลเต็มหรือย่อ</p>
+
+    <table>
+      <tr><th>Plan</th><th>ข้อมูลที่ได้รับ</th><th>เหมาะกับ</th></tr>
+      <tr><td><span class="badge gold">Full</span></td><td>คู่เงิน ทิศทาง ราคาเข้า TP1-3 SL R:R เหตุผล</td><td>VIP / กลุ่มเสียเงิน</td></tr>
+      <tr><td><span class="badge gray">Basic</span></td><td>คู่เงิน ทิศทาง ราคาเข้า TP1 SL เท่านั้น</td><td>กลุ่มฟรี / กลุ่มทดลอง</td></tr>
+    </table>
+
+    <p>การตั้งค่ากลุ่มเป้าหมายทำได้ที่หน้า Admin MT5 Signal Settings โดยระบุ:</p>
+    <ul>
+      <li><strong>LINE Group ID</strong> หรือ <strong>User ID</strong></li>
+      <li><strong>Plan</strong> ที่ต้องการ (Full/Basic)</li>
+      <li><strong>เปิด/ปิด</strong> การส่งของกลุ่มนั้น</li>
+    </ul>
+
+    <div class="box info">
+      <strong>โควต้า LINE:</strong> บัญชี LINE Messaging API แบบฟรีมีโควต้า 300 ข้อความ/เดือน ระบบจึงมีการกรองสัญญาณซ้ำและปิดการส่งสรุป BOS อัตโนมัติเพื่อประหยัดโควต้า
+    </div>
+  </section>
+
+  <!-- ===== ADMIN SETTINGS ===== -->
+  <section id="admin-settings">
+    <h2>หน้า Admin MT5 Signal Settings</h2>
+    <p>ผู้ดูแลระบบสามารถควบคุมพฤติกรรมของระบบสัญญาณได้ที่ <code>/#/admin/mt5signals</code></p>
+
+    <h3>ฟังก์ชันหลัก</h3>
+    <ul>
+      <li><strong>เปิด/ปิด AI Analysis</strong> — ห้ปิด AI ระบบจะใช้ format เริ่มต้น</li>
+      <li><strong>Confidence Threshold</strong> — ตั้งค่าคะแนนขั้นต่ำที่ AI ต้องได้จึงจะส่งสัญญาณ</li>
+      <li><strong>Admin Approval</strong> — เปิดโหมดต้องอนุมัติก่อนส่ง LINE</li>
+      <li><strong>Targets</strong> — เพิ่ม/ลบ/แก้ไขกลุ่ม LINE เป้าหมายและ Plan</li>
+      <li><strong>Send Test</strong> — ทดสอบส่งข้อความไปกลุ่มทันที</li>
+      <li><strong>Usage / Logs</strong> — ดูจำนวนข้อความที่ใช้ไปและประวัติการส่ง LINE</li>
+    </ul>
+
+    <div class="box accent">
+      <span class="badge gold">คำแนะนำ</span>
+      <p style="margin-top:0.5rem">ช่วงทดสอบควรเปิด <strong>Admin Approval</strong> ไว้ก่อน แล้วค่อยปิดเมื่อมั่นใจว่าคุณภาพสัญญาณดี</p>
+    </div>
+  </section>
+
+  <!-- ===== LOGS ===== -->
+  <section id="logs">
+    <h2>อ่าน Log</h2>
+    <p>Log ของ EA แสดงที่แท็บ <strong>Experts</strong> ใน MT5 ด้านล่างจอ ข้อความต่าง ๆ มีความหมายดังนี้</p>
+
+    <table>
+      <tr><th>Log</th><th>ความหมาย</th><th>ระดับ</th></tr>
+      <tr><td><code>[Bridge] Sending BOS bullish on XAU/USD ...</code></td><td>EA กำลังส่ง candidate ไป backend</td><td><span class="badge gray">Info</span></td></tr>
+      <tr><td><code>[Bridge] SIGNAL CREATED!</code></td><td>Backend สร้างสัญญาณสำเร็จและส่ง LINE แล้ว</td><td><span class="badge green">Success</span></td></tr>
+      <tr><td><code>[Bridge] AI declined: no valid setup</code></td><td>AI ประเมินว่า setup ไม่ผ่านหรือ confidence ต่ำเกินไป</td><td><span class="badge gray">Filtered</span></td></tr>
+      <tr><td><code>[Skip] Too old</code></td><td>object เกิดเกิน 100 แท่งแล้ว</td><td><span class="badge gray">Filtered</span></td></tr>
+      <tr><td><code>[Skip] Already sent</code></td><td>object นี้เคยส่งไปแล้วใน session ปัจจุบัน</td><td><span class="badge gray">Filtered</span></td></tr>
+      <tr><td><code>[Bridge] Debounce: skipping ...</code></td><td>สัญญาณชนิดเดียวกันของคู่เดียวกันเกิดเร็วเกินไป</td><td><span class="badge gray">Filtered</span></td></tr>
+      <tr><td><code>[Heartbeat] OK</code></td><td>EA ยังออนไลน์และ backend ตอบกลับปกติ</td><td><span class="badge green">Success</span></td></tr>
+      <tr><td><code>[Heartbeat] HTTP 403</code></td><td>API Key ไม่ถูกต้องหรือ backend ปฏิเสธ</td><td><span class="badge red">Error</span></td></tr>
+      <tr><td><code>[HTTP] FAILED | Error=4014</code></td><td>URL ไม่ได้อยู่ใน MT5 Allowed WebRequest list</td><td><span class="badge red">Error</span></td></tr>
+    </table>
+  </section>
+
+  <!-- ===== TROUBLESHOOT ===== -->
+  <section id="troubleshoot">
+    <h2>แก้ไขปัญหาที่พบบ่อย</h2>
+
+    <div class="box danger">
+      <h3>Heartbeat HTTP 403</h3>
+      <p>สาเหตุ: API Key ไม่ตรงกับ backend หรือ backend รับ key ผิดที่ ปัจจุบัน backend รองรับทั้ง <code>X-MT5-Key</code> header และ <code>?key=...</code> แล้ว ตรวจสอบว่า <code>API_KEY</code> ใน EA ตรงกับ <code>MT5_API_KEY</code> บน Vercel</p>
+    </div>
+
+    <div class="box danger">
+      <h3>HTTP Error 4014</h3>
+      <p>สาเหตุ: URL ไม่ได้อยู่ในรายการอนุญาตของ MT5 ให้ไปเพิ่ม <code>https://forex-rouge-gamma.vercel.app</code> ใน <strong>Tools &rarr; Options &rarr; Expert Advisors &rarr; Allowed WebRequest URLs</strong> แล้วรีโหลด EA</p>
+    </div>
+
+    <div class="box">
+      <h3>ไม่มีสัญญาณส่งไป LINE เลย</h3>
+      <ul>
+        <li>ตรวจสอบว่า LuxAlgo SMC วาด object BOS/CHoCH บน chart จริง</li>
+        <li>ตรวจสอบ log ว่ามี <code>[Skip] Too old</code> หรือ <code>Debounce</code> หรือไม่</li>
+        <li>ตรวจสอบ <strong>Confidence Threshold</strong> ใน Admin อาจสูงเกินไป</li>
+        <li>ตรวจสอบว่าเปิด <strong>Admin Approval</strong> แล้วลืมอนุมัติหรือไม่</li>
+        <li>ตรวจสอบ LINE Group ID / Token ถูกต้องและยังไม่หมดโควต้า</li>
+      </ul>
+    </div>
+
+    <div class="box">
+      <h3>สัญญาณซ้ำหรือมากเกินไป</h3>
+      <ul>
+        <li>เพิ่มค่า <code>DEBOUNCE_BARS</code> ใน EA</li>
+        <li>ลดจำนวน timeframe ที่เปิด EA หลาย chart พร้อมกัน</li>
+        <li>ตรวจสอบว่าไม่ได้เปิด EA ซ้ำบน chart เดียวกัน</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section id="faq">
+    <h2>คำถามที่พบบ่อย</h2>
+
+    <h3>Q: เปิด EA หลาย chart พร้อมกันได้ไหม?</h3>
+    <p>A: ได้ แต่ละ chart จะส่งตาม timeframe ของตัวเอง ควรตั้งชื่อ pair ให้ถูกต้องหรือปล่อยให้ auto-detect</p>
+
+    <h3>Q: สามารถปิดการส่ง CHoCH แล้วส่งเฉพาะ BOS ได้ไหม?</h3>
+    <p>A: ได้ ให้ตั้งค่า <code>SEND_CHOCH = false</code> และ <code>SEND_BOS = true</code> ใน Inputs</p>
+
+    <h3>Q: หากไม่ต้องการ heartbeat ต้องทำอย่างไร?</h3>
+    <p>A: ตั้งค่า <code>HEARTBEAT_MIN = 0</code> แต่จะไม่สามารถดูสถานะ EA บน Dashboard ได้</p>
+
+    <h3>Q: สัญญาณที่ AI ปฏิเสธจะถูกบันทึกไหม?</h3>
+    <p>A: บันทึกในฐานข้อมูลเสมอ แต่จะไม่ส่ง LINE และสถานะอาจเป็น <code>declined</code></p>
+
+    <h3>Q: เปลี่ยน backend URL ต้องทำอะไรบ้าง?</h3>
+    <p>A: แก้ไข <code>API_URL</code> ใน EA, อัปเดต <code>MT5_API_KEY</code> บนเซิร์ฟเวอร์ใหม่ และเพิ่ม URL ใหม่ใน MT5 Allowed WebRequest list</p>
+  </section>
+
+  <!-- ===== SUPPORT ===== -->
+  <section id="support">
+    <h2>ติดต่อสนับสนุน</h2>
+    <p>หากพบปัญหาหรือต้องการปรับแต่งเพิ่มเติม สามารถติดต่อทีมงานได้ผ่านช่องทางต่อไปนี้</p>
+    <ul>
+      <li>LINE Official Account: ATH Trader</li>
+      <li>หน้า Admin: <code>https://forex-rouge-gamma.vercel.app/#/admin</code></li>
+      <li>GitHub Repository: <code>PomFX/Forex</code></li>
+    </ul>
+
+    <div class="box accent">
+      <span class="badge gold">ข้อควรปฏิบัติ</span>
+      <p style="margin-top:0.5rem">หลังจาก deploy เสร็จและระบบทำงานปกติแล้ว อย่าลืม revoke GitHub token ชั่วคราวที่ใช้สำหรับ push เพื่อความปลอดภัย</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Active sidebar link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  function onScroll() {
+    let current = '';
+    const offset = 120;
+    sections.forEach(sec => {
+      const top = sec.offsetTop;
+      if (pageYOffset >= top - offset) current = sec.getAttribute('id');
+    });
+    links.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+    });
+  }
+  window.addEventListener('scroll', onScroll);
+  onScroll();
+</script>
+
+</body>
+</html>
