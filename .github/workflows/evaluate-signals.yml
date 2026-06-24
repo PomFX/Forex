@@ -1,0 +1,27 @@
+name: Evaluate Active Signals
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Evaluate active signals
+        run: node scripts/evaluate-signals.js
+        env:
+          AI_SIGNAL_API_KEY: ${{ secrets.AI_SIGNAL_API_KEY }}
+          AI_API_URL: ${{ secrets.AI_API_URL }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_GROUP_ID: ${{ secrets.LINE_GROUP_ID }}
+          LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
