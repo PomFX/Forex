@@ -656,6 +656,26 @@
                 </label>
               </div>
 
+              <h3 style="color:#d4a017;font-size:1rem;margin:1.5rem 0 0.5rem">Multi-Entry (3 จุด)</h3>
+              <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;margin-bottom:0.5rem">
+                <input type="checkbox" id="mt5MultiEntryEnabled">
+                <span>เปิดใช้ Multi-Entry (Entry 1/2/3 + SL/TP ตามระยะ Point)</span>
+              </label>
+              <div id="mt5MultiEntryInputs" style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:0.75rem 1rem;margin-bottom:1rem">
+                <p style="font-size:0.78rem;color:#888;margin-bottom:0.5rem">SELL: Entry อยู่เหนือราคาปัจจุบัน / BUY: Entry อยู่ต่ำกว่าราคาปัจจุบัน</p>
+                <div class="form-row" style="gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem">
+                  <label style="font-size:0.85rem">Entry1: <input type="number" id="mt5Entry1Offset" min="0" style="width:70px"> pts</label>
+                  <label style="font-size:0.85rem">Entry2: <input type="number" id="mt5Entry2Offset" min="0" style="width:70px"> pts</label>
+                  <label style="font-size:0.85rem">Entry3: <input type="number" id="mt5Entry3Offset" min="0" style="width:70px"> pts</label>
+                  <label style="font-size:0.85rem">SL: <input type="number" id="mt5SlOffset" min="0" style="width:70px"> pts</label>
+                </div>
+                <div class="form-row" style="gap:0.5rem;flex-wrap:wrap">
+                  <label style="font-size:0.85rem">TP1: <input type="number" id="mt5Tp1Offset" min="0" style="width:70px"> pts</label>
+                  <label style="font-size:0.85rem">TP2: <input type="number" id="mt5Tp2Offset" min="0" style="width:70px"> pts</label>
+                  <label style="font-size:0.85rem">TP3: <input type="number" id="mt5Tp3Offset" min="0" style="width:70px"> pts</label>
+                </div>
+              </div>
+
               <h3 style="color:#d4a017;font-size:1rem;margin:1.5rem 0 0.75rem">เป้าหมาย LINE</h3>
               <div id="mt5TargetsContainer" style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1rem"></div>
               <button type="button" class="btn btn-outline btn-sm" id="mt5AddTargetBtn">+ เพิ่มเป้าหมาย</button>

@@ -13,6 +13,22 @@ function parsePrice(v) {
   return cleaned || '';
 }
 
+function getPointForPair(pair) {
+  const p = String(pair || '').toUpperCase();
+  if (p.includes('XAU') || p.includes('GOLD') || p.includes('XAG') || p.includes('SILV') ||
+      p.includes('XPT') || p.includes('XPD') || p.includes('BTC') || p.includes('ETH')) {
+    return 0.01;
+  }
+  if (p.includes('JPY')) return 0.001;
+  return 0.0001;
+}
+
+function fmtPrice(v) {
+  if (!isFinite(v)) return '';
+  const s = v.toFixed(5);
+  return s.replace(/\.?0+$/, '');
+}
+
 async function analyzeSignalWithAI(signalData) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return null;
@@ -120,13 +136,15 @@ router.get('/mt5', async (req, res) => {
       return res.status(403).json({ error: 'Invalid MT5 key' });
     }
     const result = await pool.query(
-      "SELECT id, pair, direction, entry, tp1, tp2, tp3, sl, reason, created_at FROM signals WHERE status='active' ORDER BY created_at DESC"
+      "SELECT id, pair, direction, entry, entry2, entry3, tp1, tp2, tp3, sl, reason, created_at FROM signals WHERE status='active' ORDER BY created_at DESC"
     );
     res.json(result.rows.map(s => ({
       id: s.id,
       pair: s.pair,
       direction: s.direction,
       entry: parseFloat(s.entry) || 0,
+      entry2: parseFloat(s.entry2) || 0,
+      entry3: parseFloat(s.entry3) || 0,
       tp1: parseFloat(s.tp1) || 0,
       tp2: parseFloat(s.tp2) || 0,
       tp3: parseFloat(s.tp3) || 0,
@@ -237,46 +255,80 @@ router.post('/mt5/bos-candidate', async (req, res) => {
       return res.status(400).json({ hasSetup: false, error: 'invalid price values' });
     }
 
-    // OB height used as a volatility/protection buffer
-    const obHeight = Math.abs(fObHigh - fObLow);
-    const buffer   = Math.max(obHeight * 0.10, fEntry * 0.0001); // min 0.01%
+    const settings = await getMt5Settings();
+    const multi = settings.multiEntry || {};
+    const multiEnabled = !!multi.enabled;
 
-    // SL beyond the OB edge; TP using R:R 1:2 / 1:3 / 1:5
+    let fEntry1 = fEntry;
+    let fEntry2 = null;
+    let fEntry3 = null;
     let sl, tp1, tp2, tp3;
-    if (isBullish) {
-      sl  = fObLow  - buffer;
-      const risk = Math.abs(fEntry - sl);
-      tp1 = fEntry + risk * 2;
-      tp2 = fEntry + risk * 3;
-      tp3 = fEntry + risk * 5;
+
+    if (multiEnabled && fCurrent) {
+      const pointSize = parseFloat(req.body.point) || getPointForPair(pair);
+      const e1Off = Number(multi.entry1) || 1000;
+      const e2Off = Number(multi.entry2) || 500;
+      const e3Off = Number(multi.entry3) || 500;
+      const slOff = Number(multi.sl) || 1000;
+      const tp1Off = Number(multi.tp1) || 2000;
+      const tp2Off = Number(multi.tp2) || 3000;
+      const tp3Off = Number(multi.tp3) || 5000;
+
+      if (isBullish) {
+        fEntry1 = fCurrent - e1Off * pointSize;
+        fEntry2 = fEntry1 - e2Off * pointSize;
+        fEntry3 = fEntry2 - e3Off * pointSize;
+        sl      = fEntry3 - slOff * pointSize;
+        tp1     = fEntry1 + tp1Off * pointSize;
+        tp2     = fEntry1 + tp2Off * pointSize;
+        tp3     = fEntry1 + tp3Off * pointSize;
+      } else {
+        fEntry1 = fCurrent + e1Off * pointSize;
+        fEntry2 = fEntry1 + e2Off * pointSize;
+        fEntry3 = fEntry2 + e3Off * pointSize;
+        sl      = fEntry3 + slOff * pointSize;
+        tp1     = fEntry1 - tp1Off * pointSize;
+        tp2     = fEntry1 - tp2Off * pointSize;
+        tp3     = fEntry1 - tp3Off * pointSize;
+      }
     } else {
-      sl  = fObHigh + buffer;
-      const risk = Math.abs(sl - fEntry);
-      tp1 = fEntry - risk * 2;
-      tp2 = fEntry - risk * 3;
-      tp3 = fEntry - risk * 5;
+      // OB height used as a volatility/protection buffer
+      const obHeight = Math.abs(fObHigh - fObLow);
+      const buffer   = Math.max(obHeight * 0.10, fEntry * 0.0001); // min 0.01%
+
+      if (isBullish) {
+        sl  = fObLow  - buffer;
+        const risk = Math.abs(fEntry - sl);
+        tp1 = fEntry + risk * 2;
+        tp2 = fEntry + risk * 3;
+        tp3 = fEntry + risk * 5;
+      } else {
+        sl  = fObHigh + buffer;
+        const risk = Math.abs(sl - fEntry);
+        tp1 = fEntry - risk * 2;
+        tp2 = fEntry - risk * 3;
+        tp3 = fEntry - risk * 5;
+      }
     }
 
-    const fmt = (v) => {
-      if (!isFinite(v)) return '';
-      // Match typical forex/gold precision (5 decimals), broker will round anyway
-      const s = v.toFixed(5);
-      return s.replace(/\.?0+$/, '');
-    };
-
-    const settings = await getMt5Settings();
+    const fmt = fmtPrice;
 
     let reasonLines = [
       `LuxAlgo SMC — ${signalLabel || 'BOS/CHoCH'} (${timeframe || 'M15'})`,
       `BOS price: ${fmt(fBosPrice)} | Current: ${fmt(fCurrent)} | PrevSwing: ${fmt(fPrevSwing)}`,
-      `Order Block: ${fmt(fObLow)} - ${fmt(fObHigh)} | LIMIT @ ${fmt(fEntry)} | R:R 1:2/1:3/1:5`,
     ];
+
+    if (multiEnabled) {
+      reasonLines.push(`Multi-Entry: E1=${fmt(fEntry1)} / E2=${fmt(fEntry2)} / E3=${fmt(fEntry3)} | SL=${fmt(sl)} | R:R based TP1-3`);
+    } else {
+      reasonLines.push(`Order Block: ${fmt(fObLow)} - ${fmt(fObHigh)} | LIMIT @ ${fmt(fEntry1)} | R:R 1:2/1:3/1:5`);
+    }
 
     // AI advanced analysis (R:R, confidence)
     let aiAnalysis = null;
     if (settings.aiAnalysis) {
       aiAnalysis = await analyzeSignalWithAI({
-        pair, direction, entry: fmt(fEntry), sl: fmt(sl), tp1: fmt(tp1), tp2: fmt(tp2), tp3: fmt(tp3),
+        pair, direction, entry: fmt(fEntry1), sl: fmt(sl), tp1: fmt(tp1), tp2: fmt(tp2), tp3: fmt(tp3),
         reason: reasonLines.join('\n'),
       });
       if (aiAnalysis) {
@@ -301,14 +353,14 @@ router.post('/mt5/bos-candidate', async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO signals
-         (pair, direction, entry, tp1, tp2, tp3, sl, status, reason)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+         (pair, direction, entry, entry2, entry3, tp1, tp2, tp3, sl, status, reason)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
        RETURNING *`,
-      [pair, direction, fmt(fEntry), fmt(tp1), fmt(tp2), fmt(tp3), fmt(sl), status, reason]
+      [pair, direction, fmt(fEntry1), fmt(fEntry2), fmt(fEntry3), fmt(tp1), fmt(tp2), fmt(tp3), fmt(sl), status, reason]
     );
 
     const signal = result.rows[0];
-    console.log(`[MT5 Bridge] ${signalLabel || 'BOS'} ${direction} ${pair} @ ${signal.entry} (SL ${signal.sl}) [status=${status}]`);
+    console.log(`[MT5 Bridge] ${signalLabel || 'BOS'} ${direction} ${pair} @ ${signal.entry}${multiEnabled ? '/' + signal.entry2 + '/' + signal.entry3 : ''} (SL ${signal.sl}) [status=${status}]`);
 
     // ส่ง LINE ถ้าไม่ต้องการ Admin approval และมีเป้าหมายที่เปิดใช้งาน
     let lineSent = false;
@@ -331,6 +383,8 @@ router.post('/mt5/bos-candidate', async (req, res) => {
       pair: signal.pair,
       direction: signal.direction,
       entry: signal.entry,
+      entry2: signal.entry2,
+      entry3: signal.entry3,
       sl: signal.sl,
       tp1: signal.tp1,
       tp2: signal.tp2,

@@ -76,6 +76,8 @@ async function initDB() {
 
     // Add reason column for existing databases
     await client.query(`ALTER TABLE signals ADD COLUMN IF NOT EXISTS reason TEXT DEFAULT ''`);
+    await client.query(`ALTER TABLE signals ADD COLUMN IF NOT EXISTS entry2 VARCHAR(20)`);
+    await client.query(`ALTER TABLE signals ADD COLUMN IF NOT EXISTS entry3 VARCHAR(20)`);
 
     // LINE notification logs
     await client.query(`

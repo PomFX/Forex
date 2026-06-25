@@ -14,11 +14,15 @@ function formatSignalText(s, action) {
     : action === 'loss' ? 'ตัดขาดทุน ❌'
     : 'อัปเดต';
 
+  const entryLines = s.entry2 && s.entry3
+    ? `💰 Entry 1: ${s.entry}\n💰 Entry 2: ${s.entry2}\n💰 Entry 3: ${s.entry3}`
+    : `💰 Entry: ${s.entry}`;
+
   return `${emoji} ATH Trader — ${statusText}
 
 ${dirEmoji} ${s.pair}
 📍 ${s.direction}
-💰 Entry: ${s.entry}
+${entryLines}
 🎯 TP1: ${s.tp1}${s.tp2 ? ` / TP2: ${s.tp2}` : ''}${s.tp3 ? ` / TP3: ${s.tp3}` : ''}
 🛑 SL: ${s.sl || '-'}
 
@@ -118,6 +122,9 @@ function buildSignalPrompt(s, action, detailLevel = 'full') {
     : 'อัปเดตสัญญาณ';
 
   const isBasic = detailLevel === 'basic';
+  const entryInfo = s.entry2 && s.entry3
+    ? `- ราคาเข้า (Entry): ${s.entry || '-'} / Entry 2: ${s.entry2 || '-'} / Entry 3: ${s.entry3 || '-'}`
+    : `- ราคาเข้า (Entry): ${s.entry || '-'}`;
   const tpInfo = isBasic
     ? `- TP1: ${s.tp1 || '-'}`
     : `- TP1: ${s.tp1 || '-'} / TP2: ${s.tp2 || '-'} / TP3: ${s.tp3 || '-'}`;
@@ -131,7 +138,7 @@ function buildSignalPrompt(s, action, detailLevel = 'full') {
 - สถานะ: ${actionText}
 - คู่เงิน: ${s.pair}
 - ทิศทาง: ${s.direction}
-- ราคาเข้า (Entry): ${s.entry || '-'}
+${entryInfo}
 ${tpInfo}
 - SL: ${s.sl || '-'}
 - เหตุผล/บริบท: ${(s.reason || '-').replace(/\n/g, ' ')}

@@ -321,18 +321,19 @@ void SendSignal(string sigType, string direction, double price)
    }
 
    string json = "{";
-   json += "\"pair\":\""          + pair                             + "\",";
-   json += "\"bosType\":\""       + direction                        + "\",";
-   json += "\"signalSource\":\"LuxAlgo-SMC\",";
-   json += "\"signalLabel\":\""   + sigType                          + "\",";
-   json += "\"timeframe\":\""     + tf                               + "\",";
-   json += "\"bosPrice\":\""      + DoubleToString(price,  _Digits)  + "\",";
-   json += "\"obHigh\":\""        + DoubleToString(obHigh, _Digits)  + "\",";
-   json += "\"obLow\":\""         + DoubleToString(obLow,  _Digits)  + "\",";
-   json += "\"prevSwing\":\""     + DoubleToString(price,  _Digits)  + "\",";
-   json += "\"slReference\":\""   + DoubleToString(obLow,  _Digits)  + "\",";
-   json += "\"currentPrice\":\""  + bid                              + "\"";
-   json += "}";
+    json += "\"pair\":\""          + pair                             + "\",";
+    json += "\"bosType\":\""       + direction                        + "\",";
+    json += "\"signalSource\":\"LuxAlgo-SMC\",";
+    json += "\"signalLabel\":\""   + sigType                          + "\",";
+    json += "\"timeframe\":\""     + tf                               + "\",";
+    json += "\"bosPrice\":\""      + DoubleToString(price,  _Digits)  + "\",";
+    json += "\"obHigh\":\""        + DoubleToString(obHigh, _Digits)  + "\",";
+    json += "\"obLow\":\""         + DoubleToString(obLow,  _Digits)  + "\",";
+    json += "\"prevSwing\":\""     + DoubleToString(price,  _Digits)  + "\",";
+    json += "\"slReference\":\""   + DoubleToString(obLow,  _Digits)  + "\",";
+    json += "\"currentPrice\":\""  + bid                              + "\",";
+    json += "\"point\":\""         + DoubleToString(_Point, _Digits)  + "\"";
+    json += "}";
 
    Print("[Bridge] Sending ", sigType, " ", direction,
          " on ", pair, " @ ", bid,

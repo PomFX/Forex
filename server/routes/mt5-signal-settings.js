@@ -11,6 +11,16 @@ function defaultSettings() {
     requireApproval: false,
     aiAnalysis: false,
     minConfidence: 60,
+    multiEntry: {
+      enabled: false,
+      entry1: 1000,
+      entry2: 500,
+      entry3: 500,
+      sl: 1000,
+      tp1: 2000,
+      tp2: 3000,
+      tp3: 5000,
+    },
     targets: [
       {
         name: 'กลุ่มหลัก',
@@ -37,10 +47,23 @@ async function getSettings() {
   const raw = await getSettingsRaw();
   if (!raw) return defaultSettings();
   const defs = defaultSettings();
+  const rawMulti = raw.multiEntry || {};
+  const multiEntry = {
+    enabled: rawMulti.enabled ?? defs.multiEntry.enabled,
+    entry1: Number.isFinite(Number(rawMulti.entry1)) ? Number(rawMulti.entry1) : defs.multiEntry.entry1,
+    entry2: Number.isFinite(Number(rawMulti.entry2)) ? Number(rawMulti.entry2) : defs.multiEntry.entry2,
+    entry3: Number.isFinite(Number(rawMulti.entry3)) ? Number(rawMulti.entry3) : defs.multiEntry.entry3,
+    sl: Number.isFinite(Number(rawMulti.sl)) ? Number(rawMulti.sl) : defs.multiEntry.sl,
+    tp1: Number.isFinite(Number(rawMulti.tp1)) ? Number(rawMulti.tp1) : defs.multiEntry.tp1,
+    tp2: Number.isFinite(Number(rawMulti.tp2)) ? Number(rawMulti.tp2) : defs.multiEntry.tp2,
+    tp3: Number.isFinite(Number(rawMulti.tp3)) ? Number(rawMulti.tp3) : defs.multiEntry.tp3,
+  };
+
   return {
     requireApproval: raw.requireApproval ?? defs.requireApproval,
     aiAnalysis: raw.aiAnalysis ?? defs.aiAnalysis,
     minConfidence: Number.isFinite(raw.minConfidence) ? raw.minConfidence : defs.minConfidence,
+    multiEntry,
     targets: Array.isArray(raw.targets) && raw.targets.length > 0
       ? raw.targets.map(t => ({ ...t, plan: t.plan === 'basic' ? 'basic' : 'full', enabled: t.enabled !== false }))
       : defs.targets,
@@ -59,11 +82,25 @@ router.get('/', authMiddleware, adminMiddleware, async (req, res) => {
 
 router.put('/', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { requireApproval, aiAnalysis, minConfidence, targets } = req.body;
+    const { requireApproval, aiAnalysis, minConfidence, multiEntry, targets } = req.body;
+
+    const rawMulti = multiEntry || {};
+    const clampOffset = (v) => Math.max(0, Number.isFinite(Number(v)) ? Number(v) : 0);
+
     const settings = {
       requireApproval: !!requireApproval,
       aiAnalysis: !!aiAnalysis,
       minConfidence: Number.isFinite(Number(minConfidence)) ? Math.max(0, Math.min(100, Number(minConfidence))) : 60,
+      multiEntry: {
+        enabled: !!rawMulti.enabled,
+        entry1: clampOffset(rawMulti.entry1) || defaultSettings().multiEntry.entry1,
+        entry2: clampOffset(rawMulti.entry2) || defaultSettings().multiEntry.entry2,
+        entry3: clampOffset(rawMulti.entry3) || defaultSettings().multiEntry.entry3,
+        sl: clampOffset(rawMulti.sl) || defaultSettings().multiEntry.sl,
+        tp1: clampOffset(rawMulti.tp1) || defaultSettings().multiEntry.tp1,
+        tp2: clampOffset(rawMulti.tp2) || defaultSettings().multiEntry.tp2,
+        tp3: clampOffset(rawMulti.tp3) || defaultSettings().multiEntry.tp3,
+      },
       targets: Array.isArray(targets)
         ? targets
             .filter(t => t.id && String(t.id).trim() !== '')
@@ -166,10 +203,12 @@ router.post('/test', authMiddleware, adminMiddleware, async (req, res) => {
       pair: 'XAU/USD',
       direction: 'BUY',
       entry: '3333.33',
-      tp1: '3334.33',
-      tp2: '3335.33',
-      tp3: '3336.33',
-      sl: '3332.33',
+      entry2: '3328.33',
+      entry3: '3323.33',
+      tp1: '3338.33',
+      tp2: '3343.33',
+      tp3: '3353.33',
+      sl: '3318.33',
       reason: 'ทดสอบการส่งข้อความจาก MT5 Signal Settings',
     };
 

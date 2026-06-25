@@ -985,6 +985,11 @@ const Admin = {
   // ====== MT5 SIGNAL SETTINGS ======
   _mt5Targets: [],
 
+  _toggleMt5MultiEntry() {
+    const enabled = document.getElementById('mt5MultiEntryEnabled').checked;
+    document.getElementById('mt5MultiEntryInputs').style.display = enabled ? 'block' : 'none';
+  },
+
   _renderMt5Targets() {
     const container = document.getElementById('mt5TargetsContainer');
     container.innerHTML = this._mt5Targets.map((t, i) => `
@@ -1127,11 +1132,23 @@ const Admin = {
       document.getElementById('mt5RequireApproval').checked = !!settings.requireApproval;
       document.getElementById('mt5AiAnalysis').checked = !!settings.aiAnalysis;
       document.getElementById('mt5MinConfidence').value = Number(settings.minConfidence ?? 60);
+
+      const me = settings.multiEntry || {};
+      document.getElementById('mt5MultiEntryEnabled').checked = !!me.enabled;
+      document.getElementById('mt5Entry1Offset').value = Number(me.entry1 ?? 1000);
+      document.getElementById('mt5Entry2Offset').value = Number(me.entry2 ?? 500);
+      document.getElementById('mt5Entry3Offset').value = Number(me.entry3 ?? 500);
+      document.getElementById('mt5SlOffset').value = Number(me.sl ?? 1000);
+      document.getElementById('mt5Tp1Offset').value = Number(me.tp1 ?? 2000);
+      document.getElementById('mt5Tp2Offset').value = Number(me.tp2 ?? 3000);
+      document.getElementById('mt5Tp3Offset').value = Number(me.tp3 ?? 5000);
+      this._toggleMt5MultiEntry();
       this._renderMt5Targets();
       this._renderMt5LineQuota();
       this._renderMt5LineUsage();
       this._renderMt5LineLogs();
 
+      document.getElementById('mt5MultiEntryEnabled').onchange = () => this._toggleMt5MultiEntry();
       document.getElementById('mt5AddTargetBtn').onclick = () => this._addMt5Target();
       document.getElementById('mt5TestLineBtn').onclick = async () => {
         try {
@@ -1150,6 +1167,16 @@ const Admin = {
           requireApproval: document.getElementById('mt5RequireApproval').checked,
           aiAnalysis: document.getElementById('mt5AiAnalysis').checked,
           minConfidence: Number(document.getElementById('mt5MinConfidence').value || 60),
+          multiEntry: {
+            enabled: document.getElementById('mt5MultiEntryEnabled').checked,
+            entry1: Number(document.getElementById('mt5Entry1Offset').value || 1000),
+            entry2: Number(document.getElementById('mt5Entry2Offset').value || 500),
+            entry3: Number(document.getElementById('mt5Entry3Offset').value || 500),
+            sl: Number(document.getElementById('mt5SlOffset').value || 1000),
+            tp1: Number(document.getElementById('mt5Tp1Offset').value || 2000),
+            tp2: Number(document.getElementById('mt5Tp2Offset').value || 3000),
+            tp3: Number(document.getElementById('mt5Tp3Offset').value || 5000),
+          },
           targets: this._readMt5TargetsFromUI(),
         };
         try {
