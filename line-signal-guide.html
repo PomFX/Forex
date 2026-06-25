@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คู่มือระบบส่งสัญญาณเข้า LINE — ATH Trader</title>
+<style>
+  :root {
+    --bg: #0b0c10;
+    --panel: #12141a;
+    --panel-2: #161922;
+    --border: #252a33;
+    --text: #d1d5db;
+    --muted: #9ca3af;
+    --accent: #f59e0b;
+    --accent-2: #fbbf24;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --info: #38bdf8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    line-height: 1.7;
+  }
+  .sidebar {
+    width: 280px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+    padding: 1.5rem 0;
+  }
+  .brand {
+    padding: 0 1.5rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.75rem;
+  }
+  .brand h1 {
+    font-size: 1.1rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .brand p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+  .cat {
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 1.1rem 1.5rem 0.35rem;
+  }
+  .sidebar a {
+    display: block;
+    padding: 0.55rem 1.5rem;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.88rem;
+    border-left: 3px solid transparent;
+    transition: all 0.18s ease;
+  }
+  .sidebar a:hover {
+    color: var(--accent-2);
+    background: rgba(245, 158, 11, 0.06);
+  }
+  .sidebar a.active {
+    color: var(--accent-2);
+    border-left-color: var(--accent);
+    background: rgba(245, 158, 11, 0.1);
+  }
+  .main {
+    flex: 1;
+    padding: 2.5rem;
+    max-width: 960px;
+  }
+  .hero {
+    background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(56,189,248,0.08));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2.5rem;
+  }
+  .hero h2 {
+    font-size: 1.75rem;
+    color: var(--accent-2);
+    margin-bottom: 0.5rem;
+  }
+  .hero p {
+    color: var(--muted);
+    max-width: 720px;
+  }
+  section { margin-bottom: 3rem; }
+  h2 {
+    font-size: 1.35rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 1.05rem;
+    color: var(--accent-2);
+    margin: 1.5rem 0 0.6rem;
+  }
+  p, li {
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  ul, ol { padding-left: 1.4rem; margin: 0.75rem 0; }
+  li { margin-bottom: 0.4rem; }
+  a { color: var(--info); }
+  code {
+    background: #1b1e26;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.82rem;
+    color: var(--accent-2);
+  }
+  pre {
+    background: #0d0f14;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 0.82rem;
+    color: #c9cdd4;
+    overflow-x: auto;
+    margin: 0.75rem 0;
+  }
+  .box {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.1rem;
+    margin: 1rem 0;
+  }
+  .box.accent { border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.05); }
+  .box.success { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.04); }
+  .box.danger { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.04); }
+  .box.info { border-color: rgba(56,189,248,0.3); background: rgba(56,189,248,0.04); }
+  .badge {
+    display: inline-block;
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-right: 0.4rem;
+  }
+  .badge.gold { background: rgba(245,158,11,0.2); color: var(--accent-2); }
+  .badge.green { background: rgba(34,197,94,0.18); color: var(--success); }
+  .badge.red { background: rgba(239,68,68,0.18); color: var(--danger); }
+  .badge.gray { background: rgba(156,163,175,0.15); color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 0.8rem 0; }
+  th, td { padding: 0.65rem 0.85rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 700; background: rgba(245,158,11,0.05); }
+  td { color: var(--text); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 1rem 0;
+  }
+  .flow-step {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.82rem;
+  }
+  .flow-arrow { color: var(--accent); font-weight: 700; }
+  .message-preview {
+    background: #0d0f14;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #e5e7eb;
+  }
+  .message-preview .label { color: var(--accent-2); font-weight: 600; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 900px) {
+    body { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--border); }
+    .main { padding: 1.5rem; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="brand">
+    <h1>LINE Signal Manual</h1>
+    <p>ระบบส่งสัญญาณเข้า LINE</p>
+  </div>
+
+  <div class="cat">เริ่มต้น</div>
+  <a href="#overview" class="active">ภาพรวมระบบ</a>
+  <a href="#components">องค์ประกอบ</a>
+  <a href="#flow">โฟลว์การทำงาน</a>
+
+  <div class="cat">ตั้งค่า Admin</div>
+  <a href="#admin-page">หน้า MT5 Signal Settings</a>
+  <a href="#approval">Admin Approval</a>
+  <a href="#ai-confidence">AI Analysis / Confidence</a>
+  <a href="#multi-entry">Multi-Entry (3 จุด)</a>
+  <a href="#targets">เป้าหมาย LINE</a>
+
+  <div class="cat">ข้อความ LINE</div>
+  <a href="#message-data">ข้อมูลที่ส่งไป</a>
+  <a href="#entry-exit">จุดเข้า / ออก</a>
+  <a href="#plans">Full Plan vs Basic Plan</a>
+  <a href="#preview">ตัวอย่างข้อความ</a>
+
+  <div class="cat">ตรวจสอบ & แก้ไข</div>
+  <a href="#quota">โควต้า LINE / Logs</a>
+  <a href="#troubleshoot">แก้ไขปัญหา</a>
+  <a href="#faq">คำถามที่พบบ่อย</a>
+  <a href="#support">ติดต่อสนับสนุน</a>
+</nav>
+
+<main class="main">
+
+  <div class="hero">
+    <h2>คู่มือระบบส่งสัญญาณเข้า LINE</h2>
+    <p>อธิบายตั้งแต่การตั้งค่า Admin โฟลว์การส่งสัญญาณ ไปจนถึงความหมายของข้อมูล Entry / SL / TP ที่สมาชิกเห็นในกลุ่ม LINE</p>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section id="overview">
+    <h2>ภาพรวมระบบ</h2>
+    <p>เมื่อ EA บน MT5 ตรวจพบสัญญาณ BOS หรือ CHoCH จาก LuxAlgo SMC ระบบจะส่งข้อมูลมายัง Backend ของ ATH Trader จากนั้นระบบจะ:</p>
+    <ol>
+      <li>บันทึกสัญญาณลงฐานข้อมูล</li>
+      <li>เรียก AI วิเคราะห์ (หากเปิดใช้)</li>
+      <li>ตรวจสอบความมั่นใจและโหมดอนุมัติ</li>
+      <li>ส่งข้อความแจ้งเตือนไปยังกลุ่ม LINE เป้าหมายตามที่ตั้งไว้</li>
+    </ol>
+    <div class="box accent">
+      <span class="badge gold">ข้อควรรู้</span>
+      <p style="margin-top:0.5rem">ระบบรองบับการส่งไปหลายกลุ่มพร้อมกัน โดยแต่ละกลุ่มสามารถเลือกรับข้อมูลแบบ <strong>Full</strong> หรือ <strong>Basic</strong> ได้</p>
+    </div>
+  </section>
+
+  <!-- COMPONENTS -->
+  <section id="components">
+    <h2>องค์ประกอบของระบบ</h2>
+    <table>
+      <tr><th>ส่วนประกอบ</th><th>หน้าที่</th></tr>
+      <tr><td>MT5 EA Bridge</td><td>ตรวจจับ BOS/CHoCH แล้วส่งข้อมูลมายัง Backend</td></tr>
+      <tr><td>Backend (Vercel)</td><td>รับสัญญาณ เรียก AI คำนวณราคา ควบคุมการส่ง</td></tr>
+      <tr><td>Admin Dashboard</td><td>ตั้งค่าการส่ง เป้าหมาย LINE Multi-Entry Approval</td></tr>
+      <tr><td>LINE Messaging API</td><td>ช่องทางส่งข้อความเข้ากลุ่ม/ผู้ใช้</td></tr>
+      <tr><td>line_logs</td><td>บันทึกประวัติการส่งทุกข้อความ</td></tr>
+    </table>
+  </section>
+
+  <!-- FLOW -->
+  <section id="flow">
+    <h2>โฟลว์การทำงาน</h2>
+    <div class="flow">
+      <div class="flow-step">EA ส่ง Candidate</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">บันทึก Signal</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">AI วิเคราะห์</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">Confidence Check</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">Admin Approval (ถ้าเปิด)</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">ส่ง LINE</div>
+    </div>
+    <ul>
+      <li>หาก <strong>AI ปฏิเสธ</strong> สัญญาณจะถูกบันทึกแต่ไม่ส่ง LINE</li>
+      <li>หากเปิด <strong>Admin Approval</strong> สัญญาณจะรอการอนุมัติก่อนส่ง</li>
+      <li>เมื่อผ่านทุกขั้นตอน ระบบจะส่งข้อความไปยังกลุ่มเป้าหมายทั้งหมดที่เปิดใช้งาน</li>
+    </ul>
+  </section>
+
+  <!-- ADMIN PAGE -->
+  <section id="admin-page">
+    <h2>หน้า MT5 Signal Settings</h2>
+    <p>ผู้ดูแลระบบเข้าได้ที่ <code>https://forex-rouge-gamma.vercel.app/#/admin/mt5signals</code></p>
+
+    <h3>ส่วนหลักในหน้า</h3>
+    <table>
+      <tr><th>ส่วน</th><th>หน้าที่</th></tr>
+      <tr><td>Admin อนุมัติก่อนส่ง LINE</td><td>เปิด/ปิด โหมดต้องอนุมัติสัญญาณก่อนส่ง</td></tr>
+      <tr><td>ให้ AI วิเคราะห์เพิ่ม</td><td>เปิด/ปิด การเรียก OpenAI วิเคราะห์สัญญาณ</td></tr>
+      <tr><td>Confidence ขั้นต่ำ</td><td>กำหนดคะแนนความมั่นใจขั้นต่ำที่ AI ต้องได้</td></tr>
+      <tr><td>Multi-Entry</td><td>เปิด/ปิด และกำหนดระยะ Point ของ Entry 1/2/3, SL, TP</td></tr>
+      <tr><td>เป้าหมาย LINE</td><td>เพิ่ม/ลบ/แก้ไข กลุ่ม/ผู้ใช้เป้าหมายและ Plan</td></tr>
+      <tr><td>ทดสอบส่ง LINE</td><td>ส่งข้อความตัวอย่างไปยังเป้าหมายที่เปิดใช้งาน</td></tr>
+    </table>
+  </section>
+
+  <!-- APPROVAL -->
+  <section id="approval">
+    <h2>Admin Approval</h2>
+    <p>หากเปิดใช้งาน สัญญาณที่ EA ส่งมาจะมีสถานะ <code>pending</code> ก่อน ผู้ดูแลระบบต้องเข้าไปอนุมัติจึงจะส่ง LINE</p>
+    <div class="box info">
+      <span class="badge gray">ใช้เมื่อไหร่</span>
+      <p style="margin-top:0.5rem">เหมาะกับช่วงทดสอบหรือตลาดผันผวน ที่ต้องการตรวจสอบคุณภาพสัญญาณก่อนส่งไปยังสมาชิก</p>
+    </div>
+  </section>
+
+  <!-- AI CONFIDENCE -->
+  <section id="ai-confidence">
+    <h2>AI Analysis / Confidence</h2>
+    <p>เมื่อเปิดใช้งาน ระบบจะเรียก OpenAI เพื่อประเมิน:</p>
+    <ul>
+      <li><strong>Risk:Reward</strong> ที่ดีที่สุดจาก Entry ถึง TP3 เทียบ SL</li>
+      <li><strong>Confidence</strong> คะแนนความมั่นใจ 0-100</li>
+      <li><strong>Summary</strong> สรุปจุดเด่น/จุดเสี่ยงของ setup</li>
+    </ul>
+    <p>หากคะแนน <code>confidence &lt; minConfidence</code> สัญญาณจะถูกปฏิเสธ</p>
+    <div class="box accent">
+      <span class="badge gold">คำแนะนำ</span>
+      <p style="margin-top:0.5rem">เริ่มต้นที่ 60% แล้วค่อยปรับขึ้นหากสัญญาณดี หรือลดลงหากต้องการสัญญาณมากขึ้น</p>
+    </div>
+  </section>
+
+  <!-- MULTI ENTRY -->
+  <section id="multi-entry">
+    <h2>Multi-Entry (3 จุด)</h2>
+    <p>ฟีเจอร์นี้ช่วยให้สมาชิกได้รับสัญญาณแบบแบ่งจุดเข้า 3 ระดับ โดยระบบจะคำนวณจาก <strong>ราคาปัจจุบัน</strong> และ <strong>ระยะ Point</strong> ที่ Admin กำหนด</p>
+
+    <h3>ตัวอย่างการคำนวณ SELL</h3>
+    <table>
+      <tr><th>ค่า</th><th>ระยะ Point</th><th>ผลลัพธ์</th></tr>
+      <tr><td>ราคาปัจจุบัน</td><td>-</td><td>3982.82</td></tr>
+      <tr><td>Entry 1</td><td>+1000 pts</td><td>3992.82</td></tr>
+      <tr><td>Entry 2</td><td>+500 pts</td><td>3997.82</td></tr>
+      <tr><td>Entry 3</td><td>+500 pts</td><td>4002.82</td></tr>
+      <tr><td>SL</td><td>+1000 pts จาก Entry 3</td><td>4012.82</td></tr>
+      <tr><td>TP1</td><td>-2000 pts จาก Entry 1</td><td>3972.82</td></tr>
+      <tr><td>TP2</td><td>-3000 pts จาก Entry 1</td><td>3962.82</td></tr>
+      <tr><td>TP3</td><td>-5000 pts จาก Entry 1</td><td>3942.82</td></tr>
+    </table>
+
+    <h3>ตัวอย่างการคำนวณ BUY</h3>
+    <p>BUY จะกลับด้าน: Entry อยู่ต่ำกว่าราคาปัจจุบัน SL ต่ำกว่า Entry 3 และ TP สูงกว่า Entry 1</p>
+    <table>
+      <tr><th>ค่า</th><th>ระยะ Point</th><th>ผลลัพธ์</th></tr>
+      <tr><td>ราคาปัจจุบัน</td><td>-</td><td>3982.82</td></tr>
+      <tr><td>Entry 1</td><td>-1000 pts</td><td>3972.82</td></tr>
+      <tr><td>Entry 2</td><td>-500 pts</td><td>3967.82</td></tr>
+      <tr><td>Entry 3</td><td>-500 pts</td><td>3962.82</td></tr>
+      <tr><td>SL</td><td>-1000 pts จาก Entry 3</td><td>3952.82</td></tr>
+      <tr><td>TP1</td><td>+2000 pts จาก Entry 1</td><td>3992.82</td></tr>
+    </table>
+
+    <div class="box info">
+      <span class="badge gray">หมายเหตุ</span>
+      <p style="margin-top:0.5rem">ระบบจะใช้ค่า <code>_Point</code> ที่ EA ส่งมาหากมี หากไม่มีจะใช้ค่าประมาณการจากชื่อคู่เงิน เช่น XAU/USD = 0.01, JPY = 0.001, Forex ทั่วไป = 0.0001</p>
+    </div>
+  </section>
+
+  <!-- TARGETS -->
+  <section id="targets">
+    <h2>เป้าหมาย LINE</h2>
+    <p>สามารถเพิ่มหลายเป้าหมายได้ แต่ละเป้าหมายประกอบด้วย:</p>
+    <ul>
+      <li><strong>ชื่อ</strong> — ใช้แสดงใน Log เท่านั้น</li>
+      <li><strong>ประเภท</strong> — Group หรือ User</li>
+      <li><strong>Plan</strong> — Full หรือ Basic</li>
+      <li><strong>ID</strong> — LINE Group ID หรือ LINE User ID</li>
+      <li><strong>เปิดใช้งาน</strong> — เปิด/ปิดการส่งของเป้าหมายนี้</li>
+    </ul>
+  </section>
+
+  <!-- MESSAGE DATA -->
+  <section id="message-data">
+    <h2>ข้อมูลที่ส่งไปยัง LINE</h2>
+    <p>ข้อความที่สมาชิกได้รับประกอบด้วยข้อมูลดังนี้</p>
+    <table>
+      <tr><th>ฟิลด์</th><th>ความหมาย</th></tr>
+      <tr><td>สถานะ</td><td>สัญญาณใหม่ / ถึง TP / ตัดขาดทุน</td></tr>
+      <tr><td>คู่เงิน</td><td>เช่น XAU/USD, EUR/USD</td></tr>
+      <tr><td>ทิศทาง</td><td>BUY หรือ SELL</td></tr>
+      <tr><td>Entry</td><td>ราคาเข้า (หรือ Entry 1/2/3 หากเปิด Multi-Entry)</td></tr>
+      <tr><td>TP1 / TP2 / TP3</td><td>เป้าหมายทำกำไร 3 ระดับ</td></tr>
+      <tr><td>SL</td><td>จุดตัดขาดทุน</td></tr>
+      <tr><td>เวลา</td><td>เวลาที่ส่งข้อความ (Asia/Bangkok)</td></tr>
+    </table>
+  </section>
+
+  <!-- ENTRY EXIT -->
+  <section id="entry-exit">
+    <h2>จุดเข้า / ออก</h2>
+
+    <h3>จุดเข้า (Entry)</h3>
+    <p>ราคาที่แนะนำให้เปิดออเดอร์ หากเปิด Multi-Entry จะมี 3 ระดับเพื่อกระจายจุดเข้า</p>
+    <ul>
+      <li><strong>SELL</strong>: Entry อยู่เหนือราคาปัจจุบัน (Sell Limit)</li>
+      <li><strong>BUY</strong>: Entry อยู่ต่ำกว่าราคาปัจจุบัน (Buy Limit)</li>
+    </ul>
+
+    <h3>จุดออก (TP / SL)</h3>
+    <ul>
+      <li><strong>TP1 / TP2 / TP3</strong> — เป้าหมายทำกำไร แนะนำให้ปิดบางส่วนตามแต่ละ TP</li>
+      <li><strong>SL</strong> — จุดตัดขาดทุน หากราคามาถึงระดับนี้ถือว่าสัญญาณผิด</li>
+    </ul>
+
+    <div class="box success">
+      <span class="badge green">กลยุทธ์แนะนำ</span>
+      <p style="margin-top:0.5rem">ใช้ Multi-Entry เพื่อลดความเสี่ยงจากการเข้าออเดอร์เพียงจุดเดียว หากราคาวิ่งผ่าน Entry 1 ไป ยังสามารถเข้าที่ Entry 2/3 ได้</p>
+    </div>
+  </section>
+
+  <!-- PLANS -->
+  <section id="plans">
+    <h2>Full Plan vs Basic Plan</h2>
+    <table>
+      <tr><th>รายการ</th><th>Full</th><th>Basic</th></tr>
+      <tr><td>คู่เงิน / ทิศทาง</td><td>มี</td><td>มี</td></tr>
+      <tr><td>Entry / Entry 1-3</td><td>มี</td><td>มี</td></tr>
+      <tr><td>SL</td><td>มี</td><td>มี</td></tr>
+      <tr><td>TP1</td><td>มี</td><td>มี</td></tr>
+      <tr><td>TP2 / TP3</td><td>มี</td><td>ไม่มี</td></tr>
+      <tr><td>เหมาะกับ</td><td>VIP / กลุ่มเสียเงิน</td><td>กลุ่มฟรี / ทดลอง</td></tr>
+    </table>
+  </section>
+
+  <!-- PREVIEW -->
+  <section id="preview">
+    <h2>ตัวอย่างข้อความ</h2>
+
+    <h3>Multi-Entry Full Plan (SELL)</h3>
+    <div class="message-preview">
+      <div><span class="label">ATH Trader — สัญญาณใหม่</span></div>
+      <div>XAU/USD</div>
+      <div>SELL</div>
+      <div>Entry 1: 3992.82</div>
+      <div>Entry 2: 3997.82</div>
+      <div>Entry 3: 4002.82</div>
+      <div>TP1: 3972.82 / TP2: 3962.82 / TP3: 3942.82</div>
+      <div>SL: 4012.82</div>
+      <div style="color:#888;font-size:0.85rem;margin-top:0.5rem">25/06/2026 14:30:00</div>
+    </div>
+
+    <h3>Basic Plan</h3>
+    <div class="message-preview">
+      <div><span class="label">ATH Trader — สัญญาณใหม่</span></div>
+      <div>XAU/USD</div>
+      <div>SELL</div>
+      <div>Entry: 3992.82</div>
+      <div>TP1: 3972.82</div>
+      <div>SL: 4012.82</div>
+    </div>
+  </section>
+
+  <!-- QUOTA -->
+  <section id="quota">
+    <h2>โควต้า LINE / Logs</h2>
+    <p>หน้า Admin จะแสดง:</p>
+    <ul>
+      <li><strong>โควต้าคงเหลือ</strong> — แพลนปัจจุบันและจำนวนข้อความที่ใช้ไป</li>
+      <li><strong>สถิติการใช้งาน</strong> — จำนวนข้อความทั้งหมด / เดือนนี้ / การส่งซ้ำ</li>
+      <li><strong>ประวัติการส่ง</strong> — รายการส่งล่าสุดพร้อมสถานะ success/failed</li>
+    </ul>
+    <div class="box danger">
+      <span class="badge red">ระวัง</span>
+      <p style="margin-top:0.5rem">บัญชี LINE Messaging API แบบฟรีมีโควต้า 300 ข้อความ/เดือน ควรเปิด Multi-Entry เฉพาะเมื่อจำเป็น และตรวจสอบการส่งซ้ำจาก Log</p>
+    </div>
+  </section>
+
+  <!-- TROUBLESHOOT -->
+  <section id="troubleshoot">
+    <h2>แก้ไขปัญหาที่พบบ่อย</h2>
+
+    <div class="box">
+      <h3>สัญญาณไม่ส่งไป LINE</h3>
+      <ul>
+        <li>ตรวจสอบว่าเปิด <strong>AI Analysis</strong> แล้ว Confidence ต่ำเกินไปหรือไม่</li>
+        <li>ตรวจสอบว่าเปิด <strong>Admin Approval</strong> แล้วลืมอนุมัติหรือไม่</li>
+        <li>ตรวจสอบว่ามีเป้าหมาย LINE ที่เปิดใช้งานและ ID ถูกต้อง</li>
+        <li>ตรวจสอบ LINE Token และโควต้า</li>
+      </ul>
+    </div>
+
+    <div class="box">
+      <h3>Multi-Entry ราคาไม่ตรง</h3>
+      <ul>
+        <li>ตรวจสอบว่า EA ส่งค่า <code>point</code> มาหรือไม่ (ต้อง recompile EA หลังอัปเดต source)</li>
+        <li>ตรวจสอบว่าคู่เงินอยู่ในรายการที่ระบบรู้จำนวน Point size</li>
+      </ul>
+    </div>
+
+    <div class="box">
+      <h3>ส่งซ้ำหลายครั้ง</h3>
+      <ul>
+        <li>ดูที่ส่วน <strong>ส่งซ้ำ</strong> ใน Admin</li>
+        <li>ตรวจสอบว่า EA ไม่ได้เปิดซ้ำบน chart เดียวกัน</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <h2>คำถามที่พบบ่อย</h2>
+
+    <h3>Q: สามารถส่งไปหลายกลุ่มพร้อมกันได้ไหม?</h3>
+    <p>A: ได้ ให้เพิ่มเป้าหมายหลายรายการในหน้า Admin แต่ละกลุ่มเลือก Plan ได้เอง</p>
+
+    <h3>Q: เปลี่ยนระยะ Multi-Entry แล้วมีผลทันทีไหม?</h3>
+    <p>A: มีผลทันทีกับสัญญาณถัดไปที่ EA ส่งมา สัญญาณเก่าไม่เปลี่ยน</p>
+
+    <h3>Q: ปิด Multi-Entry แล้วจะกลับไปใช้ Entry เดียวไหม?</h3>
+    <p>A: ใช่ ระบบจะกลับไปคำนวณ Entry/SL/TP จาก Order Block เหมือนเดิม</p>
+
+    <h3>Q: ข้อความ LINE ใช้ AI เขียนหรือ Template?</h3>
+    <p>A: ระบบจะลองใช้ AI เขียนก่อน หาก AI ล้มเหลวจะ fallback เป็นข้อความ Template อัตโนมัติ</p>
+  </section>
+
+  <!-- SUPPORT -->
+  <section id="support">
+    <h2>ติดต่อสนับสนุน</h2>
+    <ul>
+      <li>LINE Official Account: ATH Trader</li>
+      <li>Admin: <code>https://forex-rouge-gamma.vercel.app/#/admin</code></li>
+      <li>GitHub Repository: <code>PomFX/Forex</code></li>
+    </ul>
+  </section>
+
+</main>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  function onScroll() {
+    let current = '';
+    const offset = 120;
+    sections.forEach(sec => {
+      const top = sec.offsetTop;
+      if (pageYOffset >= top - offset) current = sec.getAttribute('id');
+    });
+    links.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+    });
+  }
+  window.addEventListener('scroll', onScroll);
+  onScroll();
+</script>
+
+</body>
+</html>
